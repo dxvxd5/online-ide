@@ -1,2 +1,2 @@
-[submodule "client"]
+[submodule "/client"]
 	ignore = untracked
