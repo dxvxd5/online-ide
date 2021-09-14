@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+.vscode/*
+!.vscode/settings.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
