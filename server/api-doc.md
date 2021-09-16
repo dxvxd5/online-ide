@@ -1,6 +1,8 @@
 # Backend Rest API documentation
 
-## `Users`
+[TOC]
+
+## Users
 
 The users API allows to get information about a user
 
@@ -26,12 +28,11 @@ GET /users/:userID
 Status: 200 OK
 ```
 
-```json
+```js
 {
     id:1,
-    name:'Jotaro Kujo',
-    username:'Jojo',
-    photo?
+    name:"Jotaro Kujo",
+    username:"Jojo",
 }
 ```
 
@@ -61,22 +62,22 @@ GET /users/:userID/projects
 Status: 200 OK
 ```
 
-```json
+```js
 {
-	projects: [
-        {
-            id:1,
-            name:'online-ide',
-            shared:true,
-            lastOpenedDate:2334111, # from the JS Date API
-        },
-    	{
-            id:55,
-            shared:false,
-            name:'quiz-app',
-            lastOpenedDate:233781,
-        }
-    ]
+  projects: [
+    {
+      id: 1,
+      name: 'online-ide',
+      shared: true,
+      lastOpenedDate: 2334111,
+    },
+    {
+      id: 55,
+      shared: false,
+      name: 'quiz-app',
+      lastOpenedDate: 233781,
+    },
+  ];
 }
 ```
 
@@ -106,28 +107,28 @@ GET /users/:userID/files
 Status: 200 OK
 ```
 
-```json
+```js
 {
-	files : [
-        {
-            id:1,
-            projectId:555,
-            name:'index.ts',
-            lastOpenedDate:2334111, # from JS Date API
-        },
-    	{
-            id:55,
-            projectId:545,
-            name:'components/sidebar.tsx',
-            lastOpenedDate:233781, # from JS Date API
-        },
-    	{
-            id:567,
-            projectId:565,
-            name:'routers/home.ts',
-            lastOpenedDate:233781, # from JS Date API
-        }
-    ]
+  files: [
+    {
+      id: 1,
+      projectId: 555,
+      name: 'index.ts',
+      lastOpenedDate: 2334111,
+    },
+    {
+      id: 55,
+      projectId: 545,
+      name: 'components/sidebar.tsx',
+      lastOpenedDate: 233781,
+    },
+    {
+      id: 567,
+      projectId: 565,
+      name: 'routers/home.ts',
+      lastOpenedDate: 233781,
+    },
+  ];
 }
 ```
 
@@ -135,7 +136,7 @@ Status: 200 OK
 
 `bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
 
-## `Projects`
+## Projects
 
 ### Create project
 
@@ -155,11 +156,11 @@ content-type: application/json
 
 JSON file containing all the information of the file. All properties are mandatory.
 
-```json
+```js
 {
-  "name": "online-ide",
-  "creationDate": 44456,
-  "owner": "Jonathan Joestar"
+  name: "online-ide",
+  creationDate: 44456,
+  owner: "Jonathan Joestar"
 }
 ```
 
@@ -169,16 +170,16 @@ JSON file containing all the information of the file. All properties are mandato
 Status: 200 OK
 ```
 
-```json
+```js
 {
-  "id": 654,
-  "name": "online-ide",
-  "creationDate": 44456,
-  "owner": "Jonathan Joestar",
-  "lastOpenedDate": 44456,
-  "files": [],
-  "shared": false,
-  "collaborators": []
+  id: 654,
+  name: "online-ide",
+  creationDate: 44456,
+  owner: "Jonathan Joestar",
+  lastOpenedDate": 44456,
+  files: [],
+  shared: false,
+  collaborators: []
 }
 ```
 
@@ -206,23 +207,23 @@ GET /projects/:projectID
 Status: 200 OK
 ```
 
-```json
+```js
 {
     id:1,
-    name:'Jojo-bizzare-adventure',
+    name:"Jojo-bizzare-adventure",
     shared:true,
-    owner:'Joseph Joestar',
+    owner:"Joseph Joestar",
     collaborators:[
-        'Joseph Joestar',
-        'Jotaro Kujo',
+        "Joseph Joestar",
+        "Jotaro Kujo",
     ],
     files:[
-        {id:45636, name:'src/components/sidebar.tsx'},
-        {id:4567, name:'src/components/header.tsx'},
-        {id:555, name:'server/src/index.ts'}
+        {id:45636, name:"src/components/sidebar.tsx"},
+        {id:4567, name:"src/components/header.tsx"},
+        {id:555, name:"server/src/index.ts"}
     ]
-    creationDate:2334111, # from JS Date API
-    lastOpenedDate:2334111, # from JS Date API
+    creationDate:2334111,
+    lastOpenedDate:2334111,
 },
 ```
 
@@ -252,12 +253,12 @@ content-type: application/json
 
 Json whose properties are the information to be updated. The example below features all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required.
 
-```json
+```js
 {
-  "name": "awesome-online-ide",
-  "collaborators": ["Jotaro Kujo", "Joseph Joestar"],
-  "lastOpenedDate": 656566,
-  "shared": true
+  name: "awesome-online-ide",
+  collaborators: ["Jotaro Kujo", "Joseph Joestar"],
+  lastOpenedDate: 656566,
+  shared: true
 }
 ```
 
@@ -293,7 +294,7 @@ Status: 204 No Content
 
 `bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
 
-## `Files`
+## Files
 
 ### Create file
 
@@ -317,11 +318,11 @@ content-type: application/json
 
 JSON file containing all the information of the file. All properties are mandatory.
 
-```json
+```js
 {
-  "name": "/src/controllers/user.ts",
-  "creationDate": 44456,
-  "owner": "Jonathan Joestar"
+  name: "/src/controllers/user.ts",
+  creationDate: 44456,
+  owner: "Jonathan Joestar"
 }
 ```
 
@@ -331,14 +332,14 @@ JSON file containing all the information of the file. All properties are mandato
 Status: 200 OK
 ```
 
-```json
+```js
 {
-  "id": 6754,
-  "name": "/src/controllers/user.ts",
-  "creationDate": 44456,
-  "owner": "Jonathan Joestar",
-  "lastOpenedDate": 7366,
-  "projectId": 664
+  id: 6754,
+  name: "/src/controllers/user.ts",
+  creationDate: 44456,
+  owner: "Jonathan Joestar",
+  lastOpenedDate: 7366,
+  projectId: 664
 }
 ```
 
@@ -368,14 +369,14 @@ GET projects/:projectID/files/:fileID
 Status: 200 OK
 ```
 
-```json
+```js
 {
-  "id": 555,
-  "name": "server/src/index.ts",
-  "creationDate": 645466,
-  "lastOpenedDate": 736636,
-  "projectId": 6664,
-  "owner": "Joseph Joestar"
+  id: 555,
+  name: "server/src/index.ts",
+  creationDate: 645466,
+  lastOpenedDate: 736636,
+  projectId: 6664,
+  owner: "Joseph Joestar"
 }
 ```
 
@@ -437,10 +438,10 @@ content-type: application/json
 
 Json whose properties are the information to be updated. The example below features all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required.
 
-```json
+```js
 {
-  "name": "src/index.ts",
-  "lastOpenedDate": 656566
+  name: "src/index.ts",
+  lastOpenedDate: 656566
 }
 ```
 
@@ -478,7 +479,7 @@ content-type: (need to do some tests)
 
 ##### Body
 
-```json
+```js
 
 ```
 
@@ -516,7 +517,7 @@ Status: 204 No Content
 
 `bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
 
-## `Errors`
+## Errors
 
 #### Bad request
 
