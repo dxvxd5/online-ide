@@ -19,6 +19,12 @@
   },
   "homepage": "https://github.com/dxvxd5/online-ide#readme",
   "devDependencies": {
-    "concurrently": "^6.2.1"
+    "concurrently": "^6.2.1",
+    "react-monaco-editor": "^0.45.0"
+  },
+  "dependencies": {
+    "@types/history": "^4.7.9",
+    "@types/react-monaco-editor": "^0.16.0",
+    "@types/react-router": "^5.1.16"
   }
 }
