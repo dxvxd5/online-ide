@@ -4,9 +4,9 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import testingActions from './actions/testingActions';
-import userActions from './actions/userActions';
-import Home from './Home';
+import testingActions from '../../redux/actions/testingActions';
+import userActions from '../../redux/actions/userActions';
+import Home from '../home/Home';
 // import ChooseUserName from './ChooseUserName';
 
 const Login = (props: {

@@ -4,10 +4,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import { Codemirror } from 'react-codemirror-ts';
 import io from 'socket.io-client';
 import axios from 'axios';
-import EnterUsername from './components/EnterUsername';
-import ConnectedUsers from './components/connectedUsers/ConnectedUsers';
-import Messages from './components/messages/Messages';
-import CodeEditor from './components/CodeEditor';
+import EnterUsername from '../components/EnterUsername';
+import ConnectedUsers from '../components/connectedUsers/ConnectedUsers';
+import Messages from '../components/messages/Messages';
+import CodeEditor from '../editor/CodeEditor';
 
 const Home = () => {
   const [value, setValue] = useState<string>('');

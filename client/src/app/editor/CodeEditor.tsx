@@ -40,7 +40,7 @@ import 'codemirror/mode/php/php';
 import 'codemirror/mode/erlang/erlang';
 import 'codemirror/mode/coffeescript/coffeescript';
 import 'codemirror/mode/crystal/crystal';
-import User from './connectedUsers/User';
+import User from '../components/connectedUsers/User';
 
 const useConstructor: any = (callBack = () => {}) => {
   const [hasBeenCalled, setHasBeenCalled] = useState(false);

@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import Login from './Login';
+import Login from './app/login/Login';
 
 function App(): JSX.Element {
   return (
