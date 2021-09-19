@@ -1,9 +1,9 @@
 import React from 'react';
 
 const EnterUsername = (props: {
-  username: string;
-  setUsername: (...args: any[]) => any;
-  handleConnection: (...args: any[]) => any; // since handleConnection: Function is not allowed
+  handleConnection: () => void;
+  username: string | number | readonly string[] | undefined;
+  setUsername: (arg0: string) => void;
 }) => {
   return (
     <form

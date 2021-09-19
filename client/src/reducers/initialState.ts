@@ -6,6 +6,10 @@ const tokens = JSON.parse(myJSON);
 const initialState = {
   challenges: tokens,
   currentUser: faker.internet.userName(),
+  backend: {
+    dataFromBackend: {},
+    getDataFromBackend: {},
+  },
 };
 
 export default initialState;

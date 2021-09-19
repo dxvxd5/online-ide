@@ -10,6 +10,10 @@ import React, {
 import { Codemirror } from 'react-codemirror-ts';
 import MonacoEditor from 'react-monaco-editor';
 import io from 'socket.io-client';
+// import AceEditor from 'react-ace';
+
+/* import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/theme-github'; */
 
 import 'codemirror/addon/edit/matchbrackets';
 import 'codemirror/lib/codemirror.css';
@@ -273,6 +277,19 @@ const CodeEditor = (props: {
         }}
         onChange={codeIsHappening}
       />
+      {/*       <AceEditor
+        mode="javascript"
+        theme="github"
+        onChange={codeIsHappening}
+        name="example"
+        value={code}
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: true,
+        }}
+      />
+ */}{' '}
       {/*       <Codemirror
         value={code}
         name="example"

@@ -1,26 +1,41 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable comma-dangle */
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { AnyAction, bindActionCreators, Dispatch } from 'redux';
-import * as userActions from './actions/userActions';
-import CodeEditor from './components/CodeEditor';
+import testingActions from './actions/testingActions';
+import userActions from './actions/userActions';
 import Home from './Home';
 // import ChooseUserName from './ChooseUserName';
 
 const Login = (props: {
-  dispatch: (arg0: { type: string; payload: string }) => void;
-  userName: string;
-  tokens: string[];
+  actions: { getData: (arg0: string) => void };
+  /*   backend: {
+    getDataFromBackend: any;
+  };
+ */
 }) => {
-  const chooseUserName = (userName: string) => {
-    props.dispatch({ type: 'ASSIGN_USERNAME', payload: userName });
+  const [response, setResponse] = useState([]);
 
-    // props.actions.assignUserName(userName);
+  const chooseUserName = () => {
+    // "props.dispatch" is used when we don't declare "mapDispatchToProps" function in our component:
+    // props.dispatch({ type: 'ASSIGN_USERNAME', payload: userName });
+
+    // "props.actions" is used when we declare "mapDispatchToProps" function in our component:
+    // props.actions.assignUserName('Sara');
+    props.actions.getData('https://jsonplaceholder.typicode.com/users');
+
+    // console.log('backend.getDataFromBackend: ', props.getDataFromBackend);
   };
   return (
     <div>
+      <button type="submit" onClick={chooseUserName}>
+        GET REQUEST
+      </button>
+      {response.map((person: any) => (
+        <div key={person.id}>{person.name}</div>
+      ))}
       {/*      
       HomePage
       <br />
@@ -38,9 +53,28 @@ const Login = (props: {
   );
 };
 
-function mapStateToProps(state: { currentUser: string; challenges: string[] }) {
+function mapStateToProps(state: {
+  currentUser: string;
+  challenges: string[];
+  backend: any;
+}) {
   console.log('STATE: ', state);
-  return { userName: state.currentUser, tokens: state.challenges };
+  const { currentUser, challenges, backend } = state;
+
+  return {
+    currentUser,
+    challenges,
+    backend,
+  };
 }
 
-export default connect(mapStateToProps)(Login);
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+  return {
+    actions: bindActionCreators(
+      { ...testingActions, ...userActions },
+      dispatch
+    ),
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
