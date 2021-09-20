@@ -1,12 +1,21 @@
 import React from 'react';
 import './App.css';
-import Login from './app/login/Login';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import IdeModel from './data/model/model';
+import LoginPresenter from './app/login/LoginPresenter';
 
 function App(): JSX.Element {
+  const ideModel = new IdeModel();
   return (
-    <div className="app">
-      <Login />
-    </div>
+    <Router>
+      <div className="container">
+        <Route
+          path="/login"
+          exact
+          component={() => <LoginPresenter model={ideModel} />}
+        />
+      </div>
+    </Router>
   );
 }
 
