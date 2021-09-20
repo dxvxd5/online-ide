@@ -1,4 +1,5 @@
 import { FirestoreStore } from '@google-cloud/connect-firestore';
+import cors from 'cors';
 import express, {
   Request,
   Response,
@@ -35,6 +36,7 @@ const fireSessionStore = new FirestoreStore({
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // ========
 passport.use(localStrategy);
