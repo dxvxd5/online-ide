@@ -6,9 +6,49 @@
 
 The users API allows to get information about a user
 
-### Create user
+### Create user (sign up)
 
-(need to some tests)
+#### Request
+
+```http
+POST /users/signup
+```
+
+##### Header
+
+```
+Content-type: application/json
+```
+
+##### Body
+
+Json containing the name, email and password of the new user.
+
+```js
+{
+    name:"Davis Spinage",
+    username:"yaya",
+    password:"hlililiub"
+}
+```
+
+#### Response
+
+```
+Status: 200 OK
+```
+
+```js
+{
+    name: "Davis Spinage",
+    username": "yaya",
+    id: "HlQlV9hwYlMVJenAiq761oWnOBE3"
+}
+```
+
+#### Possible errors
+
+`bad request` `internal server error`
 
 ### Get user infos
 
@@ -30,15 +70,15 @@ Status: 200 OK
 
 ```js
 {
-    id:1,
+    id:"hiuiuhnootu",
     name:"Jotaro Kujo",
-    username:"Jojo",
+    username:"Jojo@gmail.com",
 }
 ```
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable`
+`bad request` `require authentification` `resource non found` `internal server error`
 
 ### Get user projects
 
@@ -66,16 +106,16 @@ Status: 200 OK
 {
   projects: [
     {
-      id: 1,
+      id: "hhdjkjdm",
       name: 'online-ide',
       shared: true,
-      lastOpenedDate: 2334111,
+      lastUpdated: 2334111,
     },
     {
-      id: 55,
+      id: "jjddll",
       shared: false,
       name: 'quiz-app',
-      lastOpenedDate: 233781,
+      lastUpdated: 233781,
     },
   ];
 }
@@ -83,7 +123,7 @@ Status: 200 OK
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Get user files
 
@@ -114,19 +154,19 @@ Status: 200 OK
       id: 1,
       projectId: 555,
       name: 'index.ts',
-      lastOpenedDate: 2334111,
+      lastUpdated: 2334111,
     },
     {
       id: 55,
       projectId: 545,
       name: 'components/sidebar.tsx',
-      lastOpenedDate: 233781,
+      lastUpdated: 233781,
     },
     {
       id: 567,
       projectId: 565,
       name: 'routers/home.ts',
-      lastOpenedDate: 233781,
+      lastUpdated: 233781,
     },
   ];
 }
@@ -134,7 +174,7 @@ Status: 200 OK
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ## Projects
 
@@ -143,8 +183,12 @@ Status: 200 OK
 #### Request
 
 ```http
-POST projects/
+POST /users/:userID/projects/
 ```
+
+##### Parameters
+
+`userID`: int
 
 ##### Header
 
@@ -160,7 +204,6 @@ JSON file containing all the information of the file. All properties are mandato
 {
   name: "online-ide",
   creationDate: 44456,
-  owner: "Jonathan Joestar"
 }
 ```
 
@@ -175,8 +218,8 @@ Status: 200 OK
   id: 654,
   name: "online-ide",
   creationDate: 44456,
-  owner: "Jonathan Joestar",
-  lastOpenedDate": 44456,
+  owner: {userID: 542442, name: "Joseph Joestar"},
+  lastUpdated": 44456,
   files: [],
   shared: false,
   collaborators: []
@@ -185,7 +228,7 @@ Status: 200 OK
 
 #### Possible errors
 
-`bad request` `require authentification` `service unavailable` `forbidden`
+`bad request` `require authentification` `internal server error` `forbidden`
 
 ### Get project
 
@@ -194,12 +237,13 @@ Get all informations of a project. The contents of the files are not included.
 #### Request
 
 ```http
-GET /projects/:projectID
+GET /users/:userID/projects/:projectID
 ```
 
 ##### Parameters
 
 `projectID`: int
+`userID`: int
 
 #### Response
 
@@ -214,34 +258,35 @@ Status: 200 OK
     shared:true,
     owner:"Joseph Joestar",
     collaborators:[
-        "Joseph Joestar",
-        "Jotaro Kujo",
+        {userID: 542442, name: "Joseph Joestar"},
+        {userID: 7363 , name: "Jotaro Kujo"},
     ],
     files:[
         {id:45636, name:"src/components/sidebar.tsx"},
         {id:4567, name:"src/components/header.tsx"},
         {id:555, name:"server/src/index.ts"}
-    ]
+    ],
     creationDate:2334111,
-    lastOpenedDate:2334111,
+    lastUpdated:2334111,
 },
 ```
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Edit project
 
 #### Request
 
 ```http
-PATCH /projects/:projectID
+PATCH /users/:userID/projects/:projectID
 ```
 
 ##### Parameters
 
 `projectID`: int
+`userID`: int
 
 ##### Header
 
@@ -256,8 +301,8 @@ Json whose properties are the information to be updated. The example below featu
 ```js
 {
   name: "awesome-online-ide",
-  collaborators: ["Jotaro Kujo", "Joseph Joestar"],
-  lastOpenedDate: 656566,
+  collaborators: ["user1ID", "user2ID"],
+  lastUpdated: 656566,
   shared: true
 }
 ```
@@ -270,7 +315,7 @@ Status: 204 No Content
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Delete project
 
@@ -292,7 +337,7 @@ Status: 204 No Content
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ## Files
 
@@ -301,11 +346,12 @@ Status: 204 No Content
 #### Request
 
 ```http
-POST projects/:projectID/files/
+POST /users/:userID/projects/:projectID/files/
 ```
 
 ##### Parameters
 
+`userID`: int
 `projectID`: int
 
 ##### Header
@@ -322,7 +368,7 @@ JSON file containing all the information of the file. All properties are mandato
 {
   name: "/src/controllers/user.ts",
   creationDate: 44456,
-  owner: "Jonathan Joestar"
+  owner: "userID"
 }
 ```
 
@@ -338,29 +384,29 @@ Status: 200 OK
   name: "/src/controllers/user.ts",
   creationDate: 44456,
   owner: "Jonathan Joestar",
-  lastOpenedDate: 7366,
+  lastUpdated: 7366,
   projectId: 664
 }
 ```
 
 #### Possible errors
 
-`bad request` `require authentification` `service unavailable` `forbidden`
+`bad request` `require authentification` `internal server error` `forbidden`
 
 ### Get file
 
-Get all informations of a file in a project, content not included.
+Get all information of a file in a project, content not included.
 
 #### Request
 
 ```http
-GET projects/:projectID/files/:fileID
+GET /users/:userID/projects/:projectID/files/:fileID
 ```
 
 ##### Parameters
 
+`userID`: int
 `fileID`: int
-
 `projectID`: int
 
 #### Response
@@ -374,29 +420,29 @@ Status: 200 OK
   id: 555,
   name: "server/src/index.ts",
   creationDate: 645466,
-  lastOpenedDate: 736636,
+  lastUpdated: 736636,
   projectId: 6664,
-  owner: "Joseph Joestar"
+  owner: {userID: 3444, name: "Joseph Joestar"}
 }
 ```
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Get file content
 
 #### Request
 
 ```http
-GET projects/:projectID/files/:fileID/content
+GET /users/:userID/projects/:projectID/files/:fileID/content
 ```
 
 ##### Parameters
 
 `fileID`: int
-
 `projectID`: int
+`userID`: int
 
 #### Response
 
@@ -410,7 +456,7 @@ Status: 200 OK
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Edit file
 
@@ -419,13 +465,13 @@ Edit all file properties except the content
 #### Request
 
 ```http
-PATCH /projects/:projectID/files/:fileID
+PATCH /users/:userID/projects/:projectID/files/:fileID
 ```
 
 ##### Parameters
 
+`userID`: int
 `projectID`: int
-
 `fileID`: int
 
 ##### Header
@@ -441,7 +487,7 @@ Json whose properties are the information to be updated. The example below featu
 ```js
 {
   name: "src/index.ts",
-  lastOpenedDate: 656566
+  lastUpdated: 656566
 }
 ```
 
@@ -453,7 +499,7 @@ Status: 204 No Content
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Update file content
 
@@ -462,13 +508,13 @@ Edit all file properties except the content
 #### Request
 
 ```http
-PATCH /projects/:projectID/files/:fileID/content
+PATCH /users/:userID/projects/:projectID/files/:fileID/content
 ```
 
 ##### Parameters
 
+`userID`: int
 `projectID`: int
-
 `fileID`: int
 
 ##### Header
@@ -491,20 +537,20 @@ Status: 204 No Content
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ### Delete file
 
 #### Request
 
 ```http
-DELETE /projects/:projectID/files/:fileID
+DELETE /users/:userID/projects/:projectID/files/:fileID
 ```
 
 ##### Parameters
 
+`userID`: int
 `projectID`: int
-
 `fileID`: int
 
 #### Response
@@ -515,7 +561,7 @@ Status: 204 No Content
 
 #### Possible errors
 
-`bad request` `require authentification` `resource non found` `service unavailable` `forbidden`
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
 ## Errors
 
@@ -537,12 +583,12 @@ Status: 401 Unauthorized
 Status: 404 Not Found
 ```
 
-#### Service unavailable
+#### Internal server error
 
-Something unexpected happened server-side
+The server has encountered a situation it doesn't know how to handle.
 
 ```
-Status: 503 Service Unavailable
+Status: 500 Internal Server Error
 ```
 
 #### Forbidden

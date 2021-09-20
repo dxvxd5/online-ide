@@ -109,3 +109,6 @@ dist
 
 # Local History for Visual Studio Code
 .history/
+
+# Firebase configuration file
+firebaseconfig.json
