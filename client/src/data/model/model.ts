@@ -5,6 +5,12 @@ type Observer = {
   (message: Message): void;
 };
 
+interface UserData {
+  name: string;
+  username: string;
+  id: string;
+}
+
 export default class IdeModel {
   name: string;
 
@@ -37,7 +43,8 @@ export default class IdeModel {
   }
 
   login(userName: string, password: string): void {
-    API.logIn(userName, password).then(({ name, username, id }) => {
+    API.logIn(userName, password).then((data) => {
+      const { username, id, name } = data as UserData;
       this.setName(name);
       this.setUserID(id);
       this.setUsername(username);
