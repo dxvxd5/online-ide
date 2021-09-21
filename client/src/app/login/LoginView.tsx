@@ -1,8 +1,10 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/ban-types */
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 type ClickFunction = {
-  (e: React.FormEvent<HTMLFormElement>): void;
+  (e: { username: string; password: string }): void;
 };
 
 interface LoginViewProp {
@@ -10,31 +12,25 @@ interface LoginViewProp {
 }
 
 const LoginView = ({ click }: LoginViewProp): JSX.Element => {
-  /*   const [username, setUsername] = React.useState(null);
-  const [password, setPassword] = React.useState(null);
- */
   return (
-    <div>
-      <form onSubmit={(e) => click(e)}>
-        <div>
-          <div>Username</div>
-          <input
-            type="text"
-            name="username"
-            // onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <div>Password </div>
-          <input
-            type="password"
-            name="password"
-            // onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <input type="submit" name="Login" />
-      </form>
-    </div>
+    <>
+      <h1>Login</h1>
+      <Formik
+        initialValues={{ username: '', password: '' }}
+        onSubmit={(e) => click(e)}
+      >
+        <Form>
+          <p>Username: </p>
+          <Field type="username" name="username" />
+          <ErrorMessage name="username" component="div" />
+          <p>Password: </p>
+          <Field type="password" name="password" />
+          <ErrorMessage name="password" component="div" />
+          <br />
+          <button type="submit">Submit</button>
+        </Form>
+      </Formik>
+    </>
   );
 };
 export default LoginView;
