@@ -1,6 +1,7 @@
 import flash from 'connect-flash';
 import express from 'express';
 import cors from 'cors';
+import http from 'http';
 
 import { PORT } from './config/env.variables';
 
@@ -9,6 +10,8 @@ import passport from './middlewares/passport';
 import session from './middlewares/session';
 
 import usersRouter from './routes/user.routes';
+
+import socketFunction from './socket';
 
 const app = express();
 
@@ -38,7 +41,8 @@ app.post(
 
 app.use('/users', usersRouter);
 
-// Start listening
-app.listen(PORT, () => {
-  console.log(`The server is at http://localhost:${PORT}`);
-});
+// Socket.IO Functionality
+const server = http.createServer(app);
+server.listen(PORT, () => console.log(`Server started on port ${PORT}!`));
+
+socketFunction(app, server);

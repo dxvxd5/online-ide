@@ -1,72 +1,72 @@
-// import express from 'express';
-// import http from 'http';
-// import { Server } from 'socket.io';
+import { Express } from 'express';
+import { Server } from 'socket.io';
+import http from 'http';
+import { PORT } from './config/env.variables';
+import { userJoin, getUsers, userLeave } from './utils/user';
 // import { getUsers, userJoin, userLeave } from './util/user';
+const socketFunction = (app: Express, server: http.Server) => {
+  const io = new Server(server, { cors: { origin: 'http://localhost:3000' } });
 
-// const app = express();
-// const serverPORT = 5000;
-// const server = http.createServer(app);
-// const io = new Server(server, { cors: { origin: 'http://localhost:3000' } });
+  io.on('connection', (socket) => {
+    console.log('Client connected');
 
-// server.listen(serverPORT, () =>
-//   console.log(`Server started on port ${serverPORT}!`)
-// );
+    // USER SOCKET CONNECTION:
+    // Everytime user logs in we want them to join the room "myChat"
+    // For every user to be able to chat with other users
+    socket.join('myChat');
 
-// io.on('connection', (socket) => {
-//   console.log('Client connected');
+    // Listen for "handle-connection" event
+    socket.on('handle-connection', (username: string) => {
+      // If user already is logged in:
+      if (!userJoin(socket.id, username)) {
+        socket.emit('username-token');
+      } else {
+        socket.emit('username-submitted-successfully');
+        // Emits the message "get-connected-users" to "myChat"
+        io.to('myChat').emit('get-connected-users', getUsers());
+      }
+    });
 
-//   // USER SOCKET CONNECTION:
-//   // Everytime user logs in we want them to join the room "myChat"
-//   // For every user to be able to chat with other users
-//   socket.join('myChat');
+    socket.on('message', (message: { message: string; username: string }) => {
+      socket.broadcast.to('myChat').emit('receive-message', message);
+    });
 
-//   // Listen for "handle-connection" event
-//   socket.on('handle-connection', (username: string) => {
-//     // If user already is logged in:
-//     if (!userJoin(socket.id, username)) {
-//       socket.emit('username-token');
-//     } else {
-//       socket.emit('username-submitted-successfully');
-//       // Emits the message "get-connected-users" to "myChat"
-//       io.to('myChat').emit('get-connected-users', getUsers());
-//     }
-//   });
+    socket.on('disconnect', () => {
+      userLeave(socket.id);
+    });
 
-//   socket.on('message', (message: { message: string; username: string }) => {
-//     socket.broadcast.to('myChat').emit('receive-message', message);
-//   });
+    // ROOM SOCKET CONNECTION:
+    socket.on('room', (data) => {
+      console.log('in joining room in SERVER');
+      socket.join(data.room);
+      console.log('Data: ', data);
+      socket.broadcast.to(data.room).emit('load users and code');
+      socket.broadcast.to(data.room).emit('new user join', data.user);
+    });
 
-//   socket.on('disconnect', () => {
-//     userLeave(socket.id);
-//   });
+    socket.on('leave room', (data) => {
+      socket.broadcast
+        .to(data.room)
+        .emit('user left room', { user: data.user });
+      socket.leave(data.room);
+    });
 
-//   // ROOM SOCKET CONNECTION:
-//   socket.on('room', (data) => {
-//     console.log('in joining room in SERVER');
-//     socket.join(data.room);
-//     console.log('Data: ', data);
-//     socket.broadcast.to(data.room).emit('load users and code');
-//     socket.broadcast.to(data.room).emit('new user join', data.user);
-//   });
+    socket.on('coding event', (data) => {
+      console.log('in EXPRESS coding event');
+      console.log(data);
+      socket.broadcast.to(data.room).emit('receive code', {
+        code: data.code,
+        currentlyTyping: data.currentlyTyping,
+      });
+    });
+    socket.on('change mode', (data) => {
+      socket.broadcast.to(data.room).emit('receive change mode', data.mode);
+    });
 
-//   socket.on('leave room', (data) => {
-//     socket.broadcast.to(data.room).emit('user left room', { user: data.user });
-//     socket.leave(data.room);
-//   });
+    socket.on('send users and code', (data) => {
+      socket.broadcast.to(data.room).emit('receive users and code', data);
+    });
+  });
+};
 
-//   socket.on('coding event', (data) => {
-//     console.log('in EXPRESS coding event');
-//     console.log(data);
-//     socket.broadcast.to(data.room).emit('receive code', {
-//       code: data.code,
-//       currentlyTyping: data.currentlyTyping,
-//     });
-//   });
-//   socket.on('change mode', (data) => {
-//     socket.broadcast.to(data.room).emit('receive change mode', data.mode);
-//   });
-
-//   socket.on('send users and code', (data) => {
-//     socket.broadcast.to(data.room).emit('receive users and code', data);
-//   });
-// });
+export default socketFunction;

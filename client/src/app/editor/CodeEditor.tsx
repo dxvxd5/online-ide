@@ -15,7 +15,7 @@ import io from 'socket.io-client';
 /* import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/theme-github'; */
 
-import 'codemirror/addon/edit/matchbrackets';
+/* import 'codemirror/addon/edit/matchbrackets';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/theme/bespin.css';
@@ -39,8 +39,11 @@ import 'codemirror/mode/python/python';
 import 'codemirror/mode/php/php';
 import 'codemirror/mode/erlang/erlang';
 import 'codemirror/mode/coffeescript/coffeescript';
-import 'codemirror/mode/crystal/crystal';
+import 'codemirror/mode/crystal/crystal'; */
 import User from '../components/connectedUsers/User';
+import Main from './Main';
+import PlaygroundStudio from './PlaygroundStudio';
+import Sidebar from './sidebar/Sidebar';
 
 const useConstructor: any = (callBack = () => {}) => {
   const [hasBeenCalled, setHasBeenCalled] = useState(false);
@@ -54,8 +57,6 @@ const CodeEditor = (props: {
   currentUser: string;
   socketClient: React.MutableRefObject<SocketIOClient.Socket | undefined>;
 }) => {
-  const [counter, setCounter] = useState(0);
-
   const [code, setCode] = useState('');
   const [mode, setMode] = useState('javascript');
   const [theme, setTheme] = useState('eclipse');
@@ -68,6 +69,51 @@ const CodeEditor = (props: {
     mode,
     theme,
   };
+
+  const sections = ['contextual', 'mockedCode', 'tests', 'hiddenCode'];
+  const files = [
+    {
+      name: 'script.js',
+      content: 'Hola',
+      section: 'contextual',
+    },
+    {
+      name: 'index.html',
+      content: 'Chao',
+      section: 'contextual',
+    },
+    {
+      name: 'style.css',
+      content: '',
+      section: 'contextual',
+    },
+    {
+      name: 'index.js',
+      content: '',
+      section: 'tests',
+    },
+    {
+      name: 'index.js',
+      content: '',
+      section: 'mockedCode',
+    },
+    {
+      name: 'htmlHidden.js',
+      content: '',
+      section: 'hiddenCode',
+    },
+    {
+      name: 'jsHidden.js',
+      content: '',
+      section: 'hiddenCode',
+    },
+  ];
+
+  const [openFiles, setOpenFiles] = useState(files);
+  const [activeFile, setActiveFile] = useState(files[0]);
+  const editorReference = React.createRef() as React.RefObject<any>;
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [activeSidebar, setActiveSidebar] = useState('files');
 
   const removeUser = (user: string) => {
     const newUsers = Object.assign([], users);
@@ -127,6 +173,11 @@ const CodeEditor = (props: {
 
   const updateCodeForCurrentUser = (newCode: string) => {
     setCode(newCode);
+    console.log('activeFile: ', activeFile);
+    const activeFileCopy = { ...activeFile };
+    console.log('activeFileCopy: ', activeFileCopy);
+    activeFileCopy.content = newCode;
+    setActiveFile(activeFileCopy);
   };
 
   const updateCurrentlyTyping = () => {
@@ -251,6 +302,36 @@ const CodeEditor = (props: {
     };
   }, [props.currentUser]);
 
+  const openFile = (file: {
+    name: string;
+    content: string;
+    section: string;
+  }) => {
+    const openFilesCopy = [...openFiles];
+    if (!openFilesCopy.find((f) => f.name === file.name)) {
+      openFilesCopy.push(file);
+      setOpenFiles(openFilesCopy);
+    }
+  };
+
+  const closeFile = (file: { name: string }) => {
+    const openFilesCopy = [...openFiles];
+    const index = openFilesCopy.findIndex((f) => f.name === file.name);
+    openFilesCopy.splice(index, 1);
+    if (!openFilesCopy.length) {
+      setActiveFile(null as any);
+    } else {
+      setActiveFile(openFilesCopy[0]);
+    }
+    setOpenFiles(openFilesCopy);
+  };
+
+  const onWrite = () => {
+    const activeFileCopy = { ...activeFile };
+    activeFileCopy.content = code;
+    setActiveFile(activeFileCopy);
+  };
+
   return (
     <>
       <h1>Room token: {codeEditorTokens[0]}</h1>
@@ -264,7 +345,7 @@ const CodeEditor = (props: {
       <ThemeSelect theme={theme} changeTheme={changeTheme} />
  */}
       {/* <Codemirror value={code} onChange={codeIsHappening} options={options} /> */}
-      <MonacoEditor
+      {/* <MonacoEditor
         width="800"
         height="600"
         className="monacoEditor"
@@ -276,6 +357,13 @@ const CodeEditor = (props: {
           selectOnLineNumbers: true,
         }}
         onChange={codeIsHappening}
+        editorDidMount={editorDidMount}
+      /> */}
+      <PlaygroundStudio
+        sections={sections}
+        files={files}
+        codeIsHappening={codeIsHappening}
+        code={code}
       />
       {/*       <AceEditor
         mode="javascript"
