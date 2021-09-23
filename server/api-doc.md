@@ -6,12 +6,52 @@
 
 The users API allows to get information about a user
 
+### Log in
+
+#### Request
+
+```http
+POST /login
+```
+##### Header
+
+```
+Content-type: application/json
+```
+##### Body
+
+Json containing the name, email and password of the new user.
+
+```js
+{
+    username:"yaya",
+    password:"hlililiub"
+}
+```
+#### Response
+
+```
+Status: 200 OK
+```
+
+```js
+{
+    name: "Davis Spinage",
+    username": "yaya",
+    id: "HlQlV9hwYlMVJenAiq761oWnOBE3"
+}
+```
+
+#### Possible errors
+
+`require authentication` `internal server error`
+
 ### Create user (sign up)
 
 #### Request
 
 ```http
-POST /users/signup
+POST /signup
 ```
 
 ##### Header
@@ -183,7 +223,7 @@ Status: 200 OK
 #### Request
 
 ```http
-POST /users/:userID/projects/
+POST /users/:userID/projects/create
 ```
 
 ##### Parameters
