@@ -257,12 +257,8 @@ Status: 200 OK
 {
   id: 654,
   name: "online-ide",
-  creationDate: 44456,
-  owner: {userID: 542442, name: "Joseph Joestar"},
   lastUpdated": 44456,
-  files: [],
   shared: false,
-  collaborators: []
 }
 ```
 
@@ -293,13 +289,12 @@ Status: 200 OK
 
 ```js
 {
-    id:1,
+    id:"37gsgsg7",
     name:"Jojo-bizzare-adventure",
     shared:true,
-    owner:"Joseph Joestar",
+    owner:{name:"Joseph Joestar", id:"56636"},
     collaborators:[
-        {userID: 542442, name: "Joseph Joestar"},
-        {userID: 7363 , name: "Jotaro Kujo"},
+        {id: 7363 , name: "Jotaro Kujo"},
     ],
     files:[
         {id:45636, name:"src/components/sidebar.tsx"},
@@ -336,12 +331,14 @@ content-type: application/json
 
 ##### Body
 
-Json whose properties are the information to be updated. The example below features all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required.
+Json whose properties are the information to be updated. The example below shows all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required. However, at least one must be included for the request to be valid.
 
 ```js
 {
   name: "awesome-online-ide",
-  collaborators: ["user1ID", "user2ID"],
+  collaborators: [
+        {id: 7363 , name: "Jotaro Kujo"},
+    ],
   lastUpdated: 656566,
   shared: true
 }
