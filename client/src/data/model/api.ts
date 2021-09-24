@@ -3,8 +3,6 @@ import axios, { Method } from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-// console.log({ API_BASE_URL });
-
 interface Request {
   url: string;
   method: Method;

@@ -40,4 +40,16 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-export default passport;
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+function passportAuthenticator(
+  successRedirect: string,
+  failureRedirect: string
+) {
+  return passport.authenticate('local', {
+    successRedirect,
+    failureRedirect,
+    failureFlash: true,
+  });
+}
+
+export { passport, passportAuthenticator };
