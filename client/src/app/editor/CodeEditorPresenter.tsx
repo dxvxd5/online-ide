@@ -230,13 +230,9 @@ export default function CodeEditorPresenter({
   // Gets updated as soon I type something inside the form element or the Codemirror element
   useEffect(() => {
     const propsCurrentUser = connectedUser;
-    sessionStorage.setItem('currentUser', propsCurrentUser.username);
+    // sessionStorage.setItem('currentUser', propsCurrentUser.username);
     const usersArr = connectedUsers.concat(propsCurrentUser);
     const usersArr2 = [...connectedUsers, propsCurrentUser];
-    console.log('propsCurrentUser: ', propsCurrentUser);
-    console.log('connectedUsers: ', connectedUsers);
-    console.log('usersArr: ', usersArr);
-    console.log('usersArr2: ', usersArr2);
     if (socketClient.current) {
       socketClient.current.emit('room', {
         room: codeEditorTokens[0],
