@@ -15,7 +15,7 @@ function App(): JSX.Element {
           exact
           component={() => <LoginPresenter model={ideModel} />}
         />
-        <Route path="/" exact component={() => <Home />} />
+        <Route path="/" exact component={() => <Home model={ideModel} />} />
       </div>
     </Router>
   );

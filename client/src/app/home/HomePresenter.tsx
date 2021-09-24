@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
-import EnterUsername from '../components/EnterUsername';
-import ConnectedUsers from '../components/connectedUsers/ConnectedUsers';
-import Messages from '../components/messages/Messages';
-import CodeEditorPresenter from '../editor/CodeEditorPresenter';
+import { toast } from 'react-toastify';
 import IdeModel from '../../data/model/model';
+import HomeView from './HomeView';
 
-interface HomeProp {
+interface HomePresenterProps {
   model: IdeModel;
 }
 
-const Home = ({ model }: HomeProp) => {
+export default function HomePresenter({
+  model,
+}: HomePresenterProps): JSX.Element {
   const [value, setValue] = useState<string>('');
   const [clickedButton, setClickedButton] = useState(false);
   const [connected, setConnected] = useState(false);
@@ -95,51 +94,21 @@ const Home = ({ model }: HomeProp) => {
       setClickedButton(true);
     }
   };
-
   return (
-    <div>
-      <div className="container">
-        {!connected && (
-          <EnterUsername
-            username={connectedUser.username}
-            setUsername={setUsername}
-            handleConnection={handleConnection}
-          />
-        )}
-        {connected && !clickedButton && (
-          <>
-            <button
-              type="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                goToCodeEditor();
-              }}
-            >
-              Go to Code Editor
-            </button>
-            <ConnectedUsers connectedUsers={connectedUsers} />
-            <Messages
-              message={message}
-              setMessage={setMessage}
-              messages={messages}
-              username={connectedUser.username}
-              handleSendMessage={handleSendMessage}
-            />
-          </>
-        )}
-        {clickedButton && (
-          <CodeEditorPresenter
-            model={model}
-            connectedUsers={connectedUsers}
-            connectedUser={connectedUser}
-            socketClient={socketClient}
-          />
-        )}
-
-        <ToastContainer position="bottom-right" />
-      </div>
-    </div>
+    <HomeView
+      connected={connected}
+      connectedUser={connectedUser}
+      setUsername={setUsername}
+      handleConnection={handleConnection}
+      clickedButton={clickedButton}
+      socketClient={socketClient}
+      goToCodeEditor={goToCodeEditor}
+      message={message}
+      messages={messages}
+      setMessage={setMessage}
+      handleSendMessage={handleSendMessage}
+      model={model}
+      connectedUsers={connectedUsers}
+    />
   );
-};
-
-export default Home;
+}

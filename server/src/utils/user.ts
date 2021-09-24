@@ -1,7 +1,7 @@
 let users: { id: string; username: string }[] = [];
 
 export const userJoin = (id: string, username: string) => {
-  const user = users.find((user) => user.username === username);
+  const user = users.find((userr) => userr.username === username);
 
   if (user) {
     return false;

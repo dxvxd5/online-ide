@@ -1,7 +1,6 @@
 import { Express } from 'express';
 import { Server } from 'socket.io';
 import http from 'http';
-import { PORT } from './config/env.variables';
 import { userJoin, getUsers, userLeave } from './utils/user';
 // import { getUsers, userJoin, userLeave } from './util/user';
 const socketFunction = (app: Express, server: http.Server) => {
@@ -16,9 +15,9 @@ const socketFunction = (app: Express, server: http.Server) => {
     socket.join('myChat');
 
     // Listen for "handle-connection" event
-    socket.on('handle-connection', (username: string) => {
+    socket.on('handle-connection', (user: { id: string; username: string }) => {
       // If user already is logged in:
-      if (!userJoin(socket.id, username)) {
+      if (!userJoin(socket.id, user.username)) {
         socket.emit('username-token');
       } else {
         socket.emit('username-submitted-successfully');
