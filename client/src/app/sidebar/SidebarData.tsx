@@ -4,30 +4,28 @@ import {
   AiFillCaretDown,
   AiFillCaretUp,
   AiOutlineHistory,
-  AiOutlineHome,
-  AiOutlineMoneyCollect,
-  AiOutlineUser,
 } from 'react-icons/ai';
-import { FaCog, FaOpencart } from 'react-icons/fa';
+import { BsFillFolderFill } from 'react-icons/bs';
+import { FaCog, FaOpencart, FaFileAlt } from 'react-icons/fa';
 import { SidebarItem } from './models/SidebarItem';
 
 export const SidebarData: SidebarItem[] = [
   {
     title: 'Folder',
-    path: '/main',
-    icon: <AiOutlineHome />,
+    path: '/folder',
+    icon: <BsFillFolderFill />,
     iconClosed: <AiFillCaretDown />,
     iconOpened: <AiFillCaretUp />,
     subnav: [
       {
         title: 'File1',
         path: '/folder/file1',
-        icon: <AiOutlineUser />,
+        icon: <FaFileAlt />,
       },
       {
         title: 'File2',
         path: '/folder/file2',
-        icon: <AiOutlineMoneyCollect />,
+        icon: <FaFileAlt />,
       },
     ],
   },
