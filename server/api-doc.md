@@ -315,7 +315,7 @@ Status: 200 OK
 #### Request
 
 ```http
-PATCH /users/:userID/projects/:projectID
+PATCH /users/:userID/projects/:projectID/edit
 ```
 
 ##### Parameters
@@ -383,7 +383,7 @@ Status: 204 No Content
 #### Request
 
 ```http
-POST /users/:userID/projects/:projectID/files/
+POST /users/:userID/projects/:projectID/files/create
 ```
 
 ##### Parameters
@@ -405,7 +405,6 @@ JSON file containing all the information of the file. All properties are mandato
 {
   name: "/src/controllers/user.ts",
   creationDate: 44456,
-  owner: "userID"
 }
 ```
 
@@ -419,10 +418,8 @@ Status: 200 OK
 {
   id: 6754,
   name: "/src/controllers/user.ts",
-  creationDate: 44456,
-  owner: "Jonathan Joestar",
   lastUpdated: 7366,
-  projectId: 664
+  projectId: "gdgdhhd88"
 }
 ```
 
@@ -487,8 +484,16 @@ GET /users/:userID/projects/:projectID/files/:fileID/content
 Status: 200 OK
 ```
 
+##### Header
+
 ```
-(need to do some tests first)
+content-type: application/octet-stream
+```
+
+##### Body
+
+```
+(File in a js buffer)
 ```
 
 #### Possible errors
@@ -545,7 +550,7 @@ Edit all file properties except the content
 #### Request
 
 ```http
-PATCH /users/:userID/projects/:projectID/files/:fileID/content
+PUT /users/:userID/projects/:projectID/files/:fileID/content/
 ```
 
 ##### Parameters
@@ -557,13 +562,13 @@ PATCH /users/:userID/projects/:projectID/files/:fileID/content
 ##### Header
 
 ```
-content-type: (need to do some tests)
+content-type: application/octet-stream
 ```
 
 ##### Body
 
-```js
-
+```
+(File in a js buffer)
 ```
 
 #### Response
