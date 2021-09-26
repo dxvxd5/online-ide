@@ -18,8 +18,9 @@ function isAuthorizedUser(req: Request): boolean {
  * Ensure that the authenticated user is not acessing someone else's project.
  */
 async function isAuthorizedProject(req: Request): Promise<boolean> {
+  const paths = ['create', 'edit'];
   const user = req.user as User;
-  if (!req.projectID || req.projectID === 'create') return true;
+  if (!req.projectID || paths.includes(req.projectID)) return true;
   const isAuthorized = await Project.isUserOwnProject(user.id, req.projectID);
   return isAuthorized;
 }
@@ -37,14 +38,14 @@ export default async function checkAuthorization(
   if (!isAuthorizedUser(req))
     res.status(403).json({
       error: new HttpError(
-        "The authenticated user is not allowed to access another user's data",
+        'The requested user is not the authenticated user',
         403
       ),
     });
   else if (!(await isAuthorizedProject(req)))
     res.status(403).json({
       error: new HttpError(
-        'The authenticated user is not allowed to access a project they do not own.',
+        'The requested project does not belong to the authenticated user',
         403
       ),
     });

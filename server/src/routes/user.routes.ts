@@ -16,7 +16,7 @@ usersRouter.use('/:userID/projects', projectsRouter);
 usersRouter.use('/:userID/files', filesRouter);
 
 // Users routing
-usersRouter.get('/', getUser);
+// usersRouter.get('/', getUser);
 usersRouter.get('/:userID', getUser);
 
 export default usersRouter;
