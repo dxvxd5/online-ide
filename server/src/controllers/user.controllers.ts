@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/user.model';
-import Error from '../utils/httperror';
+import HttpError from '../utils/httperror';
 
 export async function getUser(
   req: Request,
@@ -13,7 +13,7 @@ export async function getUser(
     if (!user)
       res
         .status(404)
-        .json({ error: new Error(`No user with id ${userID}`, 404) });
+        .json({ error: new HttpError(`No user with id ${userID}`, 404) });
     else res.status(200).json(user);
   } catch (error) {
     next(error);
@@ -29,8 +29,7 @@ export async function signUpUser(
     const { name, username, password } = req.body;
     if (!(name && username && password))
       res.status(400).json({
-        // TODO: Send better error message here
-        error: new Error(
+        error: new HttpError(
           `Please specify all of the following: username, password and name. You did not specified  ${
             name && 'name'
           }, ${username && 'username'}, ${password && 'password'}`,
@@ -40,9 +39,9 @@ export async function signUpUser(
     else if (await User.isUserExistUsername(username))
       res
         .status(400)
-        .json({ error: new Error('username already in use', 400) });
+        .json({ error: new HttpError('username already in use', 400) });
     else {
-      const newUser = await User.signUp(username, password, name);
+      const newUser = await User.create(username, password, name);
       res.status(200).json(newUser);
     }
   } catch (error) {
