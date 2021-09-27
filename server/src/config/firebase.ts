@@ -32,6 +32,18 @@ function getFilePath(
   return `${getFileBasePath(userID, projectID)}/${fileID}`;
 }
 
+function getFileContentBasePath(userID: string, projectID: string): string {
+  return `${getProjectPath(userID, projectID)}/fileContents`;
+}
+
+function getFileContentPath(
+  userID: string,
+  projectID: string,
+  contentID: string
+): string {
+  return `${getFileContentBasePath(userID, projectID)}/${contentID}`;
+}
+
 export {
   userBasePath,
   firestore,
@@ -40,4 +52,6 @@ export {
   getProjectBasePath,
   getProjectPath,
   getUserPath,
+  getFileContentPath,
+  getFileContentBasePath,
 };

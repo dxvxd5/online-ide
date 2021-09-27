@@ -1,6 +1,6 @@
 type ErrorCode = 500 | 400 | 401 | 403 | 404;
 
-export default class Error {
+export default class HttpError {
   readonly message: string;
 
   readonly statusCode: number;
@@ -25,6 +25,6 @@ export default class Error {
   constructor(message: string, code: ErrorCode) {
     this.message = message;
     this.statusCode = code;
-    this.status = Error.codeToStatus(code);
+    this.status = HttpError.codeToStatus(code);
   }
 }

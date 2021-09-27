@@ -26,7 +26,7 @@ export default class User {
     this.id = userID;
   }
 
-  static async signUp(
+  static async create(
     username: string,
     password: string,
     name: string
@@ -75,7 +75,8 @@ export default class User {
     };
   }
 
-  /** Get a user from the database by its id
+  /**
+   * Get a user from the database by its id
    */
   static async getFromId(userID: string): Promise<User | null> {
     const userData = await User._getFromId(userID);
@@ -125,8 +126,7 @@ export default class User {
   }
 
   /**
-   * Check if there is a user in database with those credentials.
-   * Check both the username and password
+   * Get a user associated with the credentials.
    */
   static async getFromCredentials(
     username: string,
