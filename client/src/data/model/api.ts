@@ -5,6 +5,10 @@ const API_BASE_URL = 'http://localhost:5000';
 
 // console.log({ API_BASE_URL });
 
+interface Projects {
+  projects: Array<unknown>;
+}
+
 interface Request {
   url: string;
   method: Method;
@@ -30,7 +34,6 @@ export default class API {
             status: error.response.status,
             headers: error.response.headers,
           };
-          throw new Error(JSON.stringify(errorData));
 
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
@@ -59,5 +62,21 @@ export default class API {
     };
 
     return API.call(request);
+  }
+
+  static getAllUserProjects(userID: string): Promise<unknown> {
+    const request = {
+      url: `users/${userID.toString()}/projects`,
+      method: 'GET' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return API.call(request).then((data) => {
+      const projects = data as Projects;
+      return projects.projects;
+    });
   }
 }

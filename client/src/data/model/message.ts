@@ -3,6 +3,8 @@ enum Message {
   ID_CHANGE,
   USERNAME_CHANGE,
   LOGIN,
+  GET_PROJECTS,
+  PROJECTS_CHANGE,
 }
 
 export default Message;

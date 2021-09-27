@@ -40,4 +40,15 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-export default passport;
+function passportAuthenticator(
+  successRedirect: string,
+  failureRedirect: string
+) {
+  return passport.authenticate('local', {
+    successRedirect,
+    failureRedirect,
+    failureFlash: true,
+  });
+}
+
+export { passport, passportAuthenticator };
