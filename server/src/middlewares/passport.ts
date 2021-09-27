@@ -40,6 +40,7 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function passportAuthenticator(
   successRedirect: string,
   failureRedirect: string

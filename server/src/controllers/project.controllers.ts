@@ -4,28 +4,7 @@ import Project from '../models/project.model';
 import User from '../models/user.model';
 import HttpError from '../utils/httperror';
 import { numberRegex } from '../utils/regex';
-
-function getUserIdFromReq(req: Request, res: Response): string | null {
-  const userID = req.params.userID || req.userID;
-  if (!userID) {
-    res
-      .status(400)
-      .json({ error: new HttpError('Please specify a user ID', 400) });
-    return null;
-  }
-  return userID;
-}
-
-function getProjectIdFromReq(req: Request, res: Response): string | null {
-  const projectID = req.params.projectID || req.projectID;
-  if (!projectID) {
-    res
-      .status(400)
-      .json({ error: new HttpError('Please specify a project ID', 400) });
-    return null;
-  }
-  return projectID;
-}
+import { getUserIdFromReq, getProjectIdFromReq } from '../utils/request';
 
 export async function getAllUserProjects(
   req: Request,
@@ -110,27 +89,49 @@ export async function getProject(req: Request, res: Response): Promise<void> {
   }
 }
 
-// export async function editProject(req: Request, res: Response): Promise<void> {
-//   try {
-//     const userID = getUserIdFromReq(req, res);
-//     if (!userID) return;
+export async function editProject(req: Request, res: Response): Promise<void> {
+  try {
+    const userID = getUserIdFromReq(req, res);
+    if (!userID) return;
 
-//     const projectID = getProjectIdFromReq(req, res);
-//     if (!projectID) return;
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
 
-//     const { name, collaborators, shared, lastUpdated } = req.body;
+    const { name, collaborators, shared, lastUpdated } = req.body;
 
-//     let toEdit = [name, collaborators, shared, lastUpdated];
-//     toEdit = _.filter(toEdit, function (p) {
-//       return _.isNil(p);
-//     });
+    if (lastUpdated && !numberRegex.test(lastUpdated)) {
+      res.status(400).json({
+        error: new HttpError('The last updated date must be a number', 400),
+      });
+      return;
+    }
 
-//     if (_.isEmpty(toEdit)) {
-//       res.status(400).json({
-//         error: new HttpError('Specify at least one valid field to update', 400),
-//       });
-//       return;
-//     }
-//     const toEditObj =
-//   } catch (error) {}
-// }
+    // Remove the nullish values from the object
+    const toEdit = _.pickBy(
+      { name, collaborators, shared, lastUpdated: Number(lastUpdated) },
+      (v) => !_.isNil(v)
+    );
+
+    if (_.isEmpty(toEdit)) {
+      res.status(400).json({
+        error: new HttpError(
+          'Specify at least one valid field to update: name, collaborators, shared or lastUpdated',
+          400
+        ),
+      });
+      return;
+    }
+
+    const isEdited = await Project.editProject(projectID, userID, toEdit);
+    if (!isEdited) {
+      res
+        .status(500)
+        .json({ error: new HttpError('Something went wrong', 500) });
+      return;
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}

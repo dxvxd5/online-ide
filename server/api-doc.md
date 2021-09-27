@@ -6,12 +6,52 @@
 
 The users API allows to get information about a user
 
+### Log in
+
+#### Request
+
+```http
+POST /login
+```
+##### Header
+
+```
+Content-type: application/json
+```
+##### Body
+
+Json containing the name, email and password of the new user.
+
+```js
+{
+    username:"yaya",
+    password:"hlililiub"
+}
+```
+#### Response
+
+```
+Status: 200 OK
+```
+
+```js
+{
+    name: "Davis Spinage",
+    username": "yaya",
+    id: "HlQlV9hwYlMVJenAiq761oWnOBE3"
+}
+```
+
+#### Possible errors
+
+`require authentication` `internal server error`
+
 ### Create user (sign up)
 
 #### Request
 
 ```http
-POST /users/signup
+POST /signup
 ```
 
 ##### Header
@@ -183,7 +223,7 @@ Status: 200 OK
 #### Request
 
 ```http
-POST /users/:userID/projects/
+POST /users/:userID/projects/create
 ```
 
 ##### Parameters
@@ -217,12 +257,8 @@ Status: 200 OK
 {
   id: 654,
   name: "online-ide",
-  creationDate: 44456,
-  owner: {userID: 542442, name: "Joseph Joestar"},
   lastUpdated": 44456,
-  files: [],
   shared: false,
-  collaborators: []
 }
 ```
 
@@ -253,13 +289,12 @@ Status: 200 OK
 
 ```js
 {
-    id:1,
+    id:"37gsgsg7",
     name:"Jojo-bizzare-adventure",
     shared:true,
-    owner:"Joseph Joestar",
+    owner:{name:"Joseph Joestar", id:"56636"},
     collaborators:[
-        {userID: 542442, name: "Joseph Joestar"},
-        {userID: 7363 , name: "Jotaro Kujo"},
+        {id: 7363 , name: "Jotaro Kujo"},
     ],
     files:[
         {id:45636, name:"src/components/sidebar.tsx"},
@@ -280,7 +315,7 @@ Status: 200 OK
 #### Request
 
 ```http
-PATCH /users/:userID/projects/:projectID
+PATCH /users/:userID/projects/:projectID/edit
 ```
 
 ##### Parameters
@@ -296,12 +331,14 @@ content-type: application/json
 
 ##### Body
 
-Json whose properties are the information to be updated. The example below features all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required.
+Json whose properties are the information to be updated. The example below shows all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required. However, at least one must be included for the request to be valid.
 
 ```js
 {
   name: "awesome-online-ide",
-  collaborators: ["user1ID", "user2ID"],
+  collaborators: [
+        {id: 7363 , name: "Jotaro Kujo"},
+    ],
   lastUpdated: 656566,
   shared: true
 }
@@ -346,7 +383,7 @@ Status: 204 No Content
 #### Request
 
 ```http
-POST /users/:userID/projects/:projectID/files/
+POST /users/:userID/projects/:projectID/files/create
 ```
 
 ##### Parameters
@@ -368,7 +405,6 @@ JSON file containing all the information of the file. All properties are mandato
 {
   name: "/src/controllers/user.ts",
   creationDate: 44456,
-  owner: "userID"
 }
 ```
 
@@ -382,10 +418,8 @@ Status: 200 OK
 {
   id: 6754,
   name: "/src/controllers/user.ts",
-  creationDate: 44456,
-  owner: "Jonathan Joestar",
   lastUpdated: 7366,
-  projectId: 664
+  projectId: "gdgdhhd88"
 }
 ```
 
@@ -450,8 +484,16 @@ GET /users/:userID/projects/:projectID/files/:fileID/content
 Status: 200 OK
 ```
 
+##### Header
+
 ```
-(need to do some tests first)
+content-type: application/octet-stream
+```
+
+##### Body
+
+```
+(File in a js buffer)
 ```
 
 #### Possible errors
@@ -508,7 +550,7 @@ Edit all file properties except the content
 #### Request
 
 ```http
-PATCH /users/:userID/projects/:projectID/files/:fileID/content
+PUT /users/:userID/projects/:projectID/files/:fileID/content/
 ```
 
 ##### Parameters
@@ -520,13 +562,13 @@ PATCH /users/:userID/projects/:projectID/files/:fileID/content
 ##### Header
 
 ```
-content-type: (need to do some tests)
+content-type: application/octet-stream
 ```
 
 ##### Body
 
-```js
-
+```
+(File in a js buffer)
 ```
 
 #### Response
