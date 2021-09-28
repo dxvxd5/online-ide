@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import IdeModel from './data/model/model';
 import LoginPresenter from './app/login/LoginPresenter';
 import Home from './app/home/Home';
+import PersonalSpacePresenter from './app/personalSpace/PersonalSpacePresenter';
 
 function App(): JSX.Element {
   const ideModel = new IdeModel();
@@ -16,6 +17,11 @@ function App(): JSX.Element {
           component={() => <LoginPresenter model={ideModel} />}
         />
         <Route path="/" exact component={() => <Home model={ideModel} />} />
+        <Route
+          path="/me"
+          exact
+          component={() => <PersonalSpacePresenter model={ideModel} />}
+        />
       </div>
     </Router>
   );
