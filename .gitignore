@@ -109,3 +109,6 @@ dist
 
 # Local History for Visual Studio Code
 .history/
+
+# MAC OS
+.DS_Store
