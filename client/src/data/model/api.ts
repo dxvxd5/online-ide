@@ -66,7 +66,7 @@ export default class API {
 
   static getAllUserProjects(userID: string): Promise<unknown> {
     const request = {
-      url: `users/${userID.toString()}/projects`,
+      url: `users/${userID}/projects`,
       method: 'GET' as Method,
       withCredentials: true,
       headers: {
@@ -78,5 +78,23 @@ export default class API {
       const projects = data as Projects;
       return projects.projects;
     });
+  }
+
+  static createProject(
+    userID: string,
+    name: string,
+    creationDate: number
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/create`,
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: { name, creationDate },
+    };
+
+    return API.call(request);
   }
 }

@@ -5,6 +5,8 @@ enum Message {
   LOGIN,
   GET_PROJECTS,
   PROJECTS_CHANGE,
+  PROJECT_CHANGE,
+  GET_PROJECT,
 }
 
 export default Message;

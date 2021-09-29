@@ -25,6 +25,8 @@ export default class IdeModel {
 
   username: string;
 
+  project: ProjectsData;
+
   projects: ProjectsData[];
 
   observers: Array<Observer>;
@@ -35,6 +37,7 @@ export default class IdeModel {
     this.username = '';
     this.observers = [];
     this.projects = [];
+    this.project = {} as ProjectsData;
   }
 
   addObserver(o: Observer): void {
@@ -65,6 +68,11 @@ export default class IdeModel {
     this.notifyObservers(Message.PROJECTS_CHANGE);
   }
 
+  setProject(project: ProjectsData): void {
+    this.project = project;
+    this.notifyObservers(Message.PROJECT_CHANGE);
+  }
+
   getName(): string {
     return this.name;
   }
@@ -79,6 +87,10 @@ export default class IdeModel {
 
   getProjects(): ProjectsData[] {
     return this.projects;
+  }
+
+  getProject(): ProjectsData {
+    return this.project;
   }
 
   async login(userName: string, password: string): Promise<void> {
@@ -97,7 +109,15 @@ export default class IdeModel {
       this.userID
     )) as ProjectsData[];
     this.setProjects(projects);
-    this.notifyObservers(Message.GET_PROJECTS);
+  }
+
+  async createProject(name: string, creationDate: number): Promise<void> {
+    const createdProject = (await API.createProject(
+      this.userID,
+      name,
+      creationDate
+    )) as ProjectsData;
+    this.setProjects([createdProject, ...this.projects]);
   }
 
   notifyObservers(message: Message): void {

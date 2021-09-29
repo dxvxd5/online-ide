@@ -13,6 +13,9 @@ interface PersonalSpaceViewProp {
   projects: ProjectsData[];
   handleSort: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOptions: string[];
+  handleProjectName: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
 }
 
 const PersonalSpaceView = ({
@@ -20,6 +23,7 @@ const PersonalSpaceView = ({
   projects,
   handleSort,
   sortOptions,
+  handleProjectName,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
@@ -38,6 +42,11 @@ const PersonalSpaceView = ({
             ))}
           </select>
         </label>
+        <form>
+          <button type="submit" onClick={(e) => handleProjectName(e)}>
+            Create a new project
+          </button>
+        </form>
       </div>
       {projects.map((project) => (
         <div key={project.id} className="PersonalSpace">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 import Message from '../../data/model/message';
 import IdeModel from '../../data/model/model';
 import PersonalSpaceView from './PersonalSpaceView';
@@ -19,18 +20,17 @@ export default function PersonalSpacePresenter({
 }: PersonalSpacePresenterProp): JSX.Element {
   const userID = model.getUserID();
   const [projects, setProjects] = useState(model.getProjects());
+  const sortOptions = ['Shared', 'Last Updated', 'Name'];
 
   useEffect(() => {
     const projectObserver = (m: Message) => {
       if (m === Message.PROJECTS_CHANGE)
-        setProjects(model.getProjects() as ProjectsData[]);
+        setProjects([...model.getProjects()] as ProjectsData[]);
     };
     model.addObserver(projectObserver);
 
     return () => model.removeObserver(projectObserver);
   }, []);
-
-  const sortOptions = ['Shared', 'Last Updated', 'Name'];
 
   const handleSortedProjects = (sortProjectsValue: string) => {
     const sortedProjects: ProjectsData[] = projects.sort(
@@ -63,8 +63,40 @@ export default function PersonalSpacePresenter({
     handleSortedProjects(event.target.value);
   };
 
+  const handleProjectName = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Enter your project name',
+      input: 'text',
+      inputLabel: 'Your project name',
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      preConfirm: (name) => {
+        const creationDate = Date.now();
+        model
+          .createProject(name, creationDate)
+          .then(() => name)
+          .catch(() =>
+            Swal.fire(
+              `Error. Could not create a project. Please try again.`,
+              '',
+              'error'
+            )
+          );
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire(`Your project name is ${result.value}`, '', 'success');
+      }
+    });
+  };
+
   return (
     <PersonalSpaceView
+      handleProjectName={handleProjectName}
       handleSort={handleSort}
       projects={projects}
       userID={userID}
