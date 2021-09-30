@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/dxvxd5/online-ide#readme",
   "devDependencies": {
+    "@typescript-eslint/parser": "^4.32.0",
     "concurrently": "^6.2.1",
     "react-monaco-editor": "^0.45.0",
     "redux-thunk": "^2.3.0"

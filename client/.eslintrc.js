@@ -5,6 +5,7 @@ module.exports = {
     node: true,
   },
   extends: [
+    'webpack',
     'airbnb',
     'airbnb-typescript',
     'plugin:react/recommended',
@@ -14,7 +15,6 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:import/typescript',
   ],
-  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -24,6 +24,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: './tsconfig.json',
   },
+  parser: '@typescript-eslint/parser',
   plugins: ['react', '@typescript-eslint', 'prettier', 'import'],
   rules: {
     'react/jsx-filename-extension': [1, { extensions: ['.tsx'] }],

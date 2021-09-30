@@ -2,6 +2,7 @@ import flash from 'connect-flash';
 import express from 'express';
 import cors from 'cors';
 
+// import { expressCspHeader, INLINE, NONE, SELF } from 'express-csp-header';
 import { PORT } from './config/env.variables';
 
 import persistParams from './middlewares/persist-param';
@@ -28,6 +29,15 @@ app.use('/users/:userID/projects/:projectID/files/:fileID', persistParams);
 app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// app.use(
+//   expressCspHeader({
+//     directives: {
+//       'default-src': [NONE],
+//       'img-src': [SELF],
+//     },
+//   })
+// );
 
 // Routes
 app.post('/signup', signUpUser);
