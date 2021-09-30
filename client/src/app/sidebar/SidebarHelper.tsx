@@ -1,12 +1,16 @@
 /* eslint-disable import/no-unresolved */
 // import React, { FC, useState } from 'react';
-import React, { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 // import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { IconContext } from 'react-icons';
 // import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
+import { CgProfile } from 'react-icons/cg';
+import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import Submenu from './Submenu';
+import Message from '../../data/model/message';
+import IdeModel from '../../data/model/model';
 
 const Nav = styled.div`
   display: flex;
@@ -34,10 +38,42 @@ const SidebarNav = styled.div`
 //   font-size: 2rem;
 //   margin-left: 2rem;
 // `;
+const NavIcon = styled(Link)`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 5rem;
+  font-size: 3rem;
+  margin-left: 2rem;
+`;
 
 const SidebarWrap = styled.div``;
+interface SideBarprop {
+  model: IdeModel;
+}
 
-const SidebarHelper: FC = () => {
+interface FilesData {
+  name: string;
+  id: string;
+}
+
+function SidebarHelper({ model }: SideBarprop): JSX.Element {
+  const userID = model.getUserID();
+  const [files, setFiles] = useState(model.getFiles());
+
+  useEffect(() => {
+    const fileObserver = (m: Message) => {
+      if (m === Message.FILES_CHANGE) setFiles(model.getFiles() as FilesData[]);
+    };
+    model.addObserver(fileObserver);
+
+    return () => model.removeObserver(fileObserver);
+  }, []);
+
+  const filesData: FilesData[] = files;
+  setFiles([...filesData]);
+
+  // const SidebarHelper: FC = () => {
   // const [sidebar, setSidebar] = useState(false);
   // const showSidebar = () => setSidebar(!sidebar);
 
@@ -47,6 +83,9 @@ const SidebarHelper: FC = () => {
         {/* <NavIcon to="#" onClick={showSidebar}>
           <AiOutlineMenu />
         </NavIcon> */}
+        <NavIcon to="#">
+          <CgProfile />
+        </NavIcon>
       </Nav>
       <SidebarNav>
         <SidebarWrap>
@@ -61,6 +100,6 @@ const SidebarHelper: FC = () => {
       </SidebarNav>
     </IconContext.Provider>
   );
-};
+}
 
 export default SidebarHelper;

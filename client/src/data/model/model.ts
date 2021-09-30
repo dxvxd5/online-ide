@@ -11,6 +11,11 @@ interface UserData {
   id: string;
 }
 
+interface FilesData {
+  name: string;
+  id: string;
+}
+
 export default class IdeModel {
   name: string;
 
@@ -20,11 +25,25 @@ export default class IdeModel {
 
   observers: Array<Observer>;
 
+  files: FilesData[];
+
+  projectID: string;
+
   constructor() {
     this.name = '';
     this.userID = '';
     this.username = '';
     this.observers = [];
+    this.files = [];
+    this.projectID = '';
+  }
+
+  addObserver(o: Observer): void {
+    this.observers.push(o);
+  }
+
+  removeObserver(observer: Observer): void {
+    this.observers = this.observers.filter((o) => o !== observer);
   }
 
   setName(name: string): void {
@@ -35,6 +54,10 @@ export default class IdeModel {
   setUserID(userID: string): void {
     this.userID = userID;
     this.notifyObservers(Message.ID_CHANGE);
+  }
+
+  getUserID(): string {
+    return this.userID;
   }
 
   setUsername(username: string): void {
@@ -50,6 +73,24 @@ export default class IdeModel {
       this.setUsername(username);
     });
     this.notifyObservers(Message.LOGIN);
+  }
+
+  setFiles(files: FilesData[]): void {
+    this.files = files;
+    this.notifyObservers(Message.FILES_CHANGE);
+  }
+
+  getFiles(): FilesData[] {
+    return this.files;
+  }
+
+  async getAllFilesOfProjecr(): Promise<void> {
+    const files = (await API.getAllFilesOfProjecr(
+      this.userID,
+      this.projectID
+    )) as FilesData[];
+    this.setFiles(files);
+    this.notifyObservers(Message.GET_FILES);
   }
 
   notifyObservers(message: Message): void {
