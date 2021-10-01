@@ -82,6 +82,7 @@
     ]
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/codemirror": "^5.60.2",
     "@types/module-alias": "^2.0.1",
     "@types/node": "^12.20.24",

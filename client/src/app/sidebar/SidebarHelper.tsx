@@ -6,11 +6,10 @@ import styled from 'styled-components';
 import { IconContext } from 'react-icons';
 // import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 import { CgProfile } from 'react-icons/cg';
+import { IoCreateOutline } from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import Submenu from './Submenu';
-import Message from '../../data/model/message';
-import IdeModel from '../../data/model/model';
 
 const Nav = styled.div`
   display: flex;
@@ -48,31 +47,25 @@ const NavIcon = styled(Link)`
 `;
 
 const SidebarWrap = styled.div``;
-interface SideBarprop {
-  model: IdeModel;
-}
 
 interface FilesData {
   name: string;
   id: string;
 }
 
-function SidebarHelper({ model }: SideBarprop): JSX.Element {
-  const userID = model.getUserID();
-  const [files, setFiles] = useState(model.getFiles());
+interface SideBarProp {
+  UserID: string;
+  ProjectID: string;
+  Files: FilesData[];
+  handleFileName: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
 
-  useEffect(() => {
-    const fileObserver = (m: Message) => {
-      if (m === Message.FILES_CHANGE) setFiles(model.getFiles() as FilesData[]);
-    };
-    model.addObserver(fileObserver);
-
-    return () => model.removeObserver(fileObserver);
-  }, []);
-
-  const filesData: FilesData[] = files;
-  setFiles([...filesData]);
-
+const SidebarHelper = ({
+  UserID,
+  ProjectID,
+  Files,
+  handleFileName,
+}: SideBarProp): JSX.Element => {
   // const SidebarHelper: FC = () => {
   // const [sidebar, setSidebar] = useState(false);
   // const showSidebar = () => setSidebar(!sidebar);
@@ -87,7 +80,13 @@ function SidebarHelper({ model }: SideBarprop): JSX.Element {
           <CgProfile />
         </NavIcon>
       </Nav>
+      <h1>Create File</h1>
       <SidebarNav>
+        <NavIcon to="#" onClick={(e) => handleFileName(e)}>
+          <IoCreateOutline />
+        </NavIcon>
+        <h2>Upload File</h2>
+        {/** TODO: Upload icon and component */}
         <SidebarWrap>
           {/* <NavIcon to="#" onClick={showSidebar}>
             <AiOutlineClose />
@@ -100,6 +99,6 @@ function SidebarHelper({ model }: SideBarprop): JSX.Element {
       </SidebarNav>
     </IconContext.Provider>
   );
-}
+};
 
 export default SidebarHelper;
