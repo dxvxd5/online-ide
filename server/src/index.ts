@@ -1,7 +1,8 @@
 import flash from 'connect-flash';
 import express from 'express';
 import cors from 'cors';
-import http from 'http';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 import { PORT } from './config/env.variables';
 
@@ -13,7 +14,7 @@ import usersRouter from './routes/user.routes';
 import { signUpUser } from './controllers/user.controllers';
 import HttpError from './utils/httperror';
 
-import socketFunction from './socket';
+import socketFunction from './socket/socket';
 
 const app = express();
 
@@ -49,8 +50,7 @@ app.get('/login/success', (req, res) => {
 
 app.use('/users', usersRouter);
 
-// Socket.IO Functionality
-const server = http.createServer(app);
+const server = createServer(app);
+const io = new Server(server, { cors: { origin: 'http://localhost:3000' } });
+socketFunction(io);
 server.listen(PORT, () => console.log(`Server started on port ${PORT}!`));
-
-socketFunction(app, server);

@@ -79,4 +79,47 @@ export default class API {
       return projects.projects;
     });
   }
+
+  static createProject(
+    userID: string,
+    name: string,
+    creationDate: number
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/create`,
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: { name, creationDate },
+    };
+
+    return API.call(request);
+  }
+
+  static async getProject(userID: string, projectID: string): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}`,
+      method: 'GET' as Method,
+      withCredentials: true,
+    };
+
+    return API.call(request);
+  }
+
+  static async getFileContent(
+    userID: string,
+    projectID: string,
+    fileID: string
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
+      method: 'GET' as Method,
+      withCredentials: true,
+    };
+    return API.call(request).then((data) => {
+      return data;
+    });
+  }
 }

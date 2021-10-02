@@ -24,9 +24,8 @@ export default function LoginPresenter({
     try {
       await model.login(username, password);
       setIsLoggedIn(true);
-      setLoginError(false);
-    } catch (err) {
-      // TODO: Check what's in the error and tell the user that the credentials are not good if that's the error
+      if (loginError) setLoginError(false);
+    } catch {
       setLoginErrorInfo('Error. Either username or password is incorrect');
       setLoginError(true);
     }
@@ -39,8 +38,7 @@ export default function LoginPresenter({
         setProjectLoaded(true);
         setProjectError(false);
       })
-      .catch((err) => {
-        // TODO: Do something if there is an error when loading the projects
+      .catch(() => {
         setProjectErrorInfo(
           'Error. Could not load the projects. Please try again.'
         );
