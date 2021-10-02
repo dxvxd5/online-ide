@@ -2,9 +2,12 @@ import axios, { Method } from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-interface Files {
-  files: Array<any>;
+// console.log({ API_BASE_URL });
+
+interface Projects {
+  projects: Array<unknown>;
 }
+
 interface Request {
   url: string;
   method: Method;
@@ -34,6 +37,9 @@ export default class API {
             status: error.response.status,
             headers: error.response.headers,
           };
+
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
           throw new Error(JSON.stringify(errorData));
         } else if (error.request) {
           // The request was made but no response was received
@@ -61,32 +67,29 @@ export default class API {
     return API.call(request);
   }
 
-  static getAllFilesOfProjecr(
-    userID: string,
-    projectsID: string
-  ): Promise<unknown> {
+  static getAllUserProjects(userID: string): Promise<unknown> {
     const request = {
-      url: `users/${userID.toString()}/projects/${projectsID}/files`,
-      method: `GET` as Method,
+      url: `users/${userID.toString()}/projects`,
+      method: 'GET' as Method,
       withCredentials: true,
       headers: {
-        'content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
     };
+
     return API.call(request).then((data) => {
-      const files = data as Files;
-      return files.files;
+      const projects = data as Projects;
+      return projects.projects;
     });
   }
 
-  static createFile(
+  static createProject(
     userID: string,
-    projectID: string,
     name: string,
     creationDate: number
   ): Promise<unknown> {
     const request = {
-      url: `users/${userID}/projects/${projectID}/files/create`,
+      url: `users/${userID}/projects/create`,
       method: 'POST' as Method,
       withCredentials: true,
       headers: {
@@ -96,5 +99,30 @@ export default class API {
     };
 
     return API.call(request);
+  }
+
+  static async getProject(userID: string, projectID: string): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}`,
+      method: 'GET' as Method,
+      withCredentials: true,
+    };
+
+    return API.call(request);
+  }
+
+  static async getFileContent(
+    userID: string,
+    projectID: string,
+    fileID: string
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
+      method: 'GET' as Method,
+      withCredentials: true,
+    };
+    return API.call(request).then((data) => {
+      return data;
+    });
   }
 }
