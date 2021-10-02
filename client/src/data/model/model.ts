@@ -1,4 +1,3 @@
-import { SidebarItem } from '../../app/sidebar/models/SidebarItem';
 import API from './api';
 import Message from './message';
 import ColorGenerator from '../../utils/color-generator';
@@ -83,11 +82,6 @@ export interface CompleteProjectData extends ProjectData {
   creationDate: number;
 }
 
-interface FilesData {
-  name: string;
-  id: string;
-}
-
 export default class IdeModel {
   name: string;
 
@@ -101,7 +95,7 @@ export default class IdeModel {
 
   projects: ProjectData[];
 
-  project: ProjectData;
+  // project: ProjectData;
 
   observers: Array<Observer>;
 
@@ -142,7 +136,6 @@ export default class IdeModel {
     this.projects = [];
     this.currentFiles = [];
     this.collaborators = [];
-    this.project = {} as ProjectData;
   }
 
   addObserver(o: Observer): void {
@@ -163,10 +156,6 @@ export default class IdeModel {
     this.notifyObservers(Message.ID_CHANGE);
   }
 
-  getUserID(): string {
-    return this.userID;
-  }
-
   setUsername(username: string): void {
     this.username = username;
     this.notifyObservers(Message.USERNAME_CHANGE);
@@ -177,9 +166,9 @@ export default class IdeModel {
     this.notifyObservers(Message.PROJECTS_CHANGE);
   }
 
-  setProject(project: ProjectData): void {
-    this.project = project;
-    this.notifyObservers(Message.PROJECT_CHANGE);
+  addFileToCurrentProject(file: FileData): void {
+    this.currentProject.files.push(file);
+    this.notifyObservers(Message.CURRENT_PROJECT_CHANGE);
   }
 
   getName(): string {
@@ -209,10 +198,6 @@ export default class IdeModel {
 
   getFocusedFile(): FileData {
     return this.focusedFile;
-  }
-
-  getProject(): ProjectData {
-    return this.project;
   }
 
   setLeaver(leaver: SparseUserData): void {
@@ -336,12 +321,11 @@ export default class IdeModel {
 
   async getFileContent(fileID: string): Promise<string> {
     if (!this.currentProject) throw new Error('No project opened');
-    const content = (await API.getFileContent(
+    return (await API.getFileContent(
       this.userID,
       this.currentProject.id,
       fileID
     )) as string;
-    return content;
   }
 
   async login(userName: string, password: string): Promise<void> {
@@ -355,16 +339,12 @@ export default class IdeModel {
     this.notifyObservers(Message.LOGIN);
   }
 
-
-
   async getAllUserProjects(): Promise<void> {
     const projects = (await API.getAllUserProjects(
       this.userID
     )) as ProjectData[];
     this.setProjects(projects);
-    this.notifyObservers(Message.GET_PROJECTS);
   }
-
 
   async createProject(name: string, creationDate: number): Promise<void> {
     const createdProject = (await API.createProject(
@@ -373,6 +353,16 @@ export default class IdeModel {
       creationDate
     )) as ProjectData;
     this.setProjects([createdProject, ...this.projects]);
+  }
+
+  async createFile(name: string, creationDate: number): Promise<void> {
+    const createdFile = await API.createFile(
+      this.userID,
+      this.currentProject.id,
+      name,
+      creationDate
+    );
+    this.addFileToCurrentProject(createdFile as FileData);
   }
 
   notifyObservers(message: Message): void {

@@ -2,8 +2,6 @@ import axios, { Method } from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-// console.log({ API_BASE_URL });
-
 interface Projects {
   projects: Array<unknown>;
 }
@@ -90,6 +88,25 @@ export default class API {
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/create`,
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: { name, creationDate },
+    };
+
+    return API.call(request);
+  }
+
+  static createFile(
+    userID: string,
+    projectID: string,
+    name: string,
+    creationDate: number
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/create`,
       method: 'POST' as Method,
       withCredentials: true,
       headers: {
