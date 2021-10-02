@@ -46,10 +46,10 @@ const Submenu: FC<SidebarLinkProps> = ({ item }) => {
 
   return (
     <>
-      <SidebarLink to={item.path} onClick={showSubnav}>
+      <SidebarLink to={item.projectsData.id} onClick={showSubnav}>
         <div>
-          {item.icon}
-          <SidebarLabel>{item.title}</SidebarLabel>
+          {/* {item.icon} */}
+          <SidebarLabel>{item.projectsData.name}</SidebarLabel>
         </div>
         <div>
           {item?.subnav && subnav ? item?.iconOpened : item?.iconClosed}
@@ -59,9 +59,9 @@ const Submenu: FC<SidebarLinkProps> = ({ item }) => {
         item?.subnav?.map((subnavItem, index) => {
           return (
             // eslint-disable-next-line react/no-array-index-key
-            <DropdownLink to={subnavItem.path} key={index}>
-              {subnavItem.icon}
-              <SidebarLabel>{subnavItem.title}</SidebarLabel>
+            <DropdownLink to={subnavItem.filesData.id} key={index}>
+              {/* {subnavItem.icon} */}
+              <SidebarLabel>{subnavItem.filesData.name}</SidebarLabel>
             </DropdownLink>
           );
         })}

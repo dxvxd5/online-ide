@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { IconContext } from 'react-icons';
 // import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 import { CgProfile } from 'react-icons/cg';
-import { IoCreateOutline } from 'react-icons/io';
+import { VscNewFile } from 'react-icons/vsc';
 import { Link } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import Submenu from './Submenu';
@@ -52,18 +52,15 @@ interface FilesData {
   name: string;
   id: string;
 }
-
 interface SideBarProp {
-  UserID: string;
-  ProjectID: string;
-  Files: FilesData[];
-  handleFileName: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  projectID: string;
+  files: FilesData[];
+  handleFileName: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }
 
 const SidebarHelper = ({
-  UserID,
-  ProjectID,
-  Files,
+  projectID,
+  files,
   handleFileName,
 }: SideBarProp): JSX.Element => {
   // const SidebarHelper: FC = () => {
@@ -83,7 +80,7 @@ const SidebarHelper = ({
       <h1>Create File</h1>
       <SidebarNav>
         <NavIcon to="#" onClick={(e) => handleFileName(e)}>
-          <IoCreateOutline />
+          <VscNewFile />
         </NavIcon>
         <h2>Upload File</h2>
         {/** TODO: Upload icon and component */}

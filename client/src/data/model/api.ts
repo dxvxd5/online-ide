@@ -1,4 +1,3 @@
-// import API_BASE_URL from '../../config/env.variables';
 import axios, { Method } from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000';
@@ -78,5 +77,24 @@ export default class API {
       const files = data as Files;
       return files.files;
     });
+  }
+
+  static createFile(
+    userID: string,
+    projectID: string,
+    name: string,
+    creationDate: number
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/create`,
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: { name, creationDate },
+    };
+
+    return API.call(request);
   }
 }

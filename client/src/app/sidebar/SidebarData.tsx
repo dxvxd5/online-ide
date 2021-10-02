@@ -7,7 +7,13 @@ import {
 } from 'react-icons/ai';
 import { BsFillFolderFill } from 'react-icons/bs';
 import { FaCog, FaOpencart, FaFileAlt } from 'react-icons/fa';
+import { useState } from 'react';
 import { SidebarItem } from './models/SidebarItem';
+import IdeModel from '../../data/model/model';
+
+interface SideBarprop {
+  model: IdeModel;
+}
 
 export const SidebarData: SidebarItem[] = [
   {

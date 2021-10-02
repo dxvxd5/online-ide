@@ -1,3 +1,4 @@
+import { SidebarItem } from '../../app/sidebar/models/SidebarItem';
 import API from './api';
 import Message from './message';
 
@@ -27,6 +28,8 @@ export default class IdeModel {
 
   files: FilesData[];
 
+  file: FilesData;
+
   projectID: string;
 
   constructor() {
@@ -35,6 +38,7 @@ export default class IdeModel {
     this.username = '';
     this.observers = [];
     this.files = [];
+    this.file = {} as FilesData;
     this.projectID = '';
   }
 
@@ -75,6 +79,10 @@ export default class IdeModel {
     this.notifyObservers(Message.LOGIN);
   }
 
+  getProjectID(): string {
+    return this.projectID;
+  }
+
   setFiles(files: FilesData[]): void {
     this.files = files;
     this.notifyObservers(Message.FILES_CHANGE);
@@ -84,13 +92,23 @@ export default class IdeModel {
     return this.files;
   }
 
-  async getAllFilesOfProjecr(): Promise<void> {
+  async getAllFilesOfProject(): Promise<void> {
     const files = (await API.getAllFilesOfProjecr(
       this.userID,
       this.projectID
     )) as FilesData[];
     this.setFiles(files);
     this.notifyObservers(Message.GET_FILES);
+  }
+
+  async createFile(name: string, creationDate: number): Promise<void> {
+    const createdFile = (await API.createFile(
+      this.userID,
+      this.projectID,
+      name,
+      creationDate
+    )) as FilesData;
+    this.setFiles([createdFile, ...this.files]);
   }
 
   notifyObservers(message: Message): void {
