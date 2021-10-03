@@ -66,6 +66,7 @@ export default function EditorTabContentManager({
       onContentDelete={onContentDelete}
       onEditorSelection={onEditorSelection}
       onEditorCursorMoved={onEditorCursorMoved}
+      fileID={focusedFile.id}
       fileName={focusedFile.name}
       fileContent={content as string}
       isFocused

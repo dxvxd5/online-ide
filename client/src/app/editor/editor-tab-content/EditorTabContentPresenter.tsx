@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { OnMount } from '@monaco-editor/react';
 import {
   RemoteCursorManager,
@@ -7,7 +7,6 @@ import {
 } from '@convergencelabs/monaco-collab-ext';
 import { editor } from 'monaco-editor';
 
-import EditorView from './EditorTabContentView';
 import { getFileLanguage } from '../../../utils/file-extension';
 import Message from '../../../data/model/message';
 import IdeModel, {
@@ -22,10 +21,12 @@ import IdeModel, {
   Replacement,
 } from '../../../data/model/model';
 import { randomNumberInRange } from '../../../utils/random';
+import EditorView from './EditorTabContentView';
 
 interface EditorPresenterProps {
   model: IdeModel;
   fileName: string;
+  fileID: string;
   fileContent: string;
   isFocused: boolean;
   onEditorCursorMoved: (position: CursorPosition) => void;
@@ -38,6 +39,7 @@ interface EditorPresenterProps {
 export default function EditorPresenter({
   model,
   fileName,
+  fileID,
   fileContent,
   isFocused,
   onEditorCursorMoved,
@@ -50,6 +52,9 @@ export default function EditorPresenter({
   const contentManagerRef = useRef<EditorContentManager>();
   const selectionManagerRef = useRef<RemoteSelectionManager>();
   const cursorManagerRef = useRef<RemoteCursorManager>();
+
+  const fiveMinutes = 300000;
+  const saveIntervalRef = useRef<NodeJS.Timeout>();
 
   const language = getFileLanguage(fileName);
 
@@ -139,10 +144,18 @@ export default function EditorPresenter({
     }
     model.addObserver(collabListener);
 
-    return () => model.removeObserver(collabListener);
+    saveIntervalRef.current = setInterval(() => {
+      model.saveContentIntoFile();
+      console.log('saved');
+    }, fiveMinutes);
+
+    return () => {
+      model.removeObserver(collabListener);
+      if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
+    };
   }, []);
 
-  const handleMount: OnMount = (e) => {
+  const handleMount: OnMount = (e, monaco) => {
     editorRef.current = e;
 
     cursorManagerRef.current = new RemoteCursorManager({
@@ -178,7 +191,23 @@ export default function EditorPresenter({
       )
     );
 
+    const editorModel = e.getModel();
+    if (editorModel)
+      model.setFileContentToSave(editorModel.getValue() as string);
+
+    // Monaco doesn't support non-bitwise sign
+    editorRef.current.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+      function () {
+        model.saveContentIntoFile();
+      }
+    );
     addAllCollaborators(model.collaborators);
+  };
+
+  const onChange = (content: string | undefined): void => {
+    if (content !== undefined) model.setFileContentToSave(content);
   };
 
   return (
@@ -187,6 +216,7 @@ export default function EditorPresenter({
       code={fileContent}
       handleMount={handleMount}
       isFocused={isFocused}
+      onContentChange={onChange}
     />
   );
 }

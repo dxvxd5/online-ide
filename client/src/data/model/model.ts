@@ -128,6 +128,12 @@ export default class IdeModel {
   // editor content operation to apply to the editor
   collabContentOperation!: EditorContentOperation;
 
+  contentToSave!: string;
+
+  roomCreator!: SparseUserData;
+
+  isHost: boolean;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -137,6 +143,7 @@ export default class IdeModel {
     this.currentFiles = [];
     this.collaborators = [];
     this.project = {} as ProjectData;
+    this.isHost = true;
   }
 
   addObserver(o: Observer): void {
@@ -170,6 +177,16 @@ export default class IdeModel {
   setProject(project: ProjectData): void {
     this.project = project;
     this.notifyObservers(Message.PROJECT_CHANGE);
+  }
+
+  setFileContentToSave(content: string): void {
+    this.contentToSave = content;
+    this.notifyObservers(Message.SAVE_FILE_CONTENT);
+  }
+
+  setRoomCreator(roomCreator: SparseUserData): void {
+    this.roomCreator = roomCreator;
+    this.notifyObservers(Message.ROOM_CREATOR);
   }
 
   getName(): string {
@@ -231,6 +248,7 @@ export default class IdeModel {
     this.formerCollaborators = this.collaborators;
     this.collaborators = [];
     this.roomID = '';
+    this.isHost = true;
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
@@ -244,9 +262,10 @@ export default class IdeModel {
     this.notifyObservers(Message.USER_JOIN);
   }
 
-  startCollaboration(roomID: string): void {
+  startCollaboration(roomID: string, isHost: boolean): void {
     this.colorGenerator = new ColorGenerator();
     this.roomID = roomID;
+    this.isHost = isHost;
     this.notifyObservers(Message.COLLAB_STARTED);
   }
 
@@ -310,6 +329,15 @@ export default class IdeModel {
 
   notifyHostLeft(): void {
     this.notifyObservers(Message.HOST_LEFT);
+  }
+
+  async saveContentIntoFile(): Promise<void> {
+    (await API.saveFileContent(
+      this.userID,
+      this.currentProject.id,
+      this.focusedFile.id,
+      this.contentToSave
+    )) as FileData;
   }
 
   /**

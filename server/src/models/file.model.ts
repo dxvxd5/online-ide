@@ -177,7 +177,7 @@ export default class File {
     projectID: string,
     userID: string,
     fileID: string,
-    fileContent: Buffer
+    fileContent: string
   ): Promise<boolean> {
     const fileContentPath = await File._getFileContentPath(
       userID,

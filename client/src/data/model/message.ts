@@ -18,6 +18,8 @@ enum Message {
   CURSOR_MOVED,
   EDITOR_SELECTION,
   CONTENT,
+  SAVE_FILE_CONTENT,
+  ROOM_CREATOR,
 }
 
 export default Message;

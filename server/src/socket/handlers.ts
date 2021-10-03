@@ -18,6 +18,8 @@ interface EditorContent {
 }
 
 export interface SocketData {
+  roomJoiner: boolean;
+  roomCreator: boolean;
   roomID: string;
   user: { id: string; name: string };
   cursorPosition: CursorPosition;
@@ -27,13 +29,18 @@ export interface SocketData {
 
 export function createRoom(socket: Socket, data: SocketData): void {
   socket.join(data.roomID);
+  socket.to(data.roomID).emit(SocketMessage.CREATED_ROOM, {
+    user: data.user,
+    socketID: socket.id,
+  });
 }
 
 export function joinRoom(socket: Socket, data: SocketData): void {
   socket.join(data.roomID);
-  socket
-    .to(data.roomID)
-    .emit(SocketMessage.JOINED_ROOM, { user: data.user, socketID: socket.id });
+  socket.to(data.roomID).emit(SocketMessage.JOINED_ROOM, {
+    user: data.user,
+    socketID: socket.id,
+  });
 }
 
 export function hostLeaveRoom(socket: Socket, { roomID }: SocketData): void {
