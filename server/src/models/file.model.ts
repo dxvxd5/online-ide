@@ -116,7 +116,10 @@ export default class File {
     projectID: string
   ): Promise<File[]> {
     const projectDocRef = firestore.doc(getProjectPath(userID, projectID));
-    const filesColSnapshot = await projectDocRef.collection('files').get();
+    const filesColSnapshot = await projectDocRef
+      .collection('files')
+      .orderBy('name', 'desc')
+      .get();
     if (filesColSnapshot.empty) return [];
     const userFiles: File[] = [];
     filesColSnapshot.forEach((fileSnapshot) => {

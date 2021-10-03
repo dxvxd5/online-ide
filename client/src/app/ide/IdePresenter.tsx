@@ -15,6 +15,7 @@ import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
 import { generateRandomString } from '../../utils/random';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
+import IdeSidebar from '../sidebar/SidebarPresenter';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -212,6 +213,7 @@ export default function IdePresenter({
         joinRoom={socketJoinRoom}
         model={model}
       />
+      <IdeSidebar model={model} />
       <EditorTabs model={model} />
       <Editor
         model={model}

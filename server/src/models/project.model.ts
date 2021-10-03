@@ -72,23 +72,6 @@ export default class Project {
    * Get all the projects of a user from the database
    */
   static async getFromUser(userID: string): Promise<Project[]> {
-    /* const projectsSnaphot = await firestore
-      .collection('users')
-      .doc('HzraCVxUiA913mkPPzde')
-      .collection('projects')
-      .get();
-
-    const projectsSnaphot2 = await firestore
-      .collection('users')
-      .doc('HzraCVxUiA913mkPPzde')
-      .get();
-
-    console.log('getProjectBasePath(userID): ', getProjectBasePath(userID));
-    console.log(
-      'projectsSnaphot: ',
-      projectsSnaphot.docs.map((doc) => doc.data())
-    ); */
-
     const projectsSnaphot = await firestore
       .collection(getProjectBasePath(userID))
       .get();

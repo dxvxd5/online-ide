@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import '../../App.css';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import SidebarView from './SidebarView';
 import Message from '../../data/model/message';
 import IdeModel from '../../data/model/model';
+import FileTreeGenerator from '../../utils/file-tree-generator';
 
-interface FilesData {
-  name: string;
-  id: string;
-}
-
-interface SideBarprops {
+interface SidebarPresenterProps {
   model: IdeModel;
 }
 
-export default function Sidebar({ model }: SideBarprops): JSX.Element {
+export default function SidebarPresenter({
+  model,
+}: SidebarPresenterProps): JSX.Element {
   const [files, setFiles] = useState(model.currentProject.files);
 
   useEffect(() => {
@@ -25,9 +20,14 @@ export default function Sidebar({ model }: SideBarprops): JSX.Element {
       }
     }
     model.addObserver(projectListener);
-
     return () => model.removeObserver(projectListener);
   }, []);
 
-  return <SidebarView projectID={projectID} files={files} />;
+  const rootFolderName = model.currentProject.name;
+  const fileTreeState = FileTreeGenerator.generateFileTree(
+    rootFolderName,
+    files
+  ).toState();
+
+  return <SidebarView fileTreeState={fileTreeState} />;
 }

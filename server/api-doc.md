@@ -13,11 +13,13 @@ The users API allows to get information about a user
 ```http
 POST /login
 ```
+
 ##### Header
 
 ```
 Content-type: application/json
 ```
+
 ##### Body
 
 Json containing the name, email and password of the new user.
@@ -28,6 +30,7 @@ Json containing the name, email and password of the new user.
     password:"hlililiub"
 }
 ```
+
 #### Response
 
 ```
@@ -44,7 +47,7 @@ Status: 200 OK
 
 #### Possible errors
 
-`require authentication` `internal server error`
+`require authentication` `internal server error`
 
 ### Create user (sign up)
 
@@ -146,13 +149,13 @@ Status: 200 OK
 {
   projects: [
     {
-      id: "hhdjkjdm",
+      id: 'hhdjkjdm',
       name: 'online-ide',
       shared: true,
       lastUpdated: 2334111,
     },
     {
-      id: "jjddll",
+      id: 'jjddll',
       shared: false,
       name: 'quiz-app',
       lastUpdated: 233781,
@@ -296,10 +299,11 @@ Status: 200 OK
     collaborators:[
         {id: 7363 , name: "Jotaro Kujo"},
     ],
+    // The files array is sorted in ascending alphabetical order with the file names
     files:[
-        {id:45636, name:"src/components/sidebar.tsx"},
+      {id:555, name:"server/src/index.ts"},
         {id:4567, name:"src/components/header.tsx"},
-        {id:555, name:"server/src/index.ts"}
+        {id:45636, name:"src/components/sidebar.tsx"},
     ],
     creationDate:2334111,
     lastUpdated:2334111,

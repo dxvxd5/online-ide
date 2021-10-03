@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+// import * as React from 'react';
+// import { useState, useEffect } from 'react';
 
 export interface File {
   name: string;
@@ -8,29 +8,29 @@ export interface File {
   type: string;
 }
 
-export interface UploadFileProps {
-  onFilesSelected?: (files: File[]) => void;
-}
+// export interface UploadFileProps {
+//   onFilesSelected?: (files: File[]) => void;
+// }
 
-export const UploadFile = (props: UploadFileProps) => {
-  const [selectedFiles, setFiles] = useState();
+// export const UploadFile = (props: UploadFileProps) => {
+//   const [selectedFiles, setFiles] = useState();
 
-  const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
-    const files = (e.target as HTMLInputElement).files || [];
-    setFiles(Array.from(files));
-  };
+//   const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
+//     const files = (e.target as HTMLInputElement).files || [];
+//     setFiles(Array.from(files));
+//   };
 
-  useEffect(() => {
-    if (!props.onFilesSelected) return;
-    props.onFilesSelected(selectedFiles);
-  }, [selectedFiles, props]);
+//   useEffect(() => {
+//     if (!props.onFilesSelected) return;
+//     props.onFilesSelected(selectedFiles);
+//   }, [selectedFiles, props]);
 
-  return (
-    <input
-      type="file"
-      accept="image/*,.pdf,.doc,.docx,.txt"
-      onChange={handleOnChange}
-      multiple
-    />
-  );
-};
+//   return (
+//     <input
+//       type="file"
+//       accept="image/*,.pdf,.doc,.docx,.txt"
+//       onChange={handleOnChange}
+//       multiple
+//     />
+//   );
+// };

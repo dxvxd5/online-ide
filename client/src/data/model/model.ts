@@ -59,7 +59,7 @@ export interface CollaboratorSelection {
   selection: CursorSelection;
 }
 
-interface FileData {
+export interface FileData {
   id: string;
   name: string;
 }
