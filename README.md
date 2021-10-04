@@ -76,7 +76,7 @@ These are the technologies that we will certainly need for this project and thei
 | Memoization of all functions created in React components | Performance                               | 3  ❔    |
 | Memoization of all computationally heavy functions       | Performance                               | 2   ❔   |
 | Lazy-loading of bundle                                   | Performance                               | 10  ❔   |
-| Use PropTypes/interface/type to declare component props  | Fewer bugs                                | 2      |
+| Use PropTypes/interface/type to declare component props  | Fewer bugs                                | 2   ✅   |
 |                                                          | **Total**                                 | **25 ❔** 2|
 
 
@@ -87,11 +87,11 @@ These are the technologies that we will certainly need for this project and thei
 
 | Server & Deployment                                          | When/Why/How                                                 | Points |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
-| Node (express.js framework or plain node) (*If you create a web server, all communication with the database must go through the server. Otherwise Fx*) | To implement the server                                      | 20     |
-| Websocket multiplayer                                        | To implement real-time collaboration                         | 10     |
-| Use cookies                                                  | Certainly to save some values we want to persist (like the id of the last file opened by the user or the theme used by the user) | 5      |
-| Good use of GET, POST, PUT, DELETE requests                  | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request | 5      |
-| Good error codes                                             | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5      |
+| Node (express.js framework or plain node) (*If you create a web server, all communication with the database must go through the server. Otherwise Fx*) | To implement the server                                      | 20  ✅   |
+| Websocket multiplayer                                        | To implement real-time collaboration                         | 10   ✅  |
+| Use cookies                                                  | Certainly to save some values we want to persist (like the id of the last file opened by the user or the theme used by the user) | 5    ✅  |
+| Good use of GET, POST, PUT, DELETE requests                  | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request | 5 ✅|
+| Good error codes                                             | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅ |
 | Deploy server without docker                                 |                                                              | 15     |
 | Handle authorization  |                               | 10      |
 |                                                              | **Total**                                                    | **70** |
