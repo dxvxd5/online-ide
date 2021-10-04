@@ -64,6 +64,24 @@ export default class API {
     return API.call(request);
   }
 
+  static signUp(
+    username: string,
+    name: string,
+    password: string
+  ): Promise<unknown> {
+    const request = {
+      url: 'signup',
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: { username, name, password },
+    };
+
+    return API.call(request);
+  }
+
   static getAllUserProjects(userID: string): Promise<unknown> {
     const request = {
       url: `users/${userID.toString()}/projects`,

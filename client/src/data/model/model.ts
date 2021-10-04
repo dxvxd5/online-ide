@@ -373,6 +373,22 @@ export default class IdeModel {
     this.notifyObservers(Message.LOGIN);
   }
 
+  async signup(
+    namee: string,
+    userName: string,
+    password: string
+  ): Promise<void> {
+    const { username, id, name } = (await API.signUp(
+      userName,
+      namee,
+      password
+    )) as UserData;
+    this.setUserID(id);
+    this.setUsername(username);
+    this.setName(name);
+    this.notifyObservers(Message.SIGNUP);
+  }
+
   async getAllUserProjects(): Promise<void> {
     const projects = (await API.getAllUserProjects(
       this.userID

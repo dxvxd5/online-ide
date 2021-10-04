@@ -20,6 +20,7 @@ enum Message {
   CONTENT,
   SAVE_FILE_CONTENT,
   ROOM_CREATOR,
+  SIGNUP,
 }
 
 export default Message;
