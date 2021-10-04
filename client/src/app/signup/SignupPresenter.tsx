@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
 import IdeModel from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
 import Loader from '../components/loader/Loader';
 import SingupView from './SignupView';
+import { signupSchema } from '../../utils/yup-schemas';
 
 interface SingupPresenterProp {
   model: IdeModel;
@@ -39,6 +40,10 @@ export default function SingupPresenter({
     }
   };
 
+  const logIn = () => {
+    history.push({ pathname: '/login' });
+  };
+
   if (isSignedUp && !isProjectLoaded && !projectError) {
     model
       .getAllUserProjects()
@@ -72,6 +77,8 @@ export default function SingupPresenter({
 
   return (
     <SingupView
+      logIn={logIn}
+      signupSchema={signupSchema}
       signupError={signupError}
       signupErrorInfo={signupErrorInfo}
       click={click}
