@@ -1,4 +1,5 @@
 .editorTab--toggle {
 }
 .editorTab--toggle__focus {
+  background-color: red;
 }

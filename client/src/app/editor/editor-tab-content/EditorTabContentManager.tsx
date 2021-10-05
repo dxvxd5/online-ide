@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import IdeModel, { CursorPosition } from '../../../data/model/model';
+import IdeModel, { CursorPosition, FileData } from '../../../data/model/model';
 import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
@@ -66,7 +66,7 @@ export default function EditorTabContentManager({
       onContentDelete={onContentDelete}
       onEditorSelection={onEditorSelection}
       onEditorCursorMoved={onEditorCursorMoved}
-      fileName={focusedFile.name}
+      fileName={(focusedFile as FileData).name}
       fileContent={content as string}
       isFocused
       model={model}

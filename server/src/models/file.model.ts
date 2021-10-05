@@ -91,18 +91,45 @@ export default class File {
     return { ...fileDoc.data(), id: fileID } as CompleteFileData;
   }
 
+  private static async _getFileDoc(
+    projectID: string,
+    userID: string,
+    fileID: string
+  ): Promise<FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData> | null> {
+    const fileDoc = await firestore
+      .doc(getFilePath(userID, projectID, fileID))
+      .get();
+
+    return fileDoc.exists ? fileDoc : null;
+  }
+
   static async editFile(
     projectID: string,
     userID: string,
     fileID: string,
     toEdit: EditableFileData
   ): Promise<boolean> {
-    const fileDoc = await firestore
-      .doc(getFilePath(userID, projectID, fileID))
-      .get();
-
-    if (!fileDoc.exists) return false;
+    const fileDoc = await File._getFileDoc(projectID, userID, fileID);
+    if (!fileDoc) return false;
     await fileDoc.ref.update(toEdit);
+    return true;
+  }
+
+  static async deleteFile(
+    projectID: string,
+    userID: string,
+    fileID: string
+  ): Promise<boolean> {
+    const fileDoc = await File._getFileDoc(projectID, userID, fileID);
+    const fileContentPath = await File._getFileContentPath(
+      userID,
+      projectID,
+      fileID
+    );
+    if (!(fileDoc && fileContentPath)) return false;
+
+    await fileDoc.ref.delete();
+    await firestore.doc(fileContentPath).delete();
 
     return true;
   }
@@ -161,7 +188,7 @@ export default class File {
     projectID: string,
     userID: string,
     fileID: string
-  ): Promise<null | Buffer> {
+  ): Promise<null | string> {
     const fileContentPath = await File._getFileContentPath(
       userID,
       projectID,
@@ -171,7 +198,7 @@ export default class File {
 
     const fileContentData = (
       await firestore.doc(fileContentPath).get()
-    ).data() as { content: Buffer };
+    ).data() as { content: string };
 
     return fileContentData.content;
   }

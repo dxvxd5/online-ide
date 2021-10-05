@@ -70,9 +70,6 @@ export default class API {
       url: `users/${userID.toString()}/projects`,
       method: 'GET' as Method,
       withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     };
 
     return API.call(request).then((data) => {
@@ -94,6 +91,47 @@ export default class API {
         'Content-Type': 'application/json',
       },
       data: { name, creationDate },
+    };
+
+    return API.call(request);
+  }
+
+  static editFile(
+    userID: string,
+    projectID: string,
+    fileID: string,
+    toUpdate: { name?: string; lastUpdated?: number }
+  ): Promise<unknown> {
+    if (!(toUpdate.name || toUpdate.lastUpdated))
+      throw new Error('Nothing to update the file with');
+    const { name, lastUpdated } = toUpdate;
+
+    let data = {};
+    if (name) data = { ...data, name };
+    if (lastUpdated) data = { ...data, lastUpdated };
+
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/${fileID}`,
+      method: 'PATCH' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data,
+    };
+
+    return API.call(request);
+  }
+
+  static deleteFile(
+    userID: string,
+    projectID: string,
+    fileID: string
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/${fileID}`,
+      method: 'DELETE' as Method,
+      withCredentials: true,
     };
 
     return API.call(request);

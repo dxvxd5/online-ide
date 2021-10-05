@@ -1,6 +1,9 @@
-import { FileData } from '../data/model/model';
-
 import TreeNode from './file-tree-node';
+
+interface FileData {
+  id: string;
+  name: string;
+}
 
 export default class FileTreeGenerator {
   private static nodeTracker: Map<string, TreeNode> = new Map();
@@ -68,7 +71,14 @@ export default class FileTreeGenerator {
   }
 
   static generateFileTree(rootFolderName: string, files: FileData[]): TreeNode {
-    const treeRoot = new TreeNode(null, rootFolderName, '', 0, rootFolderName);
+    const treeRoot = new TreeNode(
+      null,
+      rootFolderName,
+      '',
+      0,
+      rootFolderName,
+      true
+    );
     FileTreeGenerator.nodeTracker.set(rootFolderName, treeRoot);
 
     files.forEach(({ name: path, id }) => {

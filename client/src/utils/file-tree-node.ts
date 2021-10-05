@@ -16,6 +16,9 @@ export interface NodeState {
 
   // id of the file
   fileID: string;
+
+  // if the node is the root folder
+  isRoot: boolean;
 }
 
 export default class TreeNode {
@@ -31,18 +34,22 @@ export default class TreeNode {
 
   depth: number;
 
+  isRoot: boolean;
+
   constructor(
     parent: TreeNode | null,
     name: string,
     id: string,
     depth: number,
-    path: string
+    path: string,
+    isRoot = false
   ) {
     this.parent = parent;
     this.name = name;
     this.id = id;
     this.depth = depth;
     this.path = path;
+    this.isRoot = isRoot;
   }
 
   addChild(child: TreeNode): void {
@@ -72,6 +79,7 @@ export default class TreeNode {
       name: this.name,
       filePath: this.path,
       fileID: this.id,
+      isRoot: this.isRoot,
     };
 
     if (this.hasChild())
@@ -79,6 +87,7 @@ export default class TreeNode {
         children: this.children.map((child) => child.toState()),
         ...state,
       };
+    else if (this.isRoot) state = { children: [], ...state };
 
     return state;
   }

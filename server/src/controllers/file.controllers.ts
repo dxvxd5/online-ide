@@ -106,6 +106,29 @@ export async function createFile(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function deleteFile(req: Request, res: Response): Promise<void> {
+  try {
+    const userID = getUserIdFromReq(req, res);
+    if (!userID) return;
+
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
+
+    const fileID = getFileIdFromReq(req, res);
+    if (!fileID) return;
+
+    const isDeleted = await File.deleteFile(projectID, userID, fileID);
+    if (!isDeleted) {
+      res
+        .status(500)
+        .json({ error: new HttpError('Something went wrong', 500) });
+      return;
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
 export async function editFile(req: Request, res: Response): Promise<void> {
   try {
     const userID = getUserIdFromReq(req, res);
@@ -172,7 +195,7 @@ export async function getFileContent(
 
     const content = await File.getContent(projectID, userID, fileID);
 
-    if (!content) {
+    if (content === null) {
       res.status(404).json({
         error: new HttpError(
           'The file does not exist in the specified project.',

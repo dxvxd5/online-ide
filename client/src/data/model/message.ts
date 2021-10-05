@@ -21,7 +21,7 @@ enum Message {
   CURRENT_PROJECT,
 
   // when setting the currently open files
-  CURRENT_FILES,
+  CURRENT_TABS,
 
   // when setting the file we are currently working on
   FOCUSED_FILE,
