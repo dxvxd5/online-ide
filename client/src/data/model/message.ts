@@ -49,6 +49,8 @@ enum Message {
 
   // when the content of the editor change during a collaboration
   CONTENT,
+  SAVE_FILE_CONTENT,
+  ROOM_CREATOR,
 }
 
 export default Message;

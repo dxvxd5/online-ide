@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
@@ -45,6 +46,11 @@ export default function IdePresenter({
   }
 
   useEffect(() => {
+    Mousetrap.bind(['command+s', 'ctrl+s'], function () {
+      model.saveContentIntoFile();
+      return false;
+    });
+
     if (!socketRef.current) return;
     if (socketState === SocketState.DISABLED) return;
 
@@ -118,17 +124,20 @@ export default function IdePresenter({
       roomID: roomId,
       user: { name: model.name, id: model.userID },
     });
-    model.startCollaboration(roomId);
+    const isHost = socketstate === SocketState.HOST;
+    model.startCollaboration(roomId, isHost);
     setSocketState(socketstate);
   }
 
   const socketCreateRoom = () => {
     const roomId = `${model.userID}${generateRandomString()}`;
+    // model.setRoomCreator(model.userID);
     intiateSocket(roomId, SocketMessage.CREATE_ROOM, SocketState.HOST);
   };
 
-  const socketJoinRoom = (roomId: string) =>
+  const socketJoinRoom = (roomId: string) => {
     intiateSocket(roomId, SocketMessage.JOIN_ROOM, SocketState.JOIN);
+  };
 
   const socketLeaveRoom = (roomId: string): void => {
     if (!socketRef.current) return;

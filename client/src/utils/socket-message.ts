@@ -15,6 +15,7 @@ enum SocketMessage {
   CONTENT_INSERT = 'content_insert',
   CONTENT_REPLACE = 'content_replace',
   CONTENT_DELETE = 'content_delete',
+  CREATED_ROOM = 'created_room',
 }
 
 export default SocketMessage;

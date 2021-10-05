@@ -10,7 +10,7 @@ interface Request {
   url: string;
   method: Method;
   headers?: Record<string, string>;
-  data?: Record<string, unknown>;
+  data?: Record<string, unknown> | string;
   withCredentials?: boolean;
 }
 export default class API {
@@ -153,6 +153,22 @@ export default class API {
       data: { name, creationDate },
     };
 
+  static saveFileContent(
+    userID: string,
+    projectID: string,
+    fileID: string,
+    contentStr: string
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
+      method: 'PUT' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-16',
+        'Content-Transfer-Encoding': 'BASE64',
+      },
+      data: btoa(contentStr),
+    };
     return API.call(request);
   }
 
@@ -177,7 +193,7 @@ export default class API {
       withCredentials: true,
     };
     return API.call(request).then((data) => {
-      return data;
+      return atob(data as string);
     });
   }
 }

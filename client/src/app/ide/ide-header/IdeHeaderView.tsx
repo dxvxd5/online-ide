@@ -10,6 +10,8 @@ interface IdeHeaderViewProps {
   collaborators: { name: string; id: string }[];
   isCollab: boolean;
   leaveRoom: (roomId: string) => void;
+  isHost: boolean;
+  saveFileOnClick: () => void;
 }
 
 export default function IdeHeaderView({
@@ -19,6 +21,8 @@ export default function IdeHeaderView({
   collaborators,
   isCollab,
   leaveRoom,
+  isHost,
+  saveFileOnClick,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -44,6 +48,11 @@ export default function IdeHeaderView({
       {isCollab && (
         <button type="button" onClick={() => leaveRoom(roomID)}>
           Leave room
+        </button>
+      )}
+      {isHost && (
+        <button type="button" onClick={() => saveFileOnClick()}>
+          Save File
         </button>
       )}
       {roomID && <div> {roomID}</div>}
