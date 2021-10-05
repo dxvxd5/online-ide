@@ -146,6 +146,7 @@ export default class IdeModel {
 
   // the currently opened files in the current project(TABs)
   currentTabFiles: FileData[];
+
   contentToSave!: string;
 
   roomCreator!: SparseUserData;

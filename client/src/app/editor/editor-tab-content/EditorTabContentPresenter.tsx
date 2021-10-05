@@ -213,8 +213,7 @@ export default function EditorPresenter({
   return (
     <EditorView
       language={language}
-      // TODO: Remove atob
-      code={atob(fileContent)}
+      code={fileContent}
       handleMount={handleMount}
       isFocused={isFocused}
       onContentChange={onChange}
