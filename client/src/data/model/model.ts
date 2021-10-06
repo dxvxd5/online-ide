@@ -372,12 +372,19 @@ export default class IdeModel {
   async saveContentIntoFile(): Promise<void> {
     if (!this.focusedFile) return;
     if (isNil(this.contentToSave)) return;
-    (await API.saveFileContent(
+
+    const lastUpdated = Date.now();
+
+    API.saveFileContent(
       this.userID,
       this.currentProject.id,
       this.focusedFile.id,
       this.contentToSave
-    )) as FileData;
+    );
+
+    API.editFile(this.userID, this.currentProject.id, this.focusedFile.id, {
+      lastUpdated,
+    });
   }
 
   /**
