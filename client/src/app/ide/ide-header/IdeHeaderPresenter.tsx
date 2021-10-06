@@ -5,14 +5,12 @@ import IdeHeaderView from './IdeHeaderView';
 
 interface IdeHeaderPresenterProps {
   createRoom: () => void;
-  joinRoom: (roomID: string) => void;
   leaveRoom: (roomID: string) => void;
   model: IdeModel;
 }
 
 export default function IdeHeaderPresenter({
   createRoom,
-  joinRoom,
   leaveRoom,
   model,
 }: IdeHeaderPresenterProps): JSX.Element {
@@ -43,7 +41,6 @@ export default function IdeHeaderPresenter({
   return (
     <IdeHeaderView
       createRoom={createRoom}
-      joinRoom={joinRoom}
       leaveRoom={leaveRoom}
       roomID={roomID}
       collaborators={collaborators}

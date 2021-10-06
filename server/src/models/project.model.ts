@@ -2,6 +2,8 @@ import {
   firestore,
   getProjectBasePath,
   getProjectPath,
+  collabBasePath,
+  getCollabPath,
 } from '../config/firebase';
 
 import File from './file.model';
@@ -11,6 +13,7 @@ interface ProjectData {
   shared: boolean;
   lastUpdated: number;
   id: string;
+  owner?: { name: string; id: string };
 }
 
 interface CompleteProjectData extends ProjectData {
@@ -36,7 +39,7 @@ export default class Project {
 
   lastUpdated: number;
 
-  static async isProjectExist(
+  private static async isProjectExist(
     userID: string,
     projectID: string
   ): Promise<boolean> {
@@ -135,6 +138,40 @@ export default class Project {
     if (!projectDoc.exists) return false;
     await projectDoc.ref.update(toEdit);
     return true;
+  }
+
+  static async createCollaboration(
+    userID: string,
+    projectID: string
+  ): Promise<null | string> {
+    if (!(await Project.isProjectExist(userID, projectID))) return null;
+
+    const projectPath = getProjectPath(userID, projectID);
+    const collabRef = await firestore
+      .collection(collabBasePath)
+      .add({ project: firestore.doc(projectPath) });
+
+    return collabRef.id;
+  }
+
+  static async getCollabProject(
+    collabID: string
+  ): Promise<CompleteProjectData | null> {
+    const collabData = (
+      await firestore.doc(getCollabPath(collabID)).get()
+    ).data();
+
+    if (!collabData) return null;
+    const project = collabData.project as FirebaseFirestore.DocumentReference;
+
+    const projectData = (await project.get()).data() as ProjectData;
+
+    const completeProjectData = Project.getFromId(
+      project.id,
+      projectData?.owner?.id as string
+    );
+
+    return completeProjectData;
   }
 
   constructor({ id, shared, lastUpdated, name }: ProjectData) {

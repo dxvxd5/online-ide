@@ -110,6 +110,33 @@ export default function PersonalSpacePresenter({
     }
   };
 
+  const joinCollabProject = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Enter room ID',
+      input: 'text',
+      inputLabel: 'Room ID',
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      preConfirm: (roomID) => {
+        model
+          .getCollabProject(roomID)
+          .then(() => setIsProjectLoaded(true))
+          .catch(() =>
+            Swal.fire(
+              `Error. Could not join a project. Please try again.`,
+              '',
+              'error'
+            )
+          );
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+      backdrop: true,
+    });
+  };
+
   if (projectError)
     return (
       <ProjectError
@@ -126,6 +153,7 @@ export default function PersonalSpacePresenter({
 
   return (
     <PersonalSpaceView
+      joinCollabProject={joinCollabProject}
       handleProjectName={handleProjectName}
       handleSort={handleSort}
       projects={projects}

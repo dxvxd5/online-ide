@@ -12,5 +12,7 @@ projectsRouter.get('/', RouteControllers.getAllUserProjects);
 projectsRouter.post('/create', RouteControllers.createProject);
 projectsRouter.get('/:projectID', RouteControllers.getProject);
 projectsRouter.patch('/:projectID', RouteControllers.editProject);
+projectsRouter.get('/collab/:collabID', RouteControllers.getCollabProject);
+projectsRouter.post('/:projectID/collab', RouteControllers.createCollab);
 
 export default projectsRouter;

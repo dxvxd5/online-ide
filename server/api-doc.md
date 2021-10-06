@@ -314,6 +314,82 @@ Status: 200 OK
 
 `bad request` `require authentification` `resource non found` `internal server error` `forbidden`
 
+### Create Collaboration on project
+
+#### Request
+
+```http
+POST /users/:userID/projects/:projectID/collab
+```
+
+##### Parameters
+
+`projectID`: int
+`userID`: int
+
+#### Response
+
+```
+Status: 200 OK
+```
+
+##### Body
+
+JSON file containing the id of the collaboration room
+
+```js
+{roomID: "ehe6d7dhHDHe8"}
+```
+
+#### Possible errors
+
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
+
+### Get collaboration project
+
+#### Request
+
+```http
+POST /users/:userID/projects/collab/:collabID
+```
+
+##### Parameters
+
+`projectID`: int
+`userID`: int
+`collabID`: int
+
+#### Response
+
+```
+Status: 200 OK
+```
+
+```js
+{
+    id:"37gsgsg7",
+    name:"Jojo-bizzare-adventure",
+    shared:true,
+    owner:{name:"Joseph Joestar", id:"56636"},
+    collaborators:[
+        {id: 7363 , name: "Jotaro Kujo"},
+    ],
+    // The files array is sorted in ascending alphabetical order with the file names
+    files:[
+      {id:555, name:"server/src/index.ts"},
+        {id:4567, name:"src/components/header.tsx"},
+        {id:45636, name:"src/components/sidebar.tsx"},
+    ],
+    creationDate:2334111,
+    lastUpdated:2334111,
+}
+```
+
+
+#### Possible errors
+
+`bad request` `require authentification` `resource non found` `internal server error` `forbidden`
+
 ### Edit project
 
 #### Request
@@ -335,7 +411,7 @@ content-type: application/json
 
 ##### Body
 
-Json whose properties are the information to be updated. The example below shows all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required. However, at least one must be included for the request to be valid.
+JSON file whose properties are the information to be updated. The example below shows all the properties that can be updated, But a request does not have to feature all of them. Only the ones to be updated are required. However, at least one must be included for the request to be valid.
 
 ```js
 {

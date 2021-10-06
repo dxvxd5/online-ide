@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
@@ -14,7 +15,6 @@ import IdeModel, {
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
-import { generateRandomString } from '../../utils/random';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
 import IdeSidebar from '../sidebar/SidebarPresenter';
 
@@ -109,8 +109,6 @@ export default function IdePresenter({
       (data: { user: User; content: Deletion }) =>
         model.setCollabContentDeletion(data.content.index, data.content.length)
     );
-
-    // socketRef.current.on()
   }, [socketState]);
 
   function intiateSocket(
@@ -130,9 +128,15 @@ export default function IdePresenter({
   }
 
   const socketCreateRoom = () => {
-    const roomId = `${model.userID}${generateRandomString()}`;
-    // model.setRoomCreator(model.userID);
-    intiateSocket(roomId, SocketMessage.CREATE_ROOM, SocketState.HOST);
+    toast
+      .promise(model.createCollab(), {
+        success: 'Room created',
+        loading: 'creating room...',
+        error: 'Failed to create room. Please try again',
+      })
+      .then((roomID) =>
+        intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST)
+      );
   };
 
   const socketJoinRoom = (roomId: string) => {
@@ -219,7 +223,6 @@ export default function IdePresenter({
       <IdeHeader
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
-        joinRoom={socketJoinRoom}
         model={model}
       />
       <IdeSidebar model={model} />

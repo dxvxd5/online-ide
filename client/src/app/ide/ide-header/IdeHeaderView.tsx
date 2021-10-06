@@ -5,7 +5,6 @@ import './ideHeader.css';
 
 interface IdeHeaderViewProps {
   createRoom: () => void;
-  joinRoom: (roomID: string) => void;
   roomID: string;
   collaborators: { name: string; id: string }[];
   isCollab: boolean;
@@ -16,7 +15,6 @@ interface IdeHeaderViewProps {
 
 export default function IdeHeaderView({
   createRoom,
-  joinRoom,
   roomID,
   collaborators,
   isCollab,
@@ -31,18 +29,6 @@ export default function IdeHeaderView({
           <button type="button" onClick={() => createRoom()}>
             Create Room
           </button>
-          <Formik
-            initialValues={{ roomID: '' }}
-            onSubmit={(e) => joinRoom(e.roomID)}
-          >
-            <Form>
-              <p>RoomID: </p>
-              <Field type="roomID" name="roomID" />
-              <ErrorMessage name="roomID" component="div" />
-              <br />
-              <button type="submit">Join Room</button>
-            </Form>
-          </Formik>
         </>
       )}
       {isCollab && (

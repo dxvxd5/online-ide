@@ -15,6 +15,7 @@ import { signUpUser } from './controllers/user.controllers';
 import HttpError from './utils/httperror';
 
 import socketFunction from './socket/socket';
+import Project from './models/project.model';
 
 const app = express();
 

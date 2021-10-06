@@ -153,6 +153,9 @@ export default class API {
       data: { name, creationDate },
     };
 
+    return API.call(request);
+  }
+
   static saveFileContent(
     userID: string,
     projectID: string,
@@ -180,6 +183,35 @@ export default class API {
     };
 
     return API.call(request);
+  }
+
+  static async getCollabProject(
+    userID: string,
+    collabID: string
+  ): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/collab/${collabID}`,
+      method: 'GET' as Method,
+      withCredentials: true,
+    };
+
+    return API.call(request);
+  }
+
+  static createCollab(userID: string, projectID: string): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}/collab`,
+      method: 'POST' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return API.call(request).then((d) => {
+      const data = d as { roomID: string };
+      return data.roomID;
+    });
   }
 
   static async getFileContent(

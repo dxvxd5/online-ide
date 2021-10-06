@@ -135,3 +135,54 @@ export async function editProject(req: Request, res: Response): Promise<void> {
     res.status(500).send(error);
   }
 }
+
+export async function createCollab(req: Request, res: Response): Promise<void> {
+  try {
+    const userID = getUserIdFromReq(req, res);
+    if (!userID) return;
+
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
+
+    const roomID = await Project.createCollaboration(userID, projectID);
+
+    if (!roomID) {
+      res.status(404).json({
+        error: new HttpError('The specified project does not exist', 404),
+      });
+      return;
+    }
+
+    res.status(200).json({ roomID });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+export async function getCollabProject(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
+
+    const { collabID } = req.params;
+    if (!collabID)
+      res.status(400).json({
+        error: new HttpError('No collab ID provided', 400),
+      });
+
+    const project = await Project.getCollabProject(collabID);
+    if (!project) {
+      res.status(404).json({
+        error: new HttpError('The specified collab ID does not exist', 404),
+      });
+      return;
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}

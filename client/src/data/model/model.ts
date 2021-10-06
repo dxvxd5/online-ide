@@ -146,6 +146,7 @@ export default class IdeModel {
 
   // the currently opened files in the current project(TABs)
   currentTabFiles: FileData[];
+
   contentToSave!: string;
 
   roomCreator!: SparseUserData;
@@ -160,7 +161,6 @@ export default class IdeModel {
     this.projects = [];
     this.collaborators = [];
     this.currentTabFiles = [];
-    this.project = {} as ProjectData;
     this.isHost = true;
   }
 
@@ -429,15 +429,21 @@ export default class IdeModel {
     this.setProjects([createdProject, ...this.projects]);
   }
 
-  // async createFile(name: string, creationDate: number): Promise<void> {
-  //   const createdFile = await API.createFile(
-  //     this.userID,
-  //     this.currentProject.id,
-  //     name,
-  //     creationDate
-  //   );
-  //   this.addFileToCurrentProject(createdFile as FileData);
-  // }
+  async createCollab(): Promise<string> {
+    const roomID = (await API.createCollab(
+      this.userID,
+      this.currentProject.id
+    )) as string;
+    return roomID;
+  }
+
+  async getCollabProject(collabId: string): Promise<void> {
+    const project = (await API.getProject(
+      this.userID,
+      collabId
+    )) as CompleteProjectData;
+    this.setCurrentProject(project);
+  }
 
   private recursiveFolderRename(
     node: FileTree,
@@ -511,7 +517,6 @@ export default class IdeModel {
 
       const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
       if (i >= 0) {
-        console.log(this.currentTabFiles);
         this.currentTabFiles[i].name = name;
         this.notifyObservers(Message.CURRENT_TABS);
       }
