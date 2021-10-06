@@ -15,7 +15,7 @@ export default function FileIcon({ onClick }: FileIconProps) {
   }: IconProps): JSX.Element {
     const handleClick = () => {
       const { fileID, name } = nodeData;
-      onClick({ id: fileID, name });
+      if (fileID) onClick({ id: fileID, name });
       defaultOnClick();
     };
     return <SiTypescript onClick={handleClick} />;

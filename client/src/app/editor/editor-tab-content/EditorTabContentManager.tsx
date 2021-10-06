@@ -5,6 +5,7 @@ import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
 import ProjectError from '../../components/error/ProjectError';
+import { getFileLanguage } from '../../../utils/file-extension';
 
 interface EditorTabContentManagerProps {
   model: IdeModel;
@@ -23,17 +24,26 @@ export default function EditorTabContentManager({
   onContentReplace,
   onContentDelete,
 }: EditorTabContentManagerProps): JSX.Element {
-  // eslint-disable-next-line react/destructuring-assignment
   const [focusedFile, setFocusedFile] = useState(model.getFocusedFile());
+  const [language, setLanguage] = useState(
+    model.focusedFile ? getFileLanguage(model.focusedFile.name) : ''
+  );
   const [content, setContent] = useState<string | null>(null);
   const [loadFileError, setLoadFileError] = useState(false);
 
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        setFocusedFile(model.getFocusedFile());
-        setContent(null);
-        setLoadFileError(false);
+        if (focusedFile?.id !== model.focusedFile?.id) {
+          setFocusedFile(model.getFocusedFile());
+          setContent(null);
+          setLoadFileError(false);
+        }
+
+        const newLanguage = model.focusedFile
+          ? getFileLanguage(model.focusedFile.name)
+          : '';
+        setLanguage(newLanguage);
       }
     };
     model.addObserver(focusedFileListener);
@@ -66,7 +76,7 @@ export default function EditorTabContentManager({
       onContentDelete={onContentDelete}
       onEditorSelection={onEditorSelection}
       onEditorCursorMoved={onEditorCursorMoved}
-      fileName={(focusedFile as FileData).name}
+      language={language}
       fileID={(focusedFile as FileData).id}
       fileContent={content as string}
       isFocused

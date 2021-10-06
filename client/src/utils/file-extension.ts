@@ -71,7 +71,7 @@ export function extractBasename(path: string): string {
   return basename;
 }
 
-export function extractExtension(path: string) {
+export function extractExtension(path: string): string {
   const basename = extractBasename(path);
   // get last position of `.` in the basename
   const pos = basename.lastIndexOf('.');

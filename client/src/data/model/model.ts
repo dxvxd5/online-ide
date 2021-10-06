@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isNil } from 'lodash';
 
 import API from './api';
 import Message from './message';
@@ -161,7 +161,6 @@ export default class IdeModel {
     this.projects = [];
     this.collaborators = [];
     this.currentTabFiles = [];
-    this.project = {} as ProjectData;
     this.isHost = true;
   }
 
@@ -372,6 +371,7 @@ export default class IdeModel {
 
   async saveContentIntoFile(): Promise<void> {
     if (!this.focusedFile) return;
+    if (isNil(this.contentToSave)) return;
     (await API.saveFileContent(
       this.userID,
       this.currentProject.id,
@@ -489,14 +489,19 @@ export default class IdeModel {
   private async createFile(
     name: string,
     creationDate: number
-  ): Promise<FileData> {
-    const fileData = await API.createFile(
-      this.userID,
-      this.currentProject.id,
-      name,
-      creationDate
-    );
-    return fileData as FileData;
+  ): Promise<FileData | undefined> {
+    try {
+      const fileData = await API.createFile(
+        this.userID,
+        this.currentProject.id,
+        name,
+        creationDate
+      );
+      return fileData as FileData;
+    } catch {
+      console.log('Could not create file.');
+      return undefined;
+    }
   }
 
   private async renameFile(
@@ -512,9 +517,13 @@ export default class IdeModel {
 
       const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
       if (i >= 0) {
-        console.log(this.currentTabFiles);
         this.currentTabFiles[i].name = name;
         this.notifyObservers(Message.CURRENT_TABS);
+
+        if (this.currentTabFiles[i].id === this.focusedFile?.id) {
+          this.setFocusedFile(this.currentTabFiles[i]);
+          this.notifyObservers(Message.FOCUSED_FILE);
+        }
       }
     } catch {
       console.log('Error when updating file');
@@ -557,10 +566,14 @@ export default class IdeModel {
           Date.now()
         );
 
+        if (!newFile) return;
+
         if (node.children) {
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
+          // Dummy method to force tree update:
         }
+
         break;
       }
 
@@ -575,11 +588,6 @@ export default class IdeModel {
       }
 
       case FileTreeOperation.DELETE: {
-        console.log({
-          newTree,
-          path: event.path,
-          oldTree: this.currentFileTree,
-        });
         const node = this.getTreeNodeFromPath(event.path);
         if (node.fileID) {
           this.deleteFile(node.fileID);

@@ -7,7 +7,6 @@ import {
 } from '@convergencelabs/monaco-collab-ext';
 import { editor } from 'monaco-editor';
 
-import { getFileLanguage } from '../../../utils/file-extension';
 import Message from '../../../data/model/message';
 import IdeModel, {
   CursorPosition,
@@ -25,7 +24,7 @@ import EditorView from './EditorTabContentView';
 
 interface EditorPresenterProps {
   model: IdeModel;
-  fileName: string;
+  language: string;
   fileID: string;
   fileContent: string;
   isFocused: boolean;
@@ -38,7 +37,7 @@ interface EditorPresenterProps {
 
 export default function EditorPresenter({
   model,
-  fileName,
+  language,
   fileID,
   fileContent,
   isFocused,
@@ -55,8 +54,6 @@ export default function EditorPresenter({
 
   const fiveMinutes = 300000;
   const saveIntervalRef = useRef<NodeJS.Timeout>();
-
-  const language = getFileLanguage(fileName);
 
   function removeCollaborator(cursorID: string) {
     cursorManagerRef.current?.removeCursor(cursorID);

@@ -32,14 +32,20 @@ export default function SidebarPresenter({
     return () => model.removeObserver(projectListener);
   }, []);
 
-  const onFileIconClick = (file: FileData) => {
+  const updateFocusedFile = (file: FileData): void => {
+    if (file.id === model.focusedFile?.id) return;
     model.setFocusedFile(file);
+  };
+
+  const onFileIconClick = (file: FileData) => {
+    updateFocusedFile(file);
   };
 
   const onFileNameClick = ({ defaultOnClick, nodeData }: OnNameClickArgs) => {
     if (nodeData.fileID) {
       const clickedFile = { id: nodeData.fileID, name: nodeData.name };
-      model.setFocusedFile(clickedFile);
+
+      updateFocusedFile(clickedFile);
       model.addTabFile(clickedFile);
     }
     defaultOnClick();
