@@ -14,9 +14,6 @@ enum Message {
   // when setting all the project of the user
   PROJECTS_CHANGE,
 
-  // when there is any change in the currently opened project
-  CURRENT_PROJECT_CHANGE,
-
   // when we set the currently opened project
   CURRENT_PROJECT,
 
@@ -51,6 +48,7 @@ enum Message {
   CONTENT,
   SAVE_FILE_CONTENT,
   ROOM_CREATOR,
+  UPDATE_TREE,
 }
 
 export default Message;

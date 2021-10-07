@@ -40,9 +40,8 @@ export default function EditorTabContentManager({
     return () => model.removeObserver(focusedFileListener);
   }, []);
 
+  if (!focusedFile) return <div>open a file</div>;
   if (!loadFileError && content === null) {
-    if (!focusedFile) return <div>open a file</div>;
-
     model
       .getFileContent(focusedFile.id)
       .then((c) => setContent(c))

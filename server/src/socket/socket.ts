@@ -43,6 +43,10 @@ const socketFunction = (io: Server): void => {
     socket.on(SocketMessage.CONTENT_DELETE, (data) =>
       SocketHandler.deleteContent(socket, data)
     );
+
+    socket.on(SocketMessage.FILE_TREE_CHANGE, (data) =>
+      SocketHandler.updateFileTree(socket, data)
+    );
   });
 };
 

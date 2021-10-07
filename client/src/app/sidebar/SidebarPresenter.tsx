@@ -7,6 +7,7 @@ import { NodeState } from '../../utils/file-tree-node';
 
 interface SidebarPresenterProps {
   model: IdeModel;
+  onFileTreeChange: (t: NodeState, e: TreeChangeEvent) => void;
 }
 
 export interface OnNameClickArgs {
@@ -16,16 +17,20 @@ export interface OnNameClickArgs {
 
 export default function SidebarPresenter({
   model,
+  onFileTreeChange,
 }: SidebarPresenterProps): JSX.Element {
   const [files, setFiles] = useState(model.currentFileTree);
 
   useEffect(() => {
     function projectListener(m: Message) {
-      if (m === Message.CURRENT_PROJECT_CHANGE) {
-        setFiles(model.currentFileTree);
-      }
       if (m === Message.CURRENT_PROJECT) {
         setFiles(model.currentFileTree);
+      }
+      if (m === Message.UPDATE_TREE) {
+        // console.log('UPDATE_TREE called');
+        // console.log('model.currentFileTree: ', model.currentFileTree);
+        setFiles(model.currentFileTree);
+        // TODO: Need to stop the setFiles re-rendering
       }
     }
     model.addObserver(projectListener);
@@ -46,10 +51,6 @@ export default function SidebarPresenter({
   };
 
   const FileIconComponent = FileIcon({ onClick: onFileIconClick });
-
-  const onFileTreeChange = (t: NodeState, e: TreeChangeEvent) => {
-    model.applyFileTreeChange(t, e);
-  };
 
   return (
     <SidebarView

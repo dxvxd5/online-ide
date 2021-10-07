@@ -11,12 +11,15 @@ import IdeModel, {
   Insertion,
   Deletion,
   Replacement,
+  TreeChangeEvent,
+  FileTreeOperation,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
 import IdeSidebar from '../sidebar/SidebarPresenter';
+import { NodeState } from '../../utils/file-tree-node';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -45,15 +48,37 @@ export default function IdePresenter({
     });
   }
 
+  function intiateSocket(
+    roomId: string,
+    message: SocketMessage,
+    socketstate: SocketState
+  ): void {
+    socketRef.current = io.connect(serverUrl);
+    socketRef.current.emit(message, {
+      roomID: roomId,
+      user: { name: model.name, id: model.userID },
+    });
+    const isHost = socketstate === SocketState.HOST;
+    model.startCollaboration(roomId, isHost);
+    setSocketState(socketstate);
+  }
+
   useEffect(() => {
+    if (!model.isHost) {
+      // When user join roon we initiate the socket
+      intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
+    }
+  }, []);
+
+  const [counter, setCounter] = useState(0);
+  useEffect(() => {
+    if (!socketRef.current) return;
+    if (socketState === SocketState.DISABLED) return;
+
     Mousetrap.bind(['command+s', 'ctrl+s'], function () {
       model.saveContentIntoFile();
       return false;
     });
-
-    if (!socketRef.current) return;
-    if (socketState === SocketState.DISABLED) return;
-
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {
@@ -109,23 +134,17 @@ export default function IdePresenter({
       (data: { user: User; content: Deletion }) =>
         model.setCollabContentDeletion(data.content.index, data.content.length)
     );
+
+    socketRef.current.on(
+      SocketMessage.FILE_TREE_CHANGE,
+      ({ newTree, event }: { newTree: NodeState; event: TreeChangeEvent }) => {
+        // model.applyFileTreeChange(newTree, event);
+        console.log('newTree onListen: ', newTree);
+        model.setNewTree(newTree);
+        model.updateTabs(newTree, event);
+      }
+    );
   }, [socketState]);
-
-  function intiateSocket(
-    roomId: string,
-    message: SocketMessage,
-    socketstate: SocketState
-  ): void {
-    socketRef.current = io.connect(serverUrl);
-
-    socketRef.current.emit(message, {
-      roomID: roomId,
-      user: { name: model.name, id: model.userID },
-    });
-    const isHost = socketstate === SocketState.HOST;
-    model.startCollaboration(roomId, isHost);
-    setSocketState(socketstate);
-  }
 
   const socketCreateRoom = () => {
     toast
@@ -137,10 +156,6 @@ export default function IdePresenter({
       .then((roomID) =>
         intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST)
       );
-  };
-
-  const socketJoinRoom = (roomId: string) => {
-    intiateSocket(roomId, SocketMessage.JOIN_ROOM, SocketState.JOIN);
   };
 
   const socketLeaveRoom = (roomId: string): void => {
@@ -218,6 +233,32 @@ export default function IdePresenter({
     });
   };
 
+  const onFileTreeChange = (t: NodeState, e: TreeChangeEvent) => {
+    // console.log('model.isHost: ', model.isHost);
+    // console.log('onFileTreeChange called ', e.type);
+    if (
+      [
+        FileTreeOperation.INITIALIZATION,
+        FileTreeOperation.TOGGLE_OPEN,
+        FileTreeOperation.CHECK,
+      ].includes(e.type)
+    )
+      return;
+    console.log('e.params: ', e.params);
+    // setTimeout(() => {
+    model.applyFileTreeChange(t, e).then(() => {
+      if (!socketRef.current) return;
+      socketRef.current.emit(SocketMessage.FILE_TREE_CHANGE, {
+        newTree: t,
+        event: e,
+        roomID: model.roomID,
+      });
+      e.type = FileTreeOperation.INITIALIZATION;
+    });
+
+    //  }, 6000);
+  };
+
   return (
     <>
       <IdeHeader
@@ -225,7 +266,7 @@ export default function IdePresenter({
         createRoom={socketCreateRoom}
         model={model}
       />
-      <IdeSidebar model={model} />
+      <IdeSidebar onFileTreeChange={onFileTreeChange} model={model} />
       <EditorTabs model={model} />
       <Editor
         model={model}

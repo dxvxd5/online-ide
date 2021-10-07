@@ -90,16 +90,17 @@ export async function createFile(req: Request, res: Response): Promise<void> {
     const projectID = getProjectIdFromReq(req, res);
     if (!projectID) return;
 
-    const user = req.user as User;
-    const userName = user.name;
     const creationDateNum = Number(creationDate);
     const newFile = await File.createFile(
       userID,
       projectID,
-      userName,
       name,
       creationDateNum
     );
+    if (!newFile)
+      res.status(400).json({
+        error: new HttpError('The user id is invalid', 400),
+      });
     res.status(200).json(newFile);
   } catch (error) {
     res.status(500).send(error);
@@ -119,9 +120,9 @@ export async function deleteFile(req: Request, res: Response): Promise<void> {
 
     const isDeleted = await File.deleteFile(projectID, userID, fileID);
     if (!isDeleted) {
-      res
-        .status(500)
-        .json({ error: new HttpError('Something went wrong', 500) });
+      res.status(404).json({
+        error: new HttpError('The specified file does not exist.', 404),
+      });
       return;
     }
   } catch (error) {
@@ -167,9 +168,9 @@ export async function editFile(req: Request, res: Response): Promise<void> {
 
     const isEdited = await File.editFile(projectID, userID, fileID, toEdit);
     if (!isEdited) {
-      res
-        .status(500)
-        .json({ error: new HttpError('Something went wrong', 500) });
+      res.status(404).json({
+        error: new HttpError('The specified file does not exist.', 404),
+      });
       return;
     }
 
@@ -194,7 +195,6 @@ export async function getFileContent(
     if (!fileID) return;
 
     const content = await File.getContent(projectID, userID, fileID);
-
     if (content === null) {
       res.status(404).json({
         error: new HttpError(

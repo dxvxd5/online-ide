@@ -16,6 +16,7 @@ enum SocketMessage {
   CONTENT_REPLACE = 'content_replace',
   CONTENT_DELETE = 'content_delete',
   CREATED_ROOM = 'created_room',
+  FILE_TREE_CHANGE = 'file_tree_change',
 }
 
 export default SocketMessage;

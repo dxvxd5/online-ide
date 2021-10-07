@@ -9,6 +9,7 @@ import {
   getProjectBasePath,
   getProjectPath,
 } from '../config/firebase';
+import User from './user.model';
 
 interface FileData {
   name: string;
@@ -39,15 +40,17 @@ export default class File {
   static async createFile(
     userID: string,
     projectID: string,
-    userName: string,
     fileName: string,
     creationDate: number
-  ): Promise<File> {
+  ): Promise<File | null> {
+    const user = await User.getFromId(userID);
+
+    if (!user) return null;
     const fileData = {
       name: fileName,
       creationDate,
       lastUpdated: creationDate,
-      owner: { id: userID, name: userName },
+      owner: { id: userID, name: user.name },
       projectID,
     };
 

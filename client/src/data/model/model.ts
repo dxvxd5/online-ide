@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 
 import API from './api';
 import Message from './message';
@@ -6,17 +6,44 @@ import ColorGenerator from '../../utils/color-generator';
 import FileTreeGenerator from '../../utils/file-tree-generator';
 import { NodeState as FileTree } from '../../utils/file-tree-node';
 
+enum FileOperationType {
+  RENAME,
+  DELETE,
+  ADD,
+}
+interface FileOperation {
+  type: FileOperationType;
+  name: string;
+}
+
+interface FileDeleteOperation extends FileOperation {
+  fileID: string;
+}
+
+interface FileCreateOperation extends FileOperation {
+  name: string;
+  creationDate: number;
+}
+
+interface FileRenameOperation extends FileOperation {
+  fileID: string;
+  name: string;
+  lastUpdated: number;
+}
+
 export enum EditorContentOperationType {
   REPLACEMENT,
   DELETION,
   INSERTION,
 }
 
-enum FileTreeOperation {
+export enum FileTreeOperation {
   ADD = 'addNode',
   RENAME = 'renameNode',
   DELETE = 'deleteNode',
   INITIALIZATION = 'initialization',
+  CHECK = 'checkNode',
+  TOGGLE_OPEN = 'toggleOpen',
 }
 
 type Observer = {
@@ -192,11 +219,6 @@ export default class IdeModel {
     this.notifyObservers(Message.PROJECTS_CHANGE);
   }
 
-  addFileToCurrentProject(file: FileData): void {
-    this.currentProject.files.push(file);
-    this.notifyObservers(Message.CURRENT_PROJECT_CHANGE);
-  }
-
   setFileContentToSave(content: string): void {
     this.contentToSave = content;
     this.notifyObservers(Message.SAVE_FILE_CONTENT);
@@ -245,6 +267,11 @@ export default class IdeModel {
       projectRootFolderName,
       files
     ).toState();
+  }
+
+  setNewTree(newTree: FileTree): void {
+    this.currentFileTree = newTree;
+    this.notifyObservers(Message.UPDATE_TREE);
   }
 
   setCurrentTabFiles(tabFiles: FileData[]): void {
@@ -372,7 +399,7 @@ export default class IdeModel {
   async saveContentIntoFile(): Promise<void> {
     if (!this.focusedFile) return;
     (await API.saveFileContent(
-      this.userID,
+      this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
       this.focusedFile.id,
       this.contentToSave
@@ -396,7 +423,7 @@ export default class IdeModel {
   async getFileContent(fileID: string): Promise<string> {
     if (!this.currentProject) throw new Error('No project opened');
     return (await API.getFileContent(
-      this.userID,
+      this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
       fileID
     )) as string;
@@ -438,10 +465,12 @@ export default class IdeModel {
   }
 
   async getCollabProject(collabId: string): Promise<void> {
-    const project = (await API.getProject(
+    this.roomID = collabId;
+    const project = (await API.getCollabProject(
       this.userID,
       collabId
     )) as CompleteProjectData;
+    this.isHost = false;
     this.setCurrentProject(project);
   }
 
@@ -491,17 +520,53 @@ export default class IdeModel {
     return node;
   }
 
+  private async fileOperation(o: FileOperation): Promise<FileData | void> {
+    if (!this.isHost) return;
+
+    switch (o.type) {
+      case FileOperationType.ADD: {
+        // eslint-disable-next-line consistent-return
+        return this.createFile(
+          (o as FileCreateOperation).name,
+          (o as FileCreateOperation).creationDate
+        );
+      }
+      case FileOperationType.RENAME: {
+        this.renameFile(
+          (o as FileRenameOperation).name,
+          (o as FileRenameOperation).lastUpdated,
+          (o as FileRenameOperation).fileID
+        );
+        break;
+      }
+      case FileOperationType.DELETE: {
+        this.deleteFile((o as FileDeleteOperation).fileID);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
   private async createFile(
     name: string,
     creationDate: number
   ): Promise<FileData> {
     const fileData = await API.createFile(
-      this.userID,
+      this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
       name,
       creationDate
     );
     return fileData as FileData;
+  }
+
+  private renameTabFile(fileID: string, name: string): void {
+    const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
+    if (i >= 0) {
+      this.currentTabFiles[i].name = name;
+      this.notifyObservers(Message.CURRENT_TABS);
+    }
   }
 
   private async renameFile(
@@ -510,37 +575,45 @@ export default class IdeModel {
     fileID: string
   ): Promise<void> {
     try {
-      API.editFile(this.userID, this.currentProject.id, fileID, {
-        name,
-        lastUpdated,
-      });
-
-      const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
-      if (i >= 0) {
-        this.currentTabFiles[i].name = name;
-        this.notifyObservers(Message.CURRENT_TABS);
-      }
+      API.editFile(
+        this.isHost ? this.userID : this.currentProject.owner.id,
+        this.currentProject.id,
+        fileID,
+        {
+          name,
+          lastUpdated,
+        }
+      );
+      this.renameTabFile(fileID, name);
     } catch {
       console.log('Error when updating file');
     }
   }
 
+  private deleteTabFile(fileID: string): void {
+    const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
+    if (i >= 0) {
+      this.currentTabFiles.splice(i, 1);
+
+      // Open a another file
+      if (this.currentTabFiles.length) {
+        const newFocusIdx = i === 0 ? 0 : i - 1;
+        this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
+      } else this.resetFocusedFile();
+
+      this.notifyObservers(Message.CURRENT_TABS);
+    }
+  }
+
   private async deleteFile(fileID: string): Promise<void> {
     try {
-      API.deleteFile(this.userID, this.currentProject.id, fileID);
+      API.deleteFile(
+        this.isHost ? this.userID : this.currentProject.owner.id,
+        this.currentProject.id,
+        fileID
+      );
 
-      const i = this.currentTabFiles.findIndex((file) => file.id === fileID);
-      if (i >= 0) {
-        this.currentTabFiles.splice(i, 1);
-
-        // Open a another file
-        if (this.currentTabFiles.length) {
-          const newFocusIdx = i === 0 ? 0 : i - 1;
-          this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
-        } else this.resetFocusedFile();
-
-        this.notifyObservers(Message.CURRENT_TABS);
-      }
+      this.deleteTabFile(fileID);
     } catch {
       console.log('Error when deleting file');
     }
@@ -550,18 +623,22 @@ export default class IdeModel {
     newTree: FileTree,
     event: TreeChangeEvent
   ): Promise<void> {
-    if (event.type === FileTreeOperation.INITIALIZATION) return;
-
     switch (event.type) {
       case FileTreeOperation.ADD: {
         if (event.params[0]) return;
         const node = this.getTreeNodeFromPath(event.path, newTree);
+        /* const fileOp = {
+          name: `${node.filePath}/new file`,
+          type: FileOperationType.ADD,
+          creationDate: Date.now(),
+        }; */
+        // const newFile = await this.fileOperation(fileOp);
         const newFile = await this.createFile(
           `${node.filePath}/new file`,
           Date.now()
         );
-
         if (node.children) {
+          console.log('newFile.id: ', newFile.id);
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
         }
@@ -579,11 +656,6 @@ export default class IdeModel {
       }
 
       case FileTreeOperation.DELETE: {
-        console.log({
-          newTree,
-          path: event.path,
-          oldTree: this.currentFileTree,
-        });
         const node = this.getTreeNodeFromPath(event.path);
         if (node.fileID) {
           this.deleteFile(node.fileID);
@@ -597,6 +669,55 @@ export default class IdeModel {
     }
 
     this.currentFileTree = cloneDeep(newTree);
+  }
+
+  private recursiveDeleteTabFiles(
+    newTree: FileTree,
+    oldTabFiles: FileData[],
+    oldFocusedFile: FileData | null
+  ): void {
+    if (!newTree.children) return;
+    newTree.children.forEach((child) => {
+      if (child.fileID) {
+        const i = oldTabFiles.findIndex((file) => file.id === child.fileID);
+        if (i >= 0) {
+          this.currentTabFiles.push(oldTabFiles[i]);
+        }
+        if (oldFocusedFile?.id === child.fileID)
+          this.focusedFile = { id: child.fileID, name: child.name };
+      }
+      this.recursiveDeleteTabFiles(child, oldTabFiles, oldFocusedFile);
+    });
+  }
+
+  updateTabs(newTree: FileTree, event: TreeChangeEvent): void {
+    switch (event.type) {
+      case FileTreeOperation.RENAME: {
+        const node = this.getTreeNodeFromPath(event.path, newTree);
+        if (node.fileID) this.renameTabFile(node.fileID, node.name);
+        break;
+      }
+      case FileTreeOperation.DELETE: {
+        const oldTabFiles = [...this.currentTabFiles];
+        const oldFocusedFile = {
+          ...this.focusedFile,
+        } as typeof this.focusedFile;
+        this.currentTabFiles = [];
+        this.focusedFile = null;
+        this.recursiveDeleteTabFiles(newTree, oldTabFiles, oldFocusedFile);
+        if (!this.focusedFile && this.currentTabFiles.length > 0) {
+          console.log('this.currentTabFiles: ', this.currentTabFiles);
+          // eslint-disable-next-line prefer-destructuring
+          this.focusedFile = this.currentTabFiles[0];
+        }
+        console.log('this.focusedFile: ', this.focusedFile);
+        this.notifyObservers(Message.FOCUSED_FILE);
+        this.notifyObservers(Message.CURRENT_TABS);
+        break;
+      }
+      default:
+        break;
+    }
   }
 
   notifyObservers(message: Message): void {

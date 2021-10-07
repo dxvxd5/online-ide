@@ -16,16 +16,13 @@ export default function IdeHeaderPresenter({
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
-  const [isHost, setIsHost] = useState(model.isHost);
 
   useEffect(() => {
     function collabListener(m: Message) {
       if (m === Message.COLLAB_STARTED) {
         setRoomID(model.roomID);
-        setIsHost(model.isHost);
       } else if (m === Message.COLLAB_STOPPED) {
         setRoomID(model.roomID);
-        setIsHost(model.isHost);
         setCollaborators([...model.collaborators]);
       } else if (m === Message.USER_JOIN || m === Message.USER_LEFT)
         setCollaborators([...model.collaborators]);
@@ -45,7 +42,6 @@ export default function IdeHeaderPresenter({
       roomID={roomID}
       collaborators={collaborators}
       isCollab={!!roomID}
-      isHost={isHost}
       saveFileOnClick={saveFileOnClick}
     />
   );
