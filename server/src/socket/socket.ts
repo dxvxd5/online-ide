@@ -47,6 +47,8 @@ const socketFunction = (io: Server): void => {
     socket.on(SocketMessage.FILE_TREE_CHANGE, (data) =>
       SocketHandler.updateFileTree(socket, data)
     );
+
+    socket.on('disconnect', () => SocketHandler.disconnect(socket));
   });
 };
 

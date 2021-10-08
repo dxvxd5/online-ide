@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { Socket } from 'socket.io';
 import SocketMessage from './socket-message';
 
@@ -52,6 +53,11 @@ interface TreeChangeEvent {
   path: number[];
   params: Array<boolean | string>;
 }
+
+interface FileData {
+  id: string;
+  name: string;
+}
 export interface SocketData {
   roomJoiner: boolean;
   roomCreator: boolean;
@@ -60,10 +66,15 @@ export interface SocketData {
   cursorPosition: CursorPosition;
   cursorSelection: CursorSelection;
   content: EditorContent;
+  focusedFile: FileData;
+  newTree: NodeState;
+  event: TreeChangeEvent;
 }
 
 export function createRoom(socket: Socket, data: SocketData): void {
   socket.join(data.roomID);
+  socket.data = { ...socket.data, ...data, isHost: true };
+
   socket.to(data.roomID).emit(SocketMessage.CREATED_ROOM, {
     user: data.user,
     socketID: socket.id,
@@ -72,6 +83,8 @@ export function createRoom(socket: Socket, data: SocketData): void {
 
 export function joinRoom(socket: Socket, data: SocketData): void {
   socket.join(data.roomID);
+  socket.data = { ...socket.data, ...data, isHost: false };
+
   socket.to(data.roomID).emit(SocketMessage.JOINED_ROOM, {
     user: data.user,
     socketID: socket.id,
@@ -93,64 +106,73 @@ export function userLeaveRoom(
 
 export function cursorMoved(
   socket: Socket,
-  { roomID, user, cursorPosition }: SocketData
+  { roomID, user, cursorPosition, focusedFile }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.CURSOR, {
     user,
     cursorPosition,
+    focusedFile,
   });
 }
 
 export function selection(
   socket: Socket,
-  { roomID, user, cursorSelection }: SocketData
+  { roomID, user, cursorSelection, focusedFile }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.SELECTION, {
     user,
     cursorSelection,
+    focusedFile,
   });
 }
 
 export function insertContent(
   socket: Socket,
-  { roomID, user, content }: SocketData
+  { roomID, user, content, focusedFile }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.CONTENT_INSERT, {
     user,
     content,
+    focusedFile,
   });
 }
 
 export function replaceContent(
   socket: Socket,
-  { roomID, user, content }: SocketData
+  { roomID, user, content, focusedFile }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.CONTENT_REPLACE, {
     user,
     content,
+    focusedFile,
   });
 }
 
 export function deleteContent(
   socket: Socket,
-  { roomID, user, content }: SocketData
+  { roomID, user, content, focusedFile }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.CONTENT_DELETE, {
     user,
     content,
+    focusedFile,
   });
 }
 
 export function updateFileTree(
   socket: Socket,
-  {
-    roomID,
-    newTree,
-    event,
-  }: { roomID: string; newTree: NodeState; event: TreeChangeEvent }
+  { roomID, newTree, event }: SocketData
 ): void {
   socket.to(roomID).emit(SocketMessage.FILE_TREE_CHANGE, {
     newTree,
     event,
   });
+}
+
+export function disconnect(socket: Socket): void {
+  if (socket.data.isHost) {
+    hostLeaveRoom(socket, socket.data.roomID);
+  } else {
+    userLeaveRoom(socket, socket.data);
+  }
 }
