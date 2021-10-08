@@ -70,7 +70,6 @@ export default function IdePresenter({
     }
   }, []);
 
-  const [counter, setCounter] = useState(0);
   useEffect(() => {
     if (!socketRef.current) return;
     if (socketState === SocketState.DISABLED) return;
@@ -138,8 +137,6 @@ export default function IdePresenter({
     socketRef.current.on(
       SocketMessage.FILE_TREE_CHANGE,
       ({ newTree, event }: { newTree: NodeState; event: TreeChangeEvent }) => {
-        // model.applyFileTreeChange(newTree, event);
-        console.log('newTree onListen: ', newTree);
         model.setNewTree(newTree);
         model.updateTabs(newTree, event);
       }
@@ -234,8 +231,6 @@ export default function IdePresenter({
   };
 
   const onFileTreeChange = (t: NodeState, e: TreeChangeEvent) => {
-    // console.log('model.isHost: ', model.isHost);
-    // console.log('onFileTreeChange called ', e.type);
     if (
       [
         FileTreeOperation.INITIALIZATION,

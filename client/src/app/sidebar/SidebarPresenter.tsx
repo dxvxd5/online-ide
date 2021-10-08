@@ -27,8 +27,6 @@ export default function SidebarPresenter({
         setFiles(model.currentFileTree);
       }
       if (m === Message.UPDATE_TREE) {
-        // console.log('UPDATE_TREE called');
-        // console.log('model.currentFileTree: ', model.currentFileTree);
         setFiles(model.currentFileTree);
         // TODO: Need to stop the setFiles re-rendering
       }

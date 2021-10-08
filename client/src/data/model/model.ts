@@ -638,7 +638,6 @@ export default class IdeModel {
           Date.now()
         );
         if (node.children) {
-          console.log('newFile.id: ', newFile.id);
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
         }
@@ -706,11 +705,9 @@ export default class IdeModel {
         this.focusedFile = null;
         this.recursiveDeleteTabFiles(newTree, oldTabFiles, oldFocusedFile);
         if (!this.focusedFile && this.currentTabFiles.length > 0) {
-          console.log('this.currentTabFiles: ', this.currentTabFiles);
           // eslint-disable-next-line prefer-destructuring
           this.focusedFile = this.currentTabFiles[0];
         }
-        console.log('this.focusedFile: ', this.focusedFile);
         this.notifyObservers(Message.FOCUSED_FILE);
         this.notifyObservers(Message.CURRENT_TABS);
         break;
