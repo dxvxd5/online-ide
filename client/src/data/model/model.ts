@@ -1,4 +1,4 @@
-import _, { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import API from './api';
 import Message from './message';
