@@ -8,11 +8,9 @@ import IdeModel, {
   SparseUserData as User,
   CursorPosition,
   CursorSelection,
-  Insertion,
-  Deletion,
-  Replacement,
   TreeChangeEvent,
   FileTreeOperation,
+  FileData,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
@@ -29,6 +27,25 @@ enum SocketState {
   HOST,
   JOIN,
   DISABLED,
+}
+
+interface EditorContent {
+  index: number;
+  text: string;
+  length: number;
+}
+
+interface SocketData {
+  roomJoiner: boolean;
+  roomCreator: boolean;
+  roomID: string;
+  user: { id: string; name: string };
+  cursorPosition: CursorPosition;
+  cursorSelection: CursorSelection;
+  content: EditorContent;
+  focusedFile: FileData;
+  newTree: NodeState;
+  event: TreeChangeEvent;
 }
 
 export default function IdePresenter({
@@ -102,41 +119,51 @@ export default function IdePresenter({
 
     socketRef.current.on(
       SocketMessage.CURSOR,
-      (data: { user: User; cursorPosition: CursorPosition }) =>
-        model.moveCollabCursorPosition(data.cursorPosition, data.user.id)
+      ({ user, cursorPosition, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.moveCollabCursorPosition(cursorPosition, user.id);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.SELECTION,
-      (data: { user: User; cursorSelection: CursorSelection }) =>
-        model.moveCollabSelection(data.cursorSelection, data.user.id)
+      ({ user, cursorSelection, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.moveCollabSelection(cursorSelection, user.id);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_INSERT,
-      (data: { user: User; content: Insertion }) =>
-        model.setCollabContentInsertion(data.content.index, data.content.text)
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentInsertion(content.index, content.text);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_REPLACE,
-      (data: { user: User; content: Replacement }) =>
-        model.setCollabContentReplacement(
-          data.content.index,
-          data.content.length,
-          data.content.text
-        )
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentReplacement(
+            content.index,
+            content.length,
+            content.text
+          );
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_DELETE,
-      (data: { user: User; content: Deletion }) =>
-        model.setCollabContentDeletion(data.content.index, data.content.length)
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentDeletion(content.index, content.length);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.FILE_TREE_CHANGE,
-      ({ newTree, event }: { newTree: NodeState; event: TreeChangeEvent }) => {
+      ({ newTree, event }: SocketData) => {
         model.setNewTree(newTree);
         model.updateTabs(newTree, event);
       }
@@ -187,6 +214,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       cursorPosition: position,
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -197,6 +225,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       cursorSelection: { start, end },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -207,6 +236,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, text },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -217,6 +247,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, length, text },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -227,6 +258,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, length },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -239,8 +271,6 @@ export default function IdePresenter({
       ].includes(e.type)
     )
       return;
-    console.log('e.params: ', e.params);
-    // setTimeout(() => {
     model.applyFileTreeChange(t, e).then(() => {
       if (!socketRef.current) return;
       socketRef.current.emit(SocketMessage.FILE_TREE_CHANGE, {
@@ -250,8 +280,6 @@ export default function IdePresenter({
       });
       e.type = FileTreeOperation.INITIALIZATION;
     });
-
-    //  }, 6000);
   };
 
   return (
