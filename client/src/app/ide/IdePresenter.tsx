@@ -11,6 +11,9 @@ import IdeModel, {
   TreeChangeEvent,
   FileTreeOperation,
   FileData,
+  LeaderData,
+  FollowerData,
+  ScrollPosition,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
@@ -18,6 +21,7 @@ import SocketMessage from '../../utils/socket-message';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
 import IdeSidebar from '../sidebar/SidebarPresenter';
 import { NodeState } from '../../utils/file-tree-node';
+import Message from '../../data/model/message';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -46,6 +50,11 @@ interface SocketData {
   focusedFile: FileData;
   newTree: NodeState;
   event: TreeChangeEvent;
+  leaderID: string;
+  socketID: string;
+  leader: LeaderData;
+  follower: FollowerData;
+  scroll: ScrollPosition;
 }
 
 export default function IdePresenter({
@@ -80,11 +89,31 @@ export default function IdePresenter({
     setSocketState(socketstate);
   }
 
+  const emitFocusedFile = (focusedFile: FileData | null) => {
+    if (!socketRef.current) return;
+    if (!focusedFile) return;
+    model.followers.forEach((follower) => {
+      socketRef.current?.emit(SocketMessage.FOLLOW_FILE, {
+        focusedFile,
+        follower,
+      });
+    });
+  };
+
   useEffect(() => {
+    const currentFocusedFileListener = (m: Message) => {
+      if (m === Message.FOCUSED_FILE) {
+        emitFocusedFile(model.focusedFile);
+      }
+    };
+    model.addObserver(currentFocusedFileListener);
+
     if (!model.isHost) {
       // When user join roon we initiate the socket
       intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
     }
+
+    return () => model.removeObserver(currentFocusedFileListener);
   }, []);
 
   useEffect(() => {
@@ -122,6 +151,15 @@ export default function IdePresenter({
       ({ user, cursorPosition, focusedFile }: SocketData) => {
         if (focusedFile.id === model.focusedFile?.id)
           model.moveCollabCursorPosition(cursorPosition, user.id);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.SCROLL_CHANGE,
+      ({ focusedFile, scroll }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id) {
+          model.moveCollabScrollPosition(scroll);
+        }
       }
     );
 
@@ -166,6 +204,28 @@ export default function IdePresenter({
       ({ newTree, event }: SocketData) => {
         model.setNewTree(newTree);
         model.updateTabs(newTree, event);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.START_FOLLOWING,
+      ({ leader, follower }: SocketData) => {
+        if (leader.id === model.userID) model.addFollower(follower);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.FOLLOW_FILE,
+      ({ focusedFile }: SocketData) => {
+        model.addTabFile(focusedFile);
+        model.setFocusedFile(focusedFile);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.STOP_FOLLOWING,
+      ({ follower }: SocketData) => {
+        model.removeFollower(follower);
       }
     );
   }, [socketState]);
@@ -282,17 +342,57 @@ export default function IdePresenter({
     });
   };
 
+  const stopFollowing = () => {
+    if (!model.leader) return;
+    if (!socketRef.current) return;
+
+    socketRef.current.emit(SocketMessage.STOP_FOLLOWING, {
+      roomID: model.roomID,
+    });
+    model.setLeader(null);
+  };
+
+  const startFollowOnClick = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const leader: LeaderData = JSON.parse(event.target.value);
+    if (!socketRef.current) return;
+    if (!leader || leader.id === model.leader?.id) return;
+    stopFollowing();
+    model.setLeader(leader);
+    socketRef.current.emit(SocketMessage.START_FOLLOWING, {
+      leader,
+      roomID: model.roomID,
+    });
+  };
+
+  const onScrollChange = (scrollLeft: number, scrollTop: number) => {
+    if (!socketRef.current) return;
+    model.followers.forEach((follower) => {
+      socketRef.current?.emit(SocketMessage.SCROLL_CHANGE, {
+        follower,
+        focusedFile: model.focusedFile,
+        scroll: { scrollLeft, scrollTop },
+      });
+    });
+  };
+
   return (
     <>
       <IdeHeader
+        stopFollowing={stopFollowing}
+        startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
         model={model}
       />
-      <IdeSidebar onFileTreeChange={onFileTreeChange} model={model} />
-      <EditorTabs model={model} />
+      <IdeSidebar
+        stopFollowing={stopFollowing}
+        onFileTreeChange={onFileTreeChange}
+        model={model}
+      />
+      <EditorTabs stopFollowing={stopFollowing} model={model} />
       <Editor
         model={model}
+        onScrollChange={onScrollChange}
         onEditorCursorMoved={onEditorCursorMoved}
         onEditorSelection={onEditorSelection}
         onContentInsert={onContentInsert}

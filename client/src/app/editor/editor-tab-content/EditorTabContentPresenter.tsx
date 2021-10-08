@@ -34,6 +34,7 @@ interface EditorPresenterProps {
   onContentInsert: (index: number, text: string) => void;
   onContentReplace: (index: number, length: number, text: string) => void;
   onContentDelete: (index: number, length: number) => void;
+  onScrollChange: (scrollLeft: number, scrollTop: number) => void;
 }
 
 export default function EditorPresenter({
@@ -47,6 +48,7 @@ export default function EditorPresenter({
   onContentInsert,
   onContentReplace,
   onContentDelete,
+  onScrollChange,
 }: EditorPresenterProps): JSX.Element {
   const editorRef = useRef<editor.IStandaloneCodeEditor>();
   const contentManagerRef = useRef<EditorContentManager>();
@@ -140,6 +142,8 @@ export default function EditorPresenter({
         addSelection(model.collabSelection);
       } else if (m === Message.CONTENT) {
         applyContentOperation(model.collabContentOperation);
+      } else if (m === Message.EDITOR_SCROLL) {
+        editorRef.current?.setScrollPosition(model.scrollPosition);
       }
     }
     model.addObserver(collabListener);
@@ -166,6 +170,10 @@ export default function EditorPresenter({
 
     selectionManagerRef.current = new RemoteSelectionManager({
       editor: e,
+    });
+
+    editorRef.current.onDidScrollChange((event) => {
+      onScrollChange(event.scrollLeft, event.scrollTop);
     });
 
     contentManagerRef.current = new EditorContentManager({

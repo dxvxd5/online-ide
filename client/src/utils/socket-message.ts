@@ -17,6 +17,10 @@ enum SocketMessage {
   CONTENT_DELETE = 'content_delete',
   CREATED_ROOM = 'created_room',
   FILE_TREE_CHANGE = 'file_tree_change',
+  START_FOLLOWING = 'start_following',
+  STOP_FOLLOWING = 'stop_following',
+  FOLLOW_FILE = 'follow_file',
+  SCROLL_CHANGE = 'scroll_change',
 }
 
 export default SocketMessage;

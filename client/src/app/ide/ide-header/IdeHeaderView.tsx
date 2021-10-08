@@ -2,6 +2,7 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 import './ideHeader.css';
+import IdeModel from '../../../data/model/model';
 
 interface IdeHeaderViewProps {
   createRoom: () => void;
@@ -10,6 +11,9 @@ interface IdeHeaderViewProps {
   isCollab: boolean;
   leaveRoom: (roomId: string) => void;
   saveFileOnClick: () => void;
+  startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  model: IdeModel;
+  stopFollowing: () => void;
 }
 
 export default function IdeHeaderView({
@@ -19,6 +23,9 @@ export default function IdeHeaderView({
   isCollab,
   leaveRoom,
   saveFileOnClick,
+  startFollowOnClick,
+  stopFollowing,
+  model,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -34,6 +41,17 @@ export default function IdeHeaderView({
           Leave room
         </button>
       )}
+      <select id="selectLeaderToFollow" value="" onChange={startFollowOnClick}>
+        <option>Follow...</option>
+        {model.collaborators.map((collaborator) => (
+          <option value={JSON.stringify(collaborator)} key={collaborator.id}>
+            {collaborator.name}
+          </option>
+        ))}
+      </select>
+      <button type="button" onClick={() => stopFollowing()}>
+        Stop Following
+      </button>
       <button type="button" onClick={() => saveFileOnClick()}>
         Save File
       </button>

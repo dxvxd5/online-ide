@@ -7,12 +7,16 @@ interface IdeHeaderPresenterProps {
   createRoom: () => void;
   leaveRoom: (roomID: string) => void;
   model: IdeModel;
+  startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  stopFollowing: () => void;
 }
 
 export default function IdeHeaderPresenter({
   createRoom,
   leaveRoom,
   model,
+  startFollowOnClick,
+  stopFollowing,
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
@@ -37,6 +41,9 @@ export default function IdeHeaderPresenter({
 
   return (
     <IdeHeaderView
+      stopFollowing={stopFollowing}
+      model={model}
+      startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
       leaveRoom={leaveRoom}
       roomID={roomID}

@@ -13,6 +13,7 @@ interface EditorTabContentManagerProps {
   onContentInsert: (index: number, text: string) => void;
   onContentReplace: (index: number, length: number, text: string) => void;
   onContentDelete: (index: number, length: number) => void;
+  onScrollChange: (scrollLeft: number, scrollTop: number) => void;
 }
 
 export default function EditorTabContentManager({
@@ -22,6 +23,7 @@ export default function EditorTabContentManager({
   onContentInsert,
   onContentReplace,
   onContentDelete,
+  onScrollChange,
 }: EditorTabContentManagerProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const [focusedFile, setFocusedFile] = useState(model.getFocusedFile());
@@ -60,6 +62,7 @@ export default function EditorTabContentManager({
 
   return (
     <EditorPresenter
+      onScrollChange={onScrollChange}
       onContentInsert={onContentInsert}
       onContentReplace={onContentReplace}
       onContentDelete={onContentDelete}

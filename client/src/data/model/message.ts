@@ -49,6 +49,7 @@ enum Message {
   SAVE_FILE_CONTENT,
   ROOM_CREATOR,
   UPDATE_TREE,
+  EDITOR_SCROLL,
 }
 
 export default Message;

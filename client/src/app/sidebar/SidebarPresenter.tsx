@@ -8,6 +8,7 @@ import { NodeState } from '../../utils/file-tree-node';
 interface SidebarPresenterProps {
   model: IdeModel;
   onFileTreeChange: (t: NodeState, e: TreeChangeEvent) => void;
+  stopFollowing: () => void;
 }
 
 export interface OnNameClickArgs {
@@ -18,6 +19,7 @@ export interface OnNameClickArgs {
 export default function SidebarPresenter({
   model,
   onFileTreeChange,
+  stopFollowing,
 }: SidebarPresenterProps): JSX.Element {
   const [files, setFiles] = useState(model.currentFileTree);
 
@@ -28,7 +30,6 @@ export default function SidebarPresenter({
       }
       if (m === Message.UPDATE_TREE) {
         setFiles(model.currentFileTree);
-        // TODO: Need to stop the setFiles re-rendering
       }
     }
     model.addObserver(projectListener);
@@ -36,11 +37,13 @@ export default function SidebarPresenter({
   }, []);
 
   const onFileIconClick = (file: FileData) => {
+    stopFollowing();
     model.setFocusedFile(file);
   };
 
   const onFileNameClick = ({ defaultOnClick, nodeData }: OnNameClickArgs) => {
     if (nodeData.fileID) {
+      stopFollowing();
       const clickedFile = { id: nodeData.fileID, name: nodeData.name };
       model.setFocusedFile(clickedFile);
       model.addTabFile(clickedFile);

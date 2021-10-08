@@ -58,6 +58,19 @@ interface FileData {
   id: string;
   name: string;
 }
+
+interface LeaderData {
+  name: string;
+  id: string;
+}
+
+interface FollowerData {
+  socketID: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
 export interface SocketData {
   roomJoiner: boolean;
   roomCreator: boolean;
@@ -69,6 +82,10 @@ export interface SocketData {
   focusedFile: FileData;
   newTree: NodeState;
   event: TreeChangeEvent;
+  leader: LeaderData;
+  to: string;
+  follower: FollowerData;
+  scroll: { scrollLeft: number; scrollTop: number };
 }
 
 export function createRoom(socket: Socket, data: SocketData): void {
@@ -166,6 +183,41 @@ export function updateFileTree(
   socket.to(roomID).emit(SocketMessage.FILE_TREE_CHANGE, {
     newTree,
     event,
+  });
+}
+
+export function startFollowing(
+  socket: Socket,
+  { roomID, leader }: SocketData
+): void {
+  socket.to(roomID).emit(SocketMessage.START_FOLLOWING, {
+    leader,
+    follower: { socketID: socket.id, user: socket.data.user },
+  });
+}
+
+export function followFile(
+  socket: Socket,
+  { focusedFile, follower }: SocketData
+): void {
+  socket.to(follower.socketID).emit(SocketMessage.FOLLOW_FILE, {
+    focusedFile,
+  });
+}
+
+export function stopFollowing(socket: Socket, { roomID }: SocketData): void {
+  socket.to(roomID).emit(SocketMessage.STOP_FOLLOWING, {
+    follower: { socketID: socket.id, user: socket.data.user },
+  });
+}
+
+export function scrollUpdate(
+  socket: Socket,
+  { follower, focusedFile, scroll }: SocketData
+): void {
+  socket.to(follower.socketID).emit(SocketMessage.SCROLL_CHANGE, {
+    focusedFile,
+    scroll,
   });
 }
 

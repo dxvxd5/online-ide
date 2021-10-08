@@ -118,11 +118,29 @@ interface ProjectData {
   lastUpdated: number;
 }
 
+export interface LeaderData {
+  name: string;
+  id: string;
+}
+
 export interface CompleteProjectData extends ProjectData {
   owner: SparseUserData;
   collaborators: SparseUserData[];
   files: FileData[];
   creationDate: number;
+}
+
+export interface FollowerData {
+  socketID: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ScrollPosition {
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 export default class IdeModel {
@@ -180,6 +198,12 @@ export default class IdeModel {
 
   isHost: boolean;
 
+  followers: FollowerData[];
+
+  leader!: LeaderData | null;
+
+  scrollPosition!: ScrollPosition;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -189,6 +213,7 @@ export default class IdeModel {
     this.collaborators = [];
     this.currentTabFiles = [];
     this.isHost = true;
+    this.followers = [];
   }
 
   addObserver(o: Observer): void {
@@ -229,6 +254,16 @@ export default class IdeModel {
     this.notifyObservers(Message.ROOM_CREATOR);
   }
 
+  addFollower(follower: FollowerData): void {
+    if (!this.followers.some((f) => f.user.id === follower.user.id))
+      this.followers.push(follower);
+  }
+
+  removeFollower(follower: FollowerData): void {
+    const i = this.followers.findIndex((f) => f.user.id === follower.user.id);
+    if (i >= 0) this.followers.splice(i, 1);
+  }
+
   getName(): string {
     return this.name;
   }
@@ -260,6 +295,10 @@ export default class IdeModel {
 
   setLeaver(leaver: SparseUserData): void {
     this.leaver = leaver;
+  }
+
+  setLeader(leader: LeaderData | null): void {
+    this.leader = leader;
   }
 
   setCurrentFileTree(files: FileData[], projectRootFolderName: string): void {
@@ -304,6 +343,8 @@ export default class IdeModel {
   stopCollaboration(): void {
     this.formerCollaborators = this.collaborators;
     this.collaborators = [];
+    this.followers = [];
+    this.leader = null;
     this.roomID = '';
     this.isHost = true;
     this.notifyObservers(Message.COLLAB_STOPPED);
@@ -337,6 +378,8 @@ export default class IdeModel {
       }
     });
 
+    this.followers = this.followers.filter((f) => f.user.id !== leaver.id);
+
     this.collaborators = newCollaborators;
     this.setLeaver(leaver);
     this.notifyObservers(Message.USER_LEFT);
@@ -345,6 +388,11 @@ export default class IdeModel {
   moveCollabCursorPosition(position: CursorPosition, userID: string): void {
     this.collabCursor = { position, id: userID };
     this.notifyObservers(Message.CURSOR_MOVED);
+  }
+
+  moveCollabScrollPosition(scrollPosition: ScrollPosition): void {
+    this.scrollPosition = scrollPosition;
+    this.notifyObservers(Message.EDITOR_SCROLL);
   }
 
   moveCollabSelection(selection: CursorSelection, userID: string): void {
