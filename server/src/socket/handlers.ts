@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Socket } from 'socket.io';
+import { deleteCollab } from '../models/project.model';
 import SocketMessage from './socket-message';
 
 interface CursorPosition {
@@ -111,6 +112,7 @@ export function joinRoom(socket: Socket, data: SocketData): void {
 export function hostLeaveRoom(socket: Socket, { roomID }: SocketData): void {
   socket.to(roomID).emit(SocketMessage.HOST_LEAVE_ROOM);
   socket.leave(roomID);
+  deleteCollab(roomID);
 }
 
 export function userLeaveRoom(
@@ -223,7 +225,7 @@ export function scrollUpdate(
 
 export function disconnect(socket: Socket): void {
   if (socket.data.isHost) {
-    hostLeaveRoom(socket, socket.data.roomID);
+    hostLeaveRoom(socket, socket.data);
   } else {
     userLeaveRoom(socket, socket.data);
   }

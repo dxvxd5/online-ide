@@ -174,10 +174,19 @@ export default class Project {
     return completeProjectData;
   }
 
+  static async deleteCollab(collabID: string): Promise<void> {
+    const collabRef = firestore.doc(getCollabPath(collabID));
+    collabRef.delete();
+  }
+
   constructor({ id, shared, lastUpdated, name }: ProjectData) {
     this.id = id;
     this.shared = shared;
     this.lastUpdated = lastUpdated;
     this.name = name;
   }
+}
+
+export function deleteCollab(collabID: string): void {
+  Project.deleteCollab(collabID);
 }
