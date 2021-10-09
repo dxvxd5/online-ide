@@ -1,4 +1,5 @@
 import React from 'react';
+import { Toaster } from 'react-hot-toast';
 import './App.css';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import IdeModel from './data/model/model';
@@ -34,6 +35,7 @@ function App(): JSX.Element {
           component={() => <IdePresenter model={ideModel} />}
         />
       </div>
+      <Toaster />
     </Router>
   );
 }

@@ -17,6 +17,9 @@ interface PersonalSpaceViewProp {
   handleProjectName: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
+  joinCollabProject: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
 }
 
 const PersonalSpaceView = ({
@@ -26,6 +29,7 @@ const PersonalSpaceView = ({
   sortOptions,
   openProject,
   handleProjectName,
+  joinCollabProject,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
@@ -47,6 +51,9 @@ const PersonalSpaceView = ({
         <form>
           <button type="submit" onClick={(e) => handleProjectName(e)}>
             Create a new project
+          </button>
+          <button type="submit" onClick={(e) => joinCollabProject(e)}>
+            Join a collab project
           </button>
         </form>
       </div>

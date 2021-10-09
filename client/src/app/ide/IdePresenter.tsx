@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
@@ -7,15 +8,20 @@ import IdeModel, {
   SparseUserData as User,
   CursorPosition,
   CursorSelection,
-  Insertion,
-  Deletion,
-  Replacement,
+  TreeChangeEvent,
+  FileTreeOperation,
+  FileData,
+  LeaderData,
+  FollowerData,
+  ScrollPosition,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
-import { generateRandomString } from '../../utils/random';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
+import IdeSidebar from '../sidebar/SidebarPresenter';
+import { NodeState } from '../../utils/file-tree-node';
+import Message from '../../data/model/message';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -25,6 +31,30 @@ enum SocketState {
   HOST,
   JOIN,
   DISABLED,
+}
+
+interface EditorContent {
+  index: number;
+  text: string;
+  length: number;
+}
+
+interface SocketData {
+  roomJoiner: boolean;
+  roomCreator: boolean;
+  roomID: string;
+  user: { id: string; name: string };
+  cursorPosition: CursorPosition;
+  cursorSelection: CursorSelection;
+  content: EditorContent;
+  focusedFile: FileData;
+  newTree: NodeState;
+  event: TreeChangeEvent;
+  leaderID: string;
+  socketID: string;
+  leader: LeaderData;
+  follower: FollowerData;
+  scroll: ScrollPosition;
 }
 
 export default function IdePresenter({
@@ -44,15 +74,56 @@ export default function IdePresenter({
     });
   }
 
+  function intiateSocket(
+    roomId: string,
+    message: SocketMessage,
+    socketstate: SocketState
+  ): void {
+    socketRef.current = io.connect(serverUrl);
+    socketRef.current.emit(message, {
+      roomID: roomId,
+      user: { name: model.name, id: model.userID },
+    });
+    const isHost = socketstate === SocketState.HOST;
+    model.startCollaboration(roomId, isHost);
+    setSocketState(socketstate);
+  }
+
+  const emitFocusedFile = (focusedFile: FileData | null) => {
+    if (!socketRef.current) return;
+    if (!focusedFile) return;
+    model.followers.forEach((follower) => {
+      socketRef.current?.emit(SocketMessage.FOLLOW_FILE, {
+        focusedFile,
+        follower,
+      });
+    });
+  };
+
   useEffect(() => {
+    const currentFocusedFileListener = (m: Message) => {
+      if (m === Message.FOCUSED_FILE) {
+        emitFocusedFile(model.focusedFile);
+      }
+    };
+    model.addObserver(currentFocusedFileListener);
+
+    if (!model.isHost) {
+      // When user join roon we initiate the socket
+      intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
+    }
+
+    return () => model.removeObserver(currentFocusedFileListener);
+  }, []);
+
+  useEffect(() => {
+    if (!socketRef.current) return;
+    if (socketState === SocketState.DISABLED) return;
+
     Mousetrap.bind(['command+s', 'ctrl+s'], function () {
       model.saveContentIntoFile();
       return false;
     });
-
-    if (!socketRef.current) return;
-    if (socketState === SocketState.DISABLED) return;
-
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {
@@ -77,65 +148,98 @@ export default function IdePresenter({
 
     socketRef.current.on(
       SocketMessage.CURSOR,
-      (data: { user: User; cursorPosition: CursorPosition }) =>
-        model.moveCollabCursorPosition(data.cursorPosition, data.user.id)
+      ({ user, cursorPosition, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.moveCollabCursorPosition(cursorPosition, user.id);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.SCROLL_CHANGE,
+      ({ focusedFile, scroll }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id) {
+          model.moveCollabScrollPosition(scroll);
+        }
+      }
     );
 
     socketRef.current.on(
       SocketMessage.SELECTION,
-      (data: { user: User; cursorSelection: CursorSelection }) =>
-        model.moveCollabSelection(data.cursorSelection, data.user.id)
+      ({ user, cursorSelection, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.moveCollabSelection(cursorSelection, user.id);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_INSERT,
-      (data: { user: User; content: Insertion }) =>
-        model.setCollabContentInsertion(data.content.index, data.content.text)
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentInsertion(content.index, content.text);
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_REPLACE,
-      (data: { user: User; content: Replacement }) =>
-        model.setCollabContentReplacement(
-          data.content.index,
-          data.content.length,
-          data.content.text
-        )
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentReplacement(
+            content.index,
+            content.length,
+            content.text
+          );
+      }
     );
 
     socketRef.current.on(
       SocketMessage.CONTENT_DELETE,
-      (data: { user: User; content: Deletion }) =>
-        model.setCollabContentDeletion(data.content.index, data.content.length)
+      ({ content, focusedFile }: SocketData) => {
+        if (focusedFile.id === model.focusedFile?.id)
+          model.setCollabContentDeletion(content.index, content.length);
+      }
     );
 
-    // socketRef.current.on()
+    socketRef.current.on(
+      SocketMessage.FILE_TREE_CHANGE,
+      ({ newTree, event }: SocketData) => {
+        model.setNewTree(newTree);
+        model.updateTabs(newTree, event);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.START_FOLLOWING,
+      ({ leader, follower }: SocketData) => {
+        if (leader.id === model.userID) model.addFollower(follower);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.FOLLOW_FILE,
+      ({ focusedFile }: SocketData) => {
+        model.addTabFile(focusedFile);
+        model.setFocusedFile(focusedFile);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.STOP_FOLLOWING,
+      ({ follower }: SocketData) => {
+        model.removeFollower(follower);
+      }
+    );
   }, [socketState]);
 
-  function intiateSocket(
-    roomId: string,
-    message: SocketMessage,
-    socketstate: SocketState
-  ): void {
-    socketRef.current = io.connect(serverUrl);
-
-    socketRef.current.emit(message, {
-      roomID: roomId,
-      user: { name: model.name, id: model.userID },
-    });
-    const isHost = socketstate === SocketState.HOST;
-    model.startCollaboration(roomId, isHost);
-    setSocketState(socketstate);
-  }
-
   const socketCreateRoom = () => {
-    const roomId = `${model.userID}${generateRandomString()}`;
-    // model.setRoomCreator(model.userID);
-    intiateSocket(roomId, SocketMessage.CREATE_ROOM, SocketState.HOST);
-  };
-
-  const socketJoinRoom = (roomId: string) => {
-    intiateSocket(roomId, SocketMessage.JOIN_ROOM, SocketState.JOIN);
+    toast
+      .promise(model.createCollab(), {
+        success: 'Room created',
+        loading: 'creating room...',
+        error: 'Failed to create room. Please try again',
+      })
+      .then((roomID) =>
+        intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST)
+      );
   };
 
   const socketLeaveRoom = (roomId: string): void => {
@@ -170,6 +274,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       cursorPosition: position,
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -180,6 +285,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       cursorSelection: { start, end },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -190,6 +296,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, text },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -200,6 +307,7 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, length, text },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
     });
   };
 
@@ -210,20 +318,81 @@ export default function IdePresenter({
       user: { name: model.name, id: model.userID },
       content: { index, length },
       roomID: model.roomID,
+      focusedFile: model.focusedFile,
+    });
+  };
+
+  const onFileTreeChange = (t: NodeState, e: TreeChangeEvent) => {
+    if (
+      [
+        FileTreeOperation.INITIALIZATION,
+        FileTreeOperation.TOGGLE_OPEN,
+        FileTreeOperation.CHECK,
+      ].includes(e.type)
+    )
+      return;
+    model.applyFileTreeChange(t, e).then(() => {
+      if (!socketRef.current) return;
+      socketRef.current.emit(SocketMessage.FILE_TREE_CHANGE, {
+        newTree: t,
+        event: e,
+        roomID: model.roomID,
+      });
+      e.type = FileTreeOperation.INITIALIZATION;
+    });
+  };
+
+  const stopFollowing = () => {
+    if (!model.leader) return;
+    if (!socketRef.current) return;
+
+    socketRef.current.emit(SocketMessage.STOP_FOLLOWING, {
+      roomID: model.roomID,
+    });
+    model.setLeader(null);
+  };
+
+  const startFollowOnClick = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const leader: LeaderData = JSON.parse(event.target.value);
+    if (!socketRef.current) return;
+    if (!leader || leader.id === model.leader?.id) return;
+    stopFollowing();
+    model.setLeader(leader);
+    socketRef.current.emit(SocketMessage.START_FOLLOWING, {
+      leader,
+      roomID: model.roomID,
+    });
+  };
+
+  const onScrollChange = (scrollLeft: number, scrollTop: number) => {
+    if (!socketRef.current) return;
+    model.followers.forEach((follower) => {
+      socketRef.current?.emit(SocketMessage.SCROLL_CHANGE, {
+        follower,
+        focusedFile: model.focusedFile,
+        scroll: { scrollLeft, scrollTop },
+      });
     });
   };
 
   return (
     <>
       <IdeHeader
+        stopFollowing={stopFollowing}
+        startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
-        joinRoom={socketJoinRoom}
         model={model}
       />
-      <EditorTabs model={model} />
+      <IdeSidebar
+        stopFollowing={stopFollowing}
+        onFileTreeChange={onFileTreeChange}
+        model={model}
+      />
+      <EditorTabs stopFollowing={stopFollowing} model={model} />
       <Editor
         model={model}
+        onScrollChange={onScrollChange}
         onEditorCursorMoved={onEditorCursorMoved}
         onEditorSelection={onEditorSelection}
         onContentInsert={onContentInsert}

@@ -2,27 +2,30 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 import './ideHeader.css';
+import IdeModel from '../../../data/model/model';
 
 interface IdeHeaderViewProps {
   createRoom: () => void;
-  joinRoom: (roomID: string) => void;
   roomID: string;
   collaborators: { name: string; id: string }[];
   isCollab: boolean;
   leaveRoom: (roomId: string) => void;
-  isHost: boolean;
   saveFileOnClick: () => void;
+  startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  model: IdeModel;
+  stopFollowing: () => void;
 }
 
 export default function IdeHeaderView({
   createRoom,
-  joinRoom,
   roomID,
   collaborators,
   isCollab,
   leaveRoom,
-  isHost,
   saveFileOnClick,
+  startFollowOnClick,
+  stopFollowing,
+  model,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -31,18 +34,6 @@ export default function IdeHeaderView({
           <button type="button" onClick={() => createRoom()}>
             Create Room
           </button>
-          <Formik
-            initialValues={{ roomID: '' }}
-            onSubmit={(e) => joinRoom(e.roomID)}
-          >
-            <Form>
-              <p>RoomID: </p>
-              <Field type="roomID" name="roomID" />
-              <ErrorMessage name="roomID" component="div" />
-              <br />
-              <button type="submit">Join Room</button>
-            </Form>
-          </Formik>
         </>
       )}
       {isCollab && (
@@ -50,11 +41,20 @@ export default function IdeHeaderView({
           Leave room
         </button>
       )}
-      {isHost && (
-        <button type="button" onClick={() => saveFileOnClick()}>
-          Save File
-        </button>
-      )}
+      <select id="selectLeaderToFollow" value="" onChange={startFollowOnClick}>
+        <option>Follow...</option>
+        {model.collaborators.map((collaborator) => (
+          <option value={JSON.stringify(collaborator)} key={collaborator.id}>
+            {collaborator.name}
+          </option>
+        ))}
+      </select>
+      <button type="button" onClick={() => stopFollowing()}>
+        Stop Following
+      </button>
+      <button type="button" onClick={() => saveFileOnClick()}>
+        Save File
+      </button>
       {roomID && <div> {roomID}</div>}
       {collaborators &&
         collaborators.map((collaborator) => (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { OnMount } from '@monaco-editor/react';
 import {
   RemoteCursorManager,
@@ -7,7 +7,6 @@ import {
 } from '@convergencelabs/monaco-collab-ext';
 import { editor } from 'monaco-editor';
 
-import { getFileLanguage } from '../../../utils/file-extension';
 import Message from '../../../data/model/message';
 import IdeModel, {
   CursorPosition,
@@ -25,7 +24,7 @@ import EditorView from './EditorTabContentView';
 
 interface EditorPresenterProps {
   model: IdeModel;
-  fileName: string;
+  language: string;
   fileID: string;
   fileContent: string;
   isFocused: boolean;
@@ -34,11 +33,12 @@ interface EditorPresenterProps {
   onContentInsert: (index: number, text: string) => void;
   onContentReplace: (index: number, length: number, text: string) => void;
   onContentDelete: (index: number, length: number) => void;
+  onScrollChange: (scrollLeft: number, scrollTop: number) => void;
 }
 
 export default function EditorPresenter({
   model,
-  fileName,
+  language,
   fileID,
   fileContent,
   isFocused,
@@ -47,6 +47,7 @@ export default function EditorPresenter({
   onContentInsert,
   onContentReplace,
   onContentDelete,
+  onScrollChange,
 }: EditorPresenterProps): JSX.Element {
   const editorRef = useRef<editor.IStandaloneCodeEditor>();
   const contentManagerRef = useRef<EditorContentManager>();
@@ -55,8 +56,6 @@ export default function EditorPresenter({
 
   const fiveMinutes = 300000;
   const saveIntervalRef = useRef<NodeJS.Timeout>();
-
-  const language = getFileLanguage(fileName);
 
   function removeCollaborator(cursorID: string) {
     cursorManagerRef.current?.removeCursor(cursorID);
@@ -140,6 +139,8 @@ export default function EditorPresenter({
         addSelection(model.collabSelection);
       } else if (m === Message.CONTENT) {
         applyContentOperation(model.collabContentOperation);
+      } else if (m === Message.EDITOR_SCROLL) {
+        editorRef.current?.setScrollPosition(model.scrollPosition);
       }
     }
     model.addObserver(collabListener);
@@ -166,6 +167,10 @@ export default function EditorPresenter({
 
     selectionManagerRef.current = new RemoteSelectionManager({
       editor: e,
+    });
+
+    editorRef.current.onDidScrollChange((event) => {
+      onScrollChange(event.scrollLeft, event.scrollTop);
     });
 
     contentManagerRef.current = new EditorContentManager({

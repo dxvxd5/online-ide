@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-import IdeModel, { CursorPosition } from '../../../data/model/model';
+import IdeModel, { CursorPosition, FileData } from '../../../data/model/model';
 import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
 import ProjectError from '../../components/error/ProjectError';
+import { getFileLanguage } from '../../../utils/file-extension';
 
 interface EditorTabContentManagerProps {
   model: IdeModel;
@@ -13,6 +14,7 @@ interface EditorTabContentManagerProps {
   onContentInsert: (index: number, text: string) => void;
   onContentReplace: (index: number, length: number, text: string) => void;
   onContentDelete: (index: number, length: number) => void;
+  onScrollChange: (scrollLeft: number, scrollTop: number) => void;
 }
 
 export default function EditorTabContentManager({
@@ -22,27 +24,36 @@ export default function EditorTabContentManager({
   onContentInsert,
   onContentReplace,
   onContentDelete,
+  onScrollChange,
 }: EditorTabContentManagerProps): JSX.Element {
-  // eslint-disable-next-line react/destructuring-assignment
   const [focusedFile, setFocusedFile] = useState(model.getFocusedFile());
+  const [language, setLanguage] = useState(
+    model.focusedFile ? getFileLanguage(model.focusedFile.name) : ''
+  );
   const [content, setContent] = useState<string | null>(null);
   const [loadFileError, setLoadFileError] = useState(false);
 
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        setFocusedFile(model.getFocusedFile());
-        setContent(null);
-        setLoadFileError(false);
+        if (focusedFile?.id !== model.focusedFile?.id) {
+          setFocusedFile(model.getFocusedFile());
+          setContent(null);
+          setLoadFileError(false);
+        }
+
+        const newLanguage = model.focusedFile
+          ? getFileLanguage(model.focusedFile.name)
+          : '';
+        setLanguage(newLanguage);
       }
     };
     model.addObserver(focusedFileListener);
     return () => model.removeObserver(focusedFileListener);
   }, []);
 
+  if (!focusedFile) return <div>open a file</div>;
   if (!loadFileError && content === null) {
-    if (!focusedFile) return <div>open a file</div>;
-
     model
       .getFileContent(focusedFile.id)
       .then((c) => setContent(c))
@@ -61,13 +72,14 @@ export default function EditorTabContentManager({
 
   return (
     <EditorPresenter
+      onScrollChange={onScrollChange}
       onContentInsert={onContentInsert}
       onContentReplace={onContentReplace}
       onContentDelete={onContentDelete}
       onEditorSelection={onEditorSelection}
       onEditorCursorMoved={onEditorCursorMoved}
-      fileID={focusedFile.id}
-      fileName={focusedFile.name}
+      language={language}
+      fileID={(focusedFile as FileData).id}
       fileContent={content as string}
       isFocused
       model={model}

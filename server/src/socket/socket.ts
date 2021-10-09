@@ -43,6 +43,28 @@ const socketFunction = (io: Server): void => {
     socket.on(SocketMessage.CONTENT_DELETE, (data) =>
       SocketHandler.deleteContent(socket, data)
     );
+
+    socket.on(SocketMessage.FILE_TREE_CHANGE, (data) =>
+      SocketHandler.updateFileTree(socket, data)
+    );
+
+    socket.on(SocketMessage.START_FOLLOWING, (data) =>
+      SocketHandler.startFollowing(socket, data)
+    );
+
+    socket.on(SocketMessage.FOLLOW_FILE, (data) =>
+      SocketHandler.followFile(socket, data)
+    );
+
+    socket.on(SocketMessage.STOP_FOLLOWING, (data) =>
+      SocketHandler.stopFollowing(socket, data)
+    );
+
+    socket.on(SocketMessage.SCROLL_CHANGE, (data) =>
+      SocketHandler.scrollUpdate(socket, data)
+    );
+
+    socket.on('disconnect', () => SocketHandler.disconnect(socket));
   });
 };
 
