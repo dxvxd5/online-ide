@@ -155,9 +155,6 @@ export default class API {
     return API.call(request);
   }
 
-    return API.call(request);
-  }
-
   static saveFileContent(
     userID: string,
     projectID: string,
