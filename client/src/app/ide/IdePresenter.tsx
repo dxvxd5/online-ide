@@ -142,6 +142,7 @@ export default function IdePresenter({
     });
 
     socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, () => {
+      console.log('received host leave room');
       model.stopCollaboration();
       redirect();
     });
@@ -210,7 +211,10 @@ export default function IdePresenter({
     socketRef.current.on(
       SocketMessage.START_FOLLOWING,
       ({ leader, follower }: SocketData) => {
-        if (leader.id === model.userID) model.addFollower(follower);
+        if (leader.id === model.userID) {
+          model.addFollower(follower);
+          emitFocusedFile(model.focusedFile);
+        }
       }
     );
 

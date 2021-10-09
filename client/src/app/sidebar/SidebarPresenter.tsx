@@ -36,14 +36,10 @@ export default function SidebarPresenter({
     return () => model.removeObserver(projectListener);
   }, []);
 
-  const updateFocusedFile = (file: FileData): void => {
-    if (file.id === model.focusedFile?.id) return;
-    model.setFocusedFile(file);
-  };
-
   const onFileIconClick = (file: FileData) => {
     stopFollowing();
-    updateFocusedFile(file);
+    model.setFocusedFile(file);
+    model.addTabFile(file);
   };
 
   const onFileNameClick = ({ defaultOnClick, nodeData }: OnNameClickArgs) => {
@@ -51,7 +47,7 @@ export default function SidebarPresenter({
       stopFollowing();
       const clickedFile = { id: nodeData.fileID, name: nodeData.name };
 
-      updateFocusedFile(clickedFile);
+      model.setFocusedFile(clickedFile);
       model.addTabFile(clickedFile);
     }
     defaultOnClick();

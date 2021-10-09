@@ -336,6 +336,8 @@ export default class IdeModel {
   }
 
   setFocusedFile(file: FileData | null): void {
+    if (file?.id === this.focusedFile?.id) return;
+    this.saveContentIntoFile();
     this.focusedFile = file;
     this.notifyObservers(Message.FOCUSED_FILE);
   }
@@ -447,14 +449,18 @@ export default class IdeModel {
   async saveContentIntoFile(): Promise<void> {
     if (!this.focusedFile) return;
 
+    const fileOwnerId = this.isHost
+      ? this.userID
+      : this.currentProject.owner.id;
+
     API.saveFileContent(
-      this.isHost ? this.userID : this.currentProject.owner.id,
+      fileOwnerId,
       this.currentProject.id,
       this.focusedFile.id,
       this.contentToSave
     );
 
-    API.editFile(this.userID, this.currentProject.id, this.focusedFile.id, {
+    API.editFile(fileOwnerId, this.currentProject.id, this.focusedFile.id, {
       lastUpdated: Date.now(),
     });
   }
