@@ -13,7 +13,11 @@ interface PersonalSpaceViewProp {
   projects: ProjectsData[];
   handleSort: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOptions: string[];
+  openProject: (id: string) => void;
   handleProjectName: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
+  joinCollabProject: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
 }
@@ -23,7 +27,9 @@ const PersonalSpaceView = ({
   projects,
   handleSort,
   sortOptions,
+  openProject,
   handleProjectName,
+  joinCollabProject,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
@@ -46,10 +52,20 @@ const PersonalSpaceView = ({
           <button type="submit" onClick={(e) => handleProjectName(e)}>
             Create a new project
           </button>
+          <button type="submit" onClick={(e) => joinCollabProject(e)}>
+            Join a collab project
+          </button>
         </form>
       </div>
       {projects.map((project) => (
-        <div key={project.id} className="PersonalSpace">
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div
+          key={project.id}
+          className="PersonalSpace"
+          onClick={() => openProject(project.id)}
+          role="button"
+          tabIndex={0}
+        >
           <div id="personal-space-overview">
             <div>
               <div className={`${'flex-between-projects'}`}>

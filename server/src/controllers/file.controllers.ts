@@ -90,17 +90,41 @@ export async function createFile(req: Request, res: Response): Promise<void> {
     const projectID = getProjectIdFromReq(req, res);
     if (!projectID) return;
 
-    const user = req.user as User;
-    const userName = user.name;
     const creationDateNum = Number(creationDate);
     const newFile = await File.createFile(
       userID,
       projectID,
-      userName,
       name,
       creationDateNum
     );
+    if (!newFile)
+      res.status(400).json({
+        error: new HttpError('The user id is invalid', 400),
+      });
     res.status(200).json(newFile);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+export async function deleteFile(req: Request, res: Response): Promise<void> {
+  try {
+    const userID = getUserIdFromReq(req, res);
+    if (!userID) return;
+
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
+
+    const fileID = getFileIdFromReq(req, res);
+    if (!fileID) return;
+
+    const isDeleted = await File.deleteFile(projectID, userID, fileID);
+    if (!isDeleted) {
+      res.status(404).json({
+        error: new HttpError('The specified file does not exist.', 404),
+      });
+      return;
+    }
   } catch (error) {
     res.status(500).send(error);
   }
@@ -144,9 +168,9 @@ export async function editFile(req: Request, res: Response): Promise<void> {
 
     const isEdited = await File.editFile(projectID, userID, fileID, toEdit);
     if (!isEdited) {
-      res
-        .status(500)
-        .json({ error: new HttpError('Something went wrong', 500) });
+      res.status(404).json({
+        error: new HttpError('The specified file does not exist.', 404),
+      });
       return;
     }
 
@@ -171,8 +195,7 @@ export async function getFileContent(
     if (!fileID) return;
 
     const content = await File.getContent(projectID, userID, fileID);
-
-    if (!content) {
+    if (content === null) {
       res.status(404).json({
         error: new HttpError(
           'The file does not exist in the specified project.',
@@ -202,8 +225,8 @@ export async function updateFileContent(
     const fileID = getFileIdFromReq(req, res);
     if (!fileID) return;
 
-    const content = req.body as Buffer;
-    if (!content) {
+    const content = req.body as string;
+    if (_.isNil(content)) {
       res.status(400).json({
         error: new HttpError('No file content was provided', 400),
       });

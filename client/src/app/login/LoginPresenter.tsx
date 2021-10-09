@@ -4,6 +4,7 @@ import IdeModel from '../../data/model/model';
 import LoginView from './LoginView';
 import Loader from '../components/loader/Loader';
 import ProjectError from '../components/error/ProjectError';
+import { loginSchema } from '../../utils/yup-schemas';
 
 interface LoginPresenterProp {
   model: IdeModel;
@@ -25,10 +26,14 @@ export default function LoginPresenter({
       await model.login(username, password);
       setIsLoggedIn(true);
       if (loginError) setLoginError(false);
-    } catch (err) {
+    } catch {
       setLoginErrorInfo('Error. Either username or password is incorrect');
       setLoginError(true);
     }
+  };
+
+  const signUp = () => {
+    history.push({ pathname: '/signup' });
   };
 
   if (isLoggedIn && !isProjectLoaded && !projectError) {
@@ -38,7 +43,7 @@ export default function LoginPresenter({
         setProjectLoaded(true);
         setProjectError(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setProjectErrorInfo(
           'Error. Could not load the projects. Please try again.'
         );
@@ -65,6 +70,8 @@ export default function LoginPresenter({
   // if (!isLoggedIn)
   return (
     <LoginView
+      signUp={signUp}
+      loginSchema={loginSchema}
       loginError={loginError}
       loginErrorInfo={loginErrorInfo}
       click={click}

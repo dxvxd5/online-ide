@@ -2,6 +2,8 @@ import {
   firestore,
   getProjectBasePath,
   getProjectPath,
+  collabBasePath,
+  getCollabPath,
 } from '../config/firebase';
 
 import File from './file.model';
@@ -11,6 +13,7 @@ interface ProjectData {
   shared: boolean;
   lastUpdated: number;
   id: string;
+  owner?: { name: string; id: string };
 }
 
 interface CompleteProjectData extends ProjectData {
@@ -36,7 +39,7 @@ export default class Project {
 
   lastUpdated: number;
 
-  static async isProjectExist(
+  private static async isProjectExist(
     userID: string,
     projectID: string
   ): Promise<boolean> {
@@ -72,23 +75,6 @@ export default class Project {
    * Get all the projects of a user from the database
    */
   static async getFromUser(userID: string): Promise<Project[]> {
-    /* const projectsSnaphot = await firestore
-      .collection('users')
-      .doc('HzraCVxUiA913mkPPzde')
-      .collection('projects')
-      .get();
-
-    const projectsSnaphot2 = await firestore
-      .collection('users')
-      .doc('HzraCVxUiA913mkPPzde')
-      .get();
-
-    console.log('getProjectBasePath(userID): ', getProjectBasePath(userID));
-    console.log(
-      'projectsSnaphot: ',
-      projectsSnaphot.docs.map((doc) => doc.data())
-    ); */
-
     const projectsSnaphot = await firestore
       .collection(getProjectBasePath(userID))
       .get();
@@ -154,10 +140,53 @@ export default class Project {
     return true;
   }
 
+  static async createCollaboration(
+    userID: string,
+    projectID: string
+  ): Promise<null | string> {
+    if (!(await Project.isProjectExist(userID, projectID))) return null;
+
+    const projectPath = getProjectPath(userID, projectID);
+    const collabRef = await firestore
+      .collection(collabBasePath)
+      .add({ project: firestore.doc(projectPath) });
+
+    return collabRef.id;
+  }
+
+  static async getCollabProject(
+    collabID: string
+  ): Promise<CompleteProjectData | null> {
+    const collabData = (
+      await firestore.doc(getCollabPath(collabID)).get()
+    ).data();
+
+    if (!collabData) return null;
+    const project = collabData.project as FirebaseFirestore.DocumentReference;
+
+    const projectData = (await project.get()).data() as ProjectData;
+
+    const completeProjectData = Project.getFromId(
+      project.id,
+      projectData?.owner?.id as string
+    );
+
+    return completeProjectData;
+  }
+
+  static async deleteCollab(collabID: string): Promise<void> {
+    const collabRef = firestore.doc(getCollabPath(collabID));
+    collabRef.delete();
+  }
+
   constructor({ id, shared, lastUpdated, name }: ProjectData) {
     this.id = id;
     this.shared = shared;
     this.lastUpdated = lastUpdated;
     this.name = name;
   }
+}
+
+export function deleteCollab(collabID: string): void {
+  Project.deleteCollab(collabID);
 }

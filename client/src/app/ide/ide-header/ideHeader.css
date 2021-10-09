@@ -1,0 +1,4 @@
+.ide--header {
+  display: flex;
+  flex-direction: row;
+}

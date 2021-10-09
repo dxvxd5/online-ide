@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Message from '../../data/model/message';
 import IdeModel from '../../data/model/model';
+import ProjectError from '../components/error/ProjectError';
 import PersonalSpaceView from './PersonalSpaceView';
 
 interface PersonalSpacePresenterProp {
@@ -20,7 +22,10 @@ export default function PersonalSpacePresenter({
 }: PersonalSpacePresenterProp): JSX.Element {
   const userID = model.getUserID();
   const [projects, setProjects] = useState(model.getProjects());
+  const [projectError, setProjectError] = useState(false);
+  const [isProjectLoaded, setIsProjectLoaded] = useState(false);
   const sortOptions = ['Shared', 'Last Updated', 'Name'];
+  const history = useHistory();
 
   useEffect(() => {
     const projectObserver = (m: Message) => {
@@ -87,6 +92,7 @@ export default function PersonalSpacePresenter({
           );
       },
       allowOutsideClick: () => !Swal.isLoading(),
+      backdrop: true,
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire(`Your project name is ${result.value}`, '', 'success');
@@ -94,13 +100,66 @@ export default function PersonalSpacePresenter({
     });
   };
 
+  const openProject = async (projectID: string) => {
+    try {
+      await model.openProject(projectID);
+      setIsProjectLoaded(true);
+      if (projectError) setProjectError(false);
+    } catch {
+      setProjectError(true);
+    }
+  };
+
+  const joinCollabProject = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Enter room ID',
+      input: 'text',
+      inputLabel: 'Room ID',
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      preConfirm: (roomID) => {
+        model
+          .getCollabProject(roomID)
+          .then(() => setIsProjectLoaded(true))
+          .catch(() =>
+            Swal.fire(
+              `Error. Could not join a project. Please try again.`,
+              '',
+              'error'
+            )
+          );
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+      backdrop: true,
+    });
+  };
+
+  if (projectError)
+    return (
+      <ProjectError
+        projectErrorInfo="Could not open the project. Please try again"
+        tryAgain={() => setProjectError(false)}
+      />
+    );
+
+  if (isProjectLoaded) {
+    history.push({
+      pathname: '/code',
+    });
+  }
+
   return (
     <PersonalSpaceView
+      joinCollabProject={joinCollabProject}
       handleProjectName={handleProjectName}
       handleSort={handleSort}
       projects={projects}
       userID={userID}
       sortOptions={sortOptions}
+      openProject={openProject}
     />
   );
 }
