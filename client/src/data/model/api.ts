@@ -152,6 +152,8 @@ export default class API {
       },
       data: { name, creationDate },
     };
+    return API.call(request);
+  }
 
     return API.call(request);
   }

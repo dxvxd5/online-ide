@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isNil } from 'lodash';
 
 import API from './api';
 import Message from './message';
@@ -446,12 +446,17 @@ export default class IdeModel {
 
   async saveContentIntoFile(): Promise<void> {
     if (!this.focusedFile) return;
-    (await API.saveFileContent(
+
+    API.saveFileContent(
       this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
       this.focusedFile.id,
       this.contentToSave
-    )) as FileData;
+    );
+
+    API.editFile(this.userID, this.currentProject.id, this.focusedFile.id, {
+      lastUpdated: Date.now(),
+    });
   }
 
   /**
@@ -599,14 +604,19 @@ export default class IdeModel {
   private async createFile(
     name: string,
     creationDate: number
-  ): Promise<FileData> {
-    const fileData = await API.createFile(
-      this.isHost ? this.userID : this.currentProject.owner.id,
-      this.currentProject.id,
-      name,
-      creationDate
-    );
-    return fileData as FileData;
+  ): Promise<FileData | undefined> {
+    try {
+      const fileData = await API.createFile(
+        this.isHost ? this.userID : this.currentProject.owner.id,
+        this.currentProject.id,
+        name,
+        creationDate
+      );
+      return fileData as FileData;
+    } catch {
+      console.log('Could not create file.');
+      return undefined;
+    }
   }
 
   private renameTabFile(fileID: string, name: string): void {
@@ -614,6 +624,11 @@ export default class IdeModel {
     if (i >= 0) {
       this.currentTabFiles[i].name = name;
       this.notifyObservers(Message.CURRENT_TABS);
+
+      if (this.currentTabFiles[i].id === this.focusedFile?.id) {
+        this.setFocusedFile(this.currentTabFiles[i]);
+        this.notifyObservers(Message.FOCUSED_FILE);
+      }
     }
   }
 
@@ -675,20 +690,19 @@ export default class IdeModel {
       case FileTreeOperation.ADD: {
         if (event.params[0]) return;
         const node = this.getTreeNodeFromPath(event.path, newTree);
-        /* const fileOp = {
-          name: `${node.filePath}/new file`,
-          type: FileOperationType.ADD,
-          creationDate: Date.now(),
-        }; */
-        // const newFile = await this.fileOperation(fileOp);
         const newFile = await this.createFile(
           `${node.filePath}/new file`,
           Date.now()
         );
+
+        if (!newFile) return;
+
         if (node.children) {
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
+          // Dummy method to force tree update:
         }
+
         break;
       }
 
