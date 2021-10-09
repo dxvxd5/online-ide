@@ -112,3 +112,6 @@ dist
 
 # MAC OS
 .DS_Store
+
+# firebase
+.firebase
