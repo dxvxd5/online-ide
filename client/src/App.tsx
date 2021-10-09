@@ -1,7 +1,7 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import IdeModel from './data/model/model';
 import LoginPresenter from './app/login/LoginPresenter';
 import PersonalSpacePresenter from './app/personal-space/PersonalSpacePresenter';
@@ -14,6 +14,9 @@ function App(): JSX.Element {
   return (
     <Router>
       <div className="container">
+        <Route exact path="/">
+          <Redirect to="/login" />
+        </Route>
         <Route
           path="/login"
           exact

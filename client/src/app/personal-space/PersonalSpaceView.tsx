@@ -78,13 +78,6 @@ const PersonalSpaceView = ({
                     <p className="project-last-updated-sign">Last updated:</p>
                     <p>{new Date(project.lastUpdated).toUTCString()}</p>
                   </div>
-                  <div>
-                    <p className="project-shared-sign">Is Project Shared?</p>
-                    <p>{project.shared.toString()}</p>
-                  </div>
-                  <div>
-                    <p className="project-param-sign">Another param?</p>
-                  </div>
                 </div>
               </div>
             </div>

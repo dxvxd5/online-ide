@@ -36,11 +36,11 @@ export default function EditorTabContentManager({
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        if (focusedFile?.id !== model.focusedFile?.id) {
-          setFocusedFile(model.getFocusedFile());
-          setContent(null);
-          setLoadFileError(false);
-        }
+        // if (focusedFile?.id !== model.focusedFile?.id) {
+        setFocusedFile(model.getFocusedFile());
+        setContent(null);
+        setLoadFileError(false);
+        // }
 
         const newLanguage = model.focusedFile
           ? getFileLanguage(model.focusedFile.name)

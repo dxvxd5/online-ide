@@ -53,7 +53,6 @@ export default function IdeHeaderPresenter({
     diffWith,
     (l1, l2) => l1.id === l2.id
   );
-  console.log({ leader });
 
   return (
     <IdeHeaderView

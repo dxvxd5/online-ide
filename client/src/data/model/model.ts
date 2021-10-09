@@ -340,7 +340,9 @@ export default class IdeModel {
   }
 
   setFocusedFile(file: FileData | null): void {
+    if (!file && !this.focusedFile) return;
     if (file?.id === this.focusedFile?.id) return;
+
     this.saveContentIntoFile();
     this.focusedFile = file;
     this.notifyObservers(Message.FOCUSED_FILE);
@@ -695,6 +697,13 @@ export default class IdeModel {
     }
   }
 
+  private replaceFocusedFile(fileID: string) {
+    if (!(fileID === this.focusedFile.id)) return;
+    if (this.currentTabFiles.length)
+      this.setFocusedFile(this.currentTabFiles[0]);
+    else this.setFocusedFile(null);
+  }
+
   private async deleteFile(fileID: string): Promise<void> {
     try {
       API.deleteFile(
@@ -702,7 +711,7 @@ export default class IdeModel {
         this.currentProject.id,
         fileID
       );
-
+      this.replaceFocusedFile(fileID);
       this.deleteTabFile(fileID);
     } catch {
       console.log('Error when deleting file');
