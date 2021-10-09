@@ -245,22 +245,4 @@ export default class API {
       return atob(data as string);
     });
   }
-
-  static createProject(
-    userID: string,
-    name: string,
-    creationDate: number
-  ): Promise<unknown> {
-    const request = {
-      url: `users/${userID}/projects/create`,
-      method: 'POST' as Method,
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: { name, creationDate },
-    };
-
-    return API.call(request);
-  }
 }
