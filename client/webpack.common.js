@@ -43,6 +43,16 @@ loaders.push({
   ],
 });
 
+loaders.push({
+  test: /\.(png|svg|jpg|jpeg|gif)$/i,
+  type: 'asset/resource',
+});
+
+loaders.push({
+  test: /\.(woff|woff2|eot|ttf|otf)$/i,
+  type: 'asset/resource',
+});
+
 module.exports = {
   entry: './src/index.tsx',
   module: {
