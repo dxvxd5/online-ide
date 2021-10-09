@@ -11,6 +11,9 @@ enum Message {
   // when the user is logged in
   LOGIN,
 
+  // When the user has signed up
+  SIGNUP,
+
   // when setting all the project of the user
   PROJECTS_CHANGE,
 
@@ -46,11 +49,18 @@ enum Message {
 
   // when the content of the editor change during a collaboration
   CONTENT,
-  SAVE_FILE_CONTENT,
-  ROOM_CREATOR,
-  SIGNUP,
+
+  // When updating the file tree
   UPDATE_TREE,
+
+  // When we scroll in the editor
   EDITOR_SCROLL,
+
+  // When the array of followers changes
+  FOLLOWER_CHANGE,
+
+  // when we update the leader
+  LEADER_CHANGE,
 }
 
 export default Message;

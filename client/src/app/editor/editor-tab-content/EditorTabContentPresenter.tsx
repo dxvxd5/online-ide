@@ -58,8 +58,11 @@ export default function EditorPresenter({
   const saveIntervalRef = useRef<NodeJS.Timeout>();
 
   function removeCollaborator(cursorID: string) {
-    cursorManagerRef.current?.removeCursor(cursorID);
-    selectionManagerRef.current?.removeSelection(cursorID);
+    try {
+      cursorManagerRef.current?.removeCursor(cursorID);
+      selectionManagerRef.current?.removeSelection(cursorID);
+      // eslint-disable-next-line no-empty
+    } catch {}
   }
 
   function addCollaborator(joiner: Collaborator) {
@@ -147,7 +150,6 @@ export default function EditorPresenter({
 
     saveIntervalRef.current = setInterval(() => {
       model.saveContentIntoFile();
-      console.log('saved');
     }, fiveMinutes);
 
     return () => {

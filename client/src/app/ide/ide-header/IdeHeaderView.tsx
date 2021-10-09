@@ -1,18 +1,21 @@
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 import './ideHeader.css';
-import IdeModel from '../../../data/model/model';
+import {
+  Collaborator,
+  SparseUserData as User,
+} from '../../../data/model/model';
 
 interface IdeHeaderViewProps {
   createRoom: () => void;
   roomID: string;
-  collaborators: { name: string; id: string }[];
+  leader: User | null;
+  collaborators: Collaborator[];
+  potentialLeaders: Collaborator[];
   isCollab: boolean;
   leaveRoom: (roomId: string) => void;
   saveFileOnClick: () => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  model: IdeModel;
   stopFollowing: () => void;
 }
 
@@ -25,7 +28,8 @@ export default function IdeHeaderView({
   saveFileOnClick,
   startFollowOnClick,
   stopFollowing,
-  model,
+  potentialLeaders,
+  leader,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -42,8 +46,8 @@ export default function IdeHeaderView({
         </button>
       )}
       <select id="selectLeaderToFollow" value="" onChange={startFollowOnClick}>
-        <option>Follow...</option>
-        {model.collaborators.map((collaborator) => (
+        <option>{leader ? leader.name : 'Follow...'}</option>
+        {potentialLeaders.map((collaborator) => (
           <option value={JSON.stringify(collaborator)} key={collaborator.id}>
             {collaborator.name}
           </option>

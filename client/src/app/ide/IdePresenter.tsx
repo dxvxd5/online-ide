@@ -11,7 +11,6 @@ import IdeModel, {
   TreeChangeEvent,
   FileTreeOperation,
   FileData,
-  LeaderData,
   FollowerData,
   ScrollPosition,
 } from '../../data/model/model';
@@ -52,7 +51,7 @@ interface SocketData {
   event: TreeChangeEvent;
   leaderID: string;
   socketID: string;
-  leader: LeaderData;
+  leader: User;
   follower: FollowerData;
   scroll: ScrollPosition;
 }
@@ -142,7 +141,6 @@ export default function IdePresenter({
     });
 
     socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, () => {
-      console.log('received host leave room');
       model.stopCollaboration();
       redirect();
     });
@@ -357,7 +355,7 @@ export default function IdePresenter({
   };
 
   const startFollowOnClick = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const leader: LeaderData = JSON.parse(event.target.value);
+    const leader: User = JSON.parse(event.target.value);
     if (!socketRef.current) return;
     if (!leader || leader.id === model.leader?.id) return;
     stopFollowing();

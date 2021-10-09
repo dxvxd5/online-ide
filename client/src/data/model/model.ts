@@ -1,4 +1,4 @@
-import { cloneDeep, isNil } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import API from './api';
 import Message from './message';
@@ -118,11 +118,6 @@ interface ProjectData {
   lastUpdated: number;
 }
 
-export interface LeaderData {
-  name: string;
-  id: string;
-}
-
 export interface CompleteProjectData extends ProjectData {
   owner: SparseUserData;
   collaborators: SparseUserData[];
@@ -200,7 +195,7 @@ export default class IdeModel {
 
   followers: FollowerData[];
 
-  leader!: LeaderData | null;
+  leader!: SparseUserData | null;
 
   scrollPosition!: ScrollPosition;
 
@@ -246,22 +241,26 @@ export default class IdeModel {
 
   setFileContentToSave(content: string): void {
     this.contentToSave = content;
-    this.notifyObservers(Message.SAVE_FILE_CONTENT);
   }
 
-  setRoomCreator(roomCreator: SparseUserData): void {
-    this.roomCreator = roomCreator;
-    this.notifyObservers(Message.ROOM_CREATOR);
+  private setFollowers(followers: FollowerData[]): void {
+    this.followers = followers;
+    this.notifyObservers(Message.FOLLOWER_CHANGE);
   }
 
   addFollower(follower: FollowerData): void {
-    if (!this.followers.some((f) => f.user.id === follower.user.id))
+    if (!this.followers.some((f) => f.user.id === follower.user.id)) {
       this.followers.push(follower);
+      this.notifyObservers(Message.FOLLOWER_CHANGE);
+    }
   }
 
   removeFollower(follower: FollowerData): void {
     const i = this.followers.findIndex((f) => f.user.id === follower.user.id);
-    if (i >= 0) this.followers.splice(i, 1);
+    if (i >= 0) {
+      this.followers.splice(i, 1);
+      this.notifyObservers(Message.FOLLOWER_CHANGE);
+    }
   }
 
   getName(): string {
@@ -293,12 +292,17 @@ export default class IdeModel {
     return this.focusedFile;
   }
 
+  getFollowerAsUsers(): SparseUserData[] {
+    return this.followers.map((follower) => follower.user);
+  }
+
   setLeaver(leaver: SparseUserData): void {
     this.leaver = leaver;
   }
 
-  setLeader(leader: LeaderData | null): void {
+  setLeader(leader: SparseUserData | null): void {
     this.leader = leader;
+    this.notifyObservers(Message.LEADER_CHANGE);
   }
 
   setCurrentFileTree(files: FileData[], projectRootFolderName: string): void {
@@ -345,10 +349,11 @@ export default class IdeModel {
   stopCollaboration(): void {
     this.formerCollaborators = this.collaborators;
     this.collaborators = [];
-    this.followers = [];
-    this.leader = null;
+    this.setFollowers([]);
+    this.setLeader(null);
     this.roomID = '';
     this.isHost = true;
+    if (!this.isHost) this.setFocusedFile(null);
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
@@ -380,9 +385,10 @@ export default class IdeModel {
       }
     });
 
-    this.followers = this.followers.filter((f) => f.user.id !== leaver.id);
-
     this.collaborators = newCollaborators;
+    this.setFollowers(this.followers.filter((f) => f.user.id !== leaver.id));
+    if (this.leader?.id === leaver.id) this.setLeader(null);
+
     this.setLeaver(leaver);
     this.notifyObservers(Message.USER_LEFT);
   }
@@ -636,7 +642,6 @@ export default class IdeModel {
       );
       return fileData as FileData;
     } catch {
-      console.log('Could not create file.');
       return undefined;
     }
   }
