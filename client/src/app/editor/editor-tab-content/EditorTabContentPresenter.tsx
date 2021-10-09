@@ -55,7 +55,7 @@ export default function EditorPresenter({
   const cursorManagerRef = useRef<RemoteCursorManager>();
 
   const fiveMinutes = 300000;
-  const saveIntervalRef = useRef<NodeJS.Timeout>();
+  const saveIntervalRef = useRef<number>();
 
   function removeCollaborator(cursorID: string) {
     try {
