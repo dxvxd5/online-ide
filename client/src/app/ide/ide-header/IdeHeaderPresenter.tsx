@@ -10,6 +10,7 @@ interface IdeHeaderPresenterProps {
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   stopFollowing: () => void;
+  leaveProject: () => void;
 }
 
 export default function IdeHeaderPresenter({
@@ -18,6 +19,7 @@ export default function IdeHeaderPresenter({
   model,
   startFollowOnClick,
   stopFollowing,
+  leaveProject,
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
@@ -56,6 +58,7 @@ export default function IdeHeaderPresenter({
 
   return (
     <IdeHeaderView
+      leaveProject={leaveProject}
       stopFollowing={stopFollowing}
       startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
@@ -66,6 +69,7 @@ export default function IdeHeaderPresenter({
       isCollab={!!roomID}
       saveFileOnClick={saveFileOnClick}
       leader={leader}
+      isHost={model.isHost}
     />
   );
 }

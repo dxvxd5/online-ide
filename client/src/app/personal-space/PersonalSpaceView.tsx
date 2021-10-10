@@ -20,6 +20,7 @@ interface PersonalSpaceViewProp {
   joinCollabProject: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
+  deleteProject: (id: string) => void;
 }
 
 const PersonalSpaceView = ({
@@ -30,6 +31,7 @@ const PersonalSpaceView = ({
   openProject,
   handleProjectName,
   joinCollabProject,
+  deleteProject,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
@@ -58,31 +60,38 @@ const PersonalSpaceView = ({
         </form>
       </div>
       {projects.map((project) => (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div
-          key={project.id}
-          className="PersonalSpace"
-          onClick={() => openProject(project.id)}
-          role="button"
-          tabIndex={0}
-        >
-          <div id="personal-space-overview">
-            <div>
-              <div className={`${'flex-between-projects'}`}>
-                <div className="project-info-wrapper">
-                  <div className="project-name-wrapper">
-                    <p className="project-name-sign">Project Name:</p>
-                    <p style={{ color: '#ff8c00' }}>{project.name}</p>
-                  </div>
-                  <div>
-                    <p className="project-last-updated-sign">Last updated:</p>
-                    <p>{new Date(project.lastUpdated).toUTCString()}</p>
+        /* eslint-disable jsx-a11y/click-events-have-key-events */
+        <>
+          <div
+            key={project.id}
+            className="PersonalSpace"
+            onClick={() => openProject(project.id)}
+            role="button"
+            tabIndex={0}
+          >
+            <div id="personal-space-overview">
+              <div>
+                <div className={`${'flex-between-projects'}`}>
+                  <div className="project-info-wrapper">
+                    <div className="project-name-wrapper">
+                      <p className="project-name-sign">Project Name:</p>
+                      <p style={{ color: '#ff8c00' }}>{project.name}</p>
+                    </div>
+                    <div>
+                      <p className="project-last-updated-sign">Last updated:</p>
+                      <p>{new Date(project.lastUpdated).toUTCString()}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+          <div className="project-shared-sign">
+            <button type="button" onClick={() => deleteProject(project.id)}>
+              X
+            </button>
+          </div>
+        </>
       ))}
     </>
   );

@@ -24,6 +24,7 @@ export default function PersonalSpacePresenter({
   const [projects, setProjects] = useState(model.getProjects());
   const [projectError, setProjectError] = useState(false);
   const [isProjectLoaded, setIsProjectLoaded] = useState(false);
+  const [projectErrorInfo, setProjectErrorInfo] = useState('');
   const sortOptions = ['Shared', 'Last Updated', 'Name'];
   const history = useHistory();
 
@@ -106,6 +107,17 @@ export default function PersonalSpacePresenter({
       setIsProjectLoaded(true);
       if (projectError) setProjectError(false);
     } catch {
+      setProjectErrorInfo('Could not open the project. Please try again.');
+      setProjectError(true);
+    }
+  };
+
+  const deleteProject = async (projectID: string) => {
+    try {
+      await model.deleteProject(projectID);
+      if (projectError) setProjectError(false);
+    } catch {
+      setProjectErrorInfo('Could not delete the project. Please try again.');
       setProjectError(true);
     }
   };
@@ -140,7 +152,7 @@ export default function PersonalSpacePresenter({
   if (projectError)
     return (
       <ProjectError
-        projectErrorInfo="Could not open the project. Please try again"
+        projectErrorInfo={projectErrorInfo}
         tryAgain={() => setProjectError(false)}
       />
     );
@@ -153,6 +165,7 @@ export default function PersonalSpacePresenter({
 
   return (
     <PersonalSpaceView
+      deleteProject={deleteProject}
       joinCollabProject={joinCollabProject}
       handleProjectName={handleProjectName}
       handleSort={handleSort}

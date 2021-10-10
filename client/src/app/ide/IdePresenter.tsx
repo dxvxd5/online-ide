@@ -4,6 +4,7 @@ import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import IdeModel, {
   SparseUserData as User,
   CursorPosition,
@@ -73,6 +74,27 @@ export default function IdePresenter({
     });
   }
 
+  function notifyUserLeft(message: string) {
+    toast(message, {
+      style: {
+        background: '#333',
+        color: '#fff',
+      },
+    });
+  }
+
+  function swalFireLeaveProject(title: string, text: string) {
+    return Swal.fire({
+      title,
+      text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, leave!',
+    });
+  }
+
   function intiateSocket(
     roomId: string,
     message: SocketMessage,
@@ -88,13 +110,18 @@ export default function IdePresenter({
     setSocketState(socketstate);
   }
 
-  const emitFocusedFile = (focusedFile: FileData | null) => {
+  const emitFocusedFile = (
+    focusedFile: FileData | null,
+    socketMessage: string,
+    leader: User
+  ) => {
     if (!socketRef.current) return;
     if (!focusedFile) return;
     model.followers.forEach((follower) => {
-      socketRef.current?.emit(SocketMessage.FOLLOW_FILE, {
+      socketRef.current?.emit(socketMessage, {
         focusedFile,
         follower,
+        leader,
       });
     });
   };
@@ -102,7 +129,18 @@ export default function IdePresenter({
   useEffect(() => {
     const currentFocusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        emitFocusedFile(model.focusedFile);
+        emitFocusedFile(
+          model.focusedFile,
+          SocketMessage.FOLLOW_FILE,
+          model.leader
+        );
+      }
+      if (m === Message.TAB_FILE_CLOSE) {
+        emitFocusedFile(
+          model.focusedFile,
+          SocketMessage.CLOSE_TAB_FILE,
+          model.leader
+        );
       }
     };
     model.addObserver(currentFocusedFileListener);
@@ -127,6 +165,8 @@ export default function IdePresenter({
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {
         if (socketID) {
+          const message = `User ${user.name} joined the room.`;
+          notifyUserLeft(message);
           socketRef.current?.emit(SocketMessage.JOINED_ROOM, {
             to: socketID,
             user: { id: model.userID, name: model.name },
@@ -137,10 +177,16 @@ export default function IdePresenter({
     );
 
     socketRef.current.on(SocketMessage.USER_LEAVE_ROOM, (leaver: User) => {
+      const message = `User ${leaver.name} left the room.`;
+      notifyUserLeft(message);
       model.removeCollaborator(leaver);
     });
 
-    socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, () => {
+    socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, (host: User) => {
+      if (!model.isHost) {
+        const message = `Host ${host.name} left the room.`;
+        notifyUserLeft(message);
+      }
       model.stopCollaboration();
       redirect();
     });
@@ -205,13 +251,13 @@ export default function IdePresenter({
         model.updateTabs(newTree, event);
       }
     );
-
     socketRef.current.on(
       SocketMessage.START_FOLLOWING,
       ({ leader, follower }: SocketData) => {
         if (leader.id === model.userID) {
+          model.setIsLeader(true);
           model.addFollower(follower);
-          emitFocusedFile(model.focusedFile);
+          emitFocusedFile(model.focusedFile, SocketMessage.FOLLOW_FILE, leader);
         }
       }
     );
@@ -219,8 +265,16 @@ export default function IdePresenter({
     socketRef.current.on(
       SocketMessage.FOLLOW_FILE,
       ({ focusedFile }: SocketData) => {
+        model.setIsLeader(false);
         model.addTabFile(focusedFile);
         model.setFocusedFile(focusedFile);
+      }
+    );
+
+    socketRef.current.on(
+      SocketMessage.CLOSE_TAB_FILE,
+      ({ focusedFile }: SocketData) => {
+        model.closeTabFile(focusedFile);
       }
     );
 
@@ -244,29 +298,46 @@ export default function IdePresenter({
       );
   };
 
+  function emitHostLeaveRoom(roomID: string) {
+    if (!socketRef.current) return;
+    socketRef.current.emit(SocketMessage.HOST_LEAVE_ROOM, {
+      roomID,
+      user: { name: model.name, id: model.userID },
+    });
+  }
+
   const socketLeaveRoom = (roomId: string): void => {
     if (!socketRef.current) return;
 
-    const message =
-      socketState === SocketState.HOST
-        ? SocketMessage.HOST_LEAVE_ROOM
-        : SocketMessage.USER_LEAVE_ROOM;
-
-    socketRef.current.emit(message, {
-      roomID: roomId,
-      user: { name: model.name, id: model.userID },
-    });
-
     if (socketState === SocketState.JOIN) {
-      model.stopCollaboration();
-      setSocketState(SocketState.DISABLED);
-      redirect();
+      swalFireLeaveProject(
+        'Are you sure you want to stop collaborating?',
+        'You will be disconnected.'
+      ).then((result) => {
+        if (result.isConfirmed) {
+          socketRef.current.emit(SocketMessage.USER_LEAVE_ROOM, {
+            roomID: roomId,
+            user: { name: model.name, id: model.userID },
+          });
+          model.stopCollaboration();
+          setSocketState(SocketState.DISABLED);
+          redirect();
+        }
+      });
     }
 
     if (socketState === SocketState.HOST) {
-      model.stopCollaboration();
-      model.notifyHostLeft();
-      setSocketState(SocketState.DISABLED);
+      swalFireLeaveProject(
+        'Are you sure you want to stop the collaboration?',
+        'All collaborators will be disconnected.'
+      ).then((result) => {
+        if (result.isConfirmed) {
+          emitHostLeaveRoom(roomId);
+          model.stopCollaboration();
+          model.notifyHostLeft();
+          setSocketState(SocketState.DISABLED);
+        }
+      });
     }
   };
 
@@ -377,9 +448,37 @@ export default function IdePresenter({
     });
   };
 
+  const leaveProject = () => {
+    const isCollab = !!model.roomID;
+    const title = 'Are you sure you want to leave this project?';
+    if (!isCollab) {
+      swalFireLeaveProject(title, '').then((result) => {
+        if (result.isConfirmed) {
+          redirect();
+        }
+      });
+    }
+    if (isCollab && model.isHost) {
+      swalFireLeaveProject(
+        title,
+        'All collaborators will be disconnected!'
+      ).then((result) => {
+        if (result.isConfirmed) {
+          if (!socketRef.current) return;
+          emitHostLeaveRoom(model.roomID);
+          model.stopCollaboration();
+          model.notifyHostLeft();
+          setSocketState(SocketState.DISABLED);
+          redirect();
+        }
+      });
+    }
+  };
+
   return (
     <>
       <IdeHeader
+        leaveProject={leaveProject}
         stopFollowing={stopFollowing}
         startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}

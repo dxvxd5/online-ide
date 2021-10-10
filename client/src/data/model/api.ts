@@ -114,6 +114,44 @@ export default class API {
     return API.call(request);
   }
 
+  static editProject(
+    userID: string,
+    projectID: string,
+    toUpdate: { lastUpdated?: number }
+  ): Promise<unknown> {
+    if (!toUpdate.lastUpdated)
+      throw new Error('Nothing to update the file with');
+    const { lastUpdated } = toUpdate;
+
+    let data = {};
+    if (lastUpdated) data = { ...data, lastUpdated };
+
+    const request = {
+      url: `users/${userID}/projects/${projectID}`,
+      method: 'PATCH' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data,
+    };
+
+    return API.call(request);
+  }
+
+  static deleteProject(userID: string, projectID: string): Promise<unknown> {
+    const request = {
+      url: `users/${userID}/projects/${projectID}`,
+      method: 'DELETE' as Method,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    return API.call(request);
+  }
+
   static editFile(
     userID: string,
     projectID: string,

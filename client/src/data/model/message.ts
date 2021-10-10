@@ -61,6 +61,9 @@ enum Message {
 
   // when we update the leader
   LEADER_CHANGE,
+
+  // When we remove a file from the tab
+  TAB_FILE_CLOSE,
 }
 
 export default Message;

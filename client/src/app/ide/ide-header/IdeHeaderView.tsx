@@ -17,6 +17,8 @@ interface IdeHeaderViewProps {
   saveFileOnClick: () => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   stopFollowing: () => void;
+  leaveProject: () => void;
+  isHost: boolean;
 }
 
 export default function IdeHeaderView({
@@ -30,9 +32,16 @@ export default function IdeHeaderView({
   stopFollowing,
   potentialLeaders,
   leader,
+  leaveProject,
+  isHost,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
+      {isHost && (
+        <button type="button" onClick={() => leaveProject()}>
+          Go back
+        </button>
+      )}
       {!isCollab && (
         <>
           <button type="button" onClick={() => createRoom()}>

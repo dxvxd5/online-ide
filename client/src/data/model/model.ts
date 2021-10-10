@@ -199,6 +199,8 @@ export default class IdeModel {
 
   scrollPosition!: ScrollPosition;
 
+  isLeader!: boolean;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -246,6 +248,10 @@ export default class IdeModel {
   private setFollowers(followers: FollowerData[]): void {
     this.followers = followers;
     this.notifyObservers(Message.FOLLOWER_CHANGE);
+  }
+
+  setIsLeader(isLeader: boolean): void {
+    this.isLeader = isLeader;
   }
 
   addFollower(follower: FollowerData): void {
@@ -333,6 +339,28 @@ export default class IdeModel {
     }
   }
 
+  private openAnotherTabFile(i: number): void {
+    // Open a another file
+    if (this.currentTabFiles.length) {
+      const newFocusIdx = i === 0 ? 0 : i - 1;
+      this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
+    } else this.resetFocusedFile();
+  }
+
+  closeTabFile(tabFile: FileData): void {
+    const i = this.currentTabFiles.findIndex((tf) => tf.id === tabFile.id);
+    if (i >= 0) {
+      this.currentTabFiles.splice(i, 1);
+      if (this.isLeader) {
+        if (this.focusedFile.id === tabFile.id) {
+          this.notifyObservers(Message.TAB_FILE_CLOSE);
+        }
+        this.openAnotherTabFile(i);
+      }
+      this.notifyObservers(Message.CURRENT_TABS);
+    }
+  }
+
   setCurrentProject(project: CompleteProjectData): void {
     this.currentProject = project;
     this.setCurrentFileTree(project.files, project.name);
@@ -356,6 +384,7 @@ export default class IdeModel {
     this.roomID = '';
     this.isHost = true;
     if (!this.isHost) this.setFocusedFile(null);
+    this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
@@ -471,6 +500,8 @@ export default class IdeModel {
     API.editFile(fileOwnerId, this.currentProject.id, this.focusedFile.id, {
       lastUpdated: Date.now(),
     });
+
+    this.editProject();
   }
 
   /**
@@ -661,6 +692,37 @@ export default class IdeModel {
     }
   }
 
+  private async editProject(): Promise<void> {
+    try {
+      API.editProject(
+        this.isHost ? this.userID : this.currentProject.owner.id,
+        this.currentProject.id,
+        {
+          lastUpdated: Date.now(),
+        }
+      );
+
+      const i = this.projects.findIndex(
+        (project) => project.id === this.currentProject.id
+      );
+      if (i >= 0) {
+        this.projects[i].lastUpdated = Date.now();
+        this.notifyObservers(Message.PROJECTS_CHANGE);
+      }
+    } catch {
+      console.log('Error when updating project');
+    }
+  }
+
+  async deleteProject(projectID: string): Promise<void> {
+    try {
+      API.deleteProject(this.userID, projectID);
+      this.deleteProjectFromProjects(projectID);
+    } catch {
+      console.log('Error when deleting file');
+    }
+  }
+
   private async renameFile(
     name: string,
     lastUpdated: number,
@@ -688,12 +750,17 @@ export default class IdeModel {
       this.currentTabFiles.splice(i, 1);
 
       // Open a another file
-      if (this.currentTabFiles.length) {
-        const newFocusIdx = i === 0 ? 0 : i - 1;
-        this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
-      } else this.resetFocusedFile();
+      this.openAnotherTabFile(i);
 
       this.notifyObservers(Message.CURRENT_TABS);
+    }
+  }
+
+  private deleteProjectFromProjects(projectID: string): void {
+    const i = this.projects.findIndex((project) => project.id === projectID);
+    if (i >= 0) {
+      this.projects.splice(i, 1);
+      this.notifyObservers(Message.PROJECTS_CHANGE);
     }
   }
 

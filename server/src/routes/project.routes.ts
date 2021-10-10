@@ -14,5 +14,6 @@ projectsRouter.get('/:projectID', RouteControllers.getProject);
 projectsRouter.patch('/:projectID', RouteControllers.editProject);
 projectsRouter.get('/collab/:collabID', RouteControllers.getCollabProject);
 projectsRouter.post('/:projectID/collab', RouteControllers.createCollab);
+projectsRouter.delete('/:projectID', RouteControllers.deleteProject);
 
 export default projectsRouter;

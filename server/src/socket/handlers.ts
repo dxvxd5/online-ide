@@ -110,7 +110,7 @@ export function joinRoom(socket: Socket, data: SocketData): void {
 }
 
 export function hostLeaveRoom(socket: Socket, { roomID }: SocketData): void {
-  socket.to(roomID).emit(SocketMessage.HOST_LEAVE_ROOM);
+  socket.to(roomID).emit(SocketMessage.HOST_LEAVE_ROOM, socket.data.user);
   socket.leave(roomID);
   deleteCollab(roomID);
 }
@@ -200,10 +200,11 @@ export function startFollowing(
 
 export function followFile(
   socket: Socket,
-  { focusedFile, follower }: SocketData
+  { focusedFile, follower, leader }: SocketData
 ): void {
   socket.to(follower.socketID).emit(SocketMessage.FOLLOW_FILE, {
     focusedFile,
+    leader,
   });
 }
 
@@ -220,6 +221,15 @@ export function scrollUpdate(
   socket.to(follower.socketID).emit(SocketMessage.SCROLL_CHANGE, {
     focusedFile,
     scroll,
+  });
+}
+
+export function deleteTabFile(
+  socket: Socket,
+  { follower, focusedFile }: SocketData
+): void {
+  socket.to(follower.socketID).emit(SocketMessage.CLOSE_TAB_FILE, {
+    focusedFile,
   });
 }
 

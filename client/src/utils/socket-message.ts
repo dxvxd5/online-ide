@@ -21,6 +21,7 @@ enum SocketMessage {
   STOP_FOLLOWING = 'stop_following',
   FOLLOW_FILE = 'follow_file',
   SCROLL_CHANGE = 'scroll_change',
+  CLOSE_TAB_FILE = 'close_tab_file',
 }
 
 export default SocketMessage;

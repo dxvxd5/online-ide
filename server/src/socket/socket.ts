@@ -64,6 +64,10 @@ const socketFunction = (io: Server): void => {
       SocketHandler.scrollUpdate(socket, data)
     );
 
+    socket.on(SocketMessage.CLOSE_TAB_FILE, (data) =>
+      SocketHandler.deleteTabFile(socket, data)
+    );
+
     socket.on('disconnect', () => SocketHandler.disconnect(socket));
   });
 };

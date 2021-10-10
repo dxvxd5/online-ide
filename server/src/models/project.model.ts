@@ -140,6 +140,18 @@ export default class Project {
     return true;
   }
 
+  static async deleteProject(
+    projectID: string,
+    userID: string
+  ): Promise<boolean> {
+    const projectDoc = await firestore
+      .doc(getProjectPath(userID, projectID))
+      .get();
+    if (!projectDoc.exists) return false;
+    await projectDoc.ref.delete();
+    return true;
+  }
+
   static async createCollaboration(
     userID: string,
     projectID: string
