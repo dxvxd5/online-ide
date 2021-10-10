@@ -15,7 +15,7 @@ function isAuthorizedUser(req: Request): boolean {
 }
 
 /**
- * Ensure that the authenticated user is not acessing someone else's project.
+ * Ensure that the authenticated user is not accessing someone else's project.
  */
 async function isAuthorizedProject(req: Request): Promise<boolean> {
   const user = req.user as User;
@@ -26,7 +26,7 @@ async function isAuthorizedProject(req: Request): Promise<boolean> {
 
 /**
  * Checks if the user is allowed to access the ressource requested
- * And return 401 error if not
+ * And return 403 error if not
  * Assumes that the request has passed the check authentication middleware
  */
 export default async function checkAuthorization(

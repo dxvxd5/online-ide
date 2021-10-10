@@ -25,7 +25,6 @@ import EditorView from './EditorTabContentView';
 interface EditorPresenterProps {
   model: IdeModel;
   language: string;
-  fileID: string;
   fileContent: string;
   isFocused: boolean;
   onEditorCursorMoved: (position: CursorPosition) => void;
@@ -39,7 +38,6 @@ interface EditorPresenterProps {
 export default function EditorPresenter({
   model,
   language,
-  fileID,
   fileContent,
   isFocused,
   onEditorCursorMoved,

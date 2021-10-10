@@ -36,15 +36,6 @@ app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use(
-//   expressCspHeader({
-//     directives: {
-//       'default-src': [NONE],
-//       'img-src': [SELF],
-//     },
-//   })
-// );
-
 // Routes
 app.post('/signup', signUpUser);
 // TODO: Maybe use the HTTP basic or digest authentication
