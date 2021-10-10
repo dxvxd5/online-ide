@@ -30,7 +30,7 @@ async function isAuthorizedProject(req: Request): Promise<boolean> {
 
 /**
  * Checks if the user is allowed to access the ressource requested
- * And return 401 error if not
+ * And return 403 error if not
  * Assumes that the request has passed the check authentication middleware
  */
 export default async function checkAuthorization(

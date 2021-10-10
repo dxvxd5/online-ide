@@ -79,7 +79,6 @@ export default function EditorTabContentManager({
       onEditorSelection={onEditorSelection}
       onEditorCursorMoved={onEditorCursorMoved}
       language={language}
-      fileID={(focusedFile as FileData).id}
       fileContent={content as string}
       isFocused
       model={model}
