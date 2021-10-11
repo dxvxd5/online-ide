@@ -11,33 +11,33 @@ import SignupPresenter from './app/signup/SignupPresenter';
 
 function App(): JSX.Element {
   const ideModel = new IdeModel();
+  ideModel.persist();
+
   return (
     <Router>
-      <div className="container">
-        <Route exact path="/">
-          <Redirect to="/login" />
-        </Route>
-        <Route
-          path="/login"
-          exact
-          component={() => <LoginPresenter model={ideModel} />}
-        />
-        <Route
-          path="/signup"
-          exact
-          component={() => <SignupPresenter model={ideModel} />}
-        />
-        <Route
-          path="/me"
-          exact
-          component={() => <PersonalSpacePresenter model={ideModel} />}
-        />
-        <Route
-          path="/code"
-          exact
-          component={() => <IdePresenter model={ideModel} />}
-        />
-      </div>
+      <Route exact path="/">
+        <Redirect to="/login" />
+      </Route>
+      <Route
+        path="/login"
+        exact
+        component={() => <LoginPresenter model={ideModel} />}
+      />
+      <Route
+        path="/signup"
+        exact
+        component={() => <SignupPresenter model={ideModel} />}
+      />
+      <Route
+        path="/me"
+        exact
+        component={() => <PersonalSpacePresenter model={ideModel} />}
+      />
+      <Route
+        path="/code"
+        exact
+        component={() => <IdePresenter model={ideModel} />}
+      />
       <Toaster />
     </Router>
   );

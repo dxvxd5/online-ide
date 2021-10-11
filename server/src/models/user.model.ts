@@ -86,9 +86,8 @@ export default class User {
 
   /**
    * Get all the info of a user (even the hash and salt) by its username
-   * Must not be exposed outside this class
    */
-  private static async _getFromUsername(
+  static async getFromUsername(
     username: string
   ): Promise<CompleteUserData | null> {
     const userQuerySnapshot = await firestore
@@ -119,11 +118,11 @@ export default class User {
    * Get a user from the database by its username
    * Assumes that the user exists in the database
    */
-  static async getFromUsername(username: string): Promise<User | null> {
-    const userData = await User._getFromUsername(username);
-    if (!userData) return null;
-    return new User(userData);
-  }
+  // static async getFromUsername(username: string): Promise<User | null> {
+  //   const userData = await User._getFromUsername(username);
+  //   if (!userData) return null;
+  //   return new User(userData);
+  // }
 
   /**
    * Get a user associated with the credentials.
@@ -132,7 +131,7 @@ export default class User {
     username: string,
     password: string
   ): Promise<null | User> {
-    const userData = await User._getFromUsername(username);
+    const userData = await User.getFromUsername(username);
     if (!userData) return null;
 
     // Here we know the username is valid so we check the password

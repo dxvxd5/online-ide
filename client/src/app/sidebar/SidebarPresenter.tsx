@@ -55,6 +55,8 @@ export default function SidebarPresenter({
 
   const FileIconComponent = FileIcon({ onClick: onFileIconClick });
 
+  if (!files) return null;
+
   return (
     <SidebarView
       fileTreeState={files}

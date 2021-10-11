@@ -100,15 +100,18 @@ export default function IdePresenter({
   };
 
   useEffect(() => {
+    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+
     const currentFocusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
         emitFocusedFile(model.focusedFile);
       }
     };
     model.addObserver(currentFocusedFileListener);
-
+    console.log(model.persisted, model.isHost);
+    if (model.persisted && !model.isHost) history.push({ pathname: '/me' });
     if (!model.isHost) {
-      // When user join roon we initiate the socket
+      // When user join room we initiate the socket
       intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
     }
 
@@ -123,6 +126,7 @@ export default function IdePresenter({
       model.saveContentIntoFile();
       return false;
     });
+
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {

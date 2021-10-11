@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import IdeModel, { CursorPosition, FileData } from '../../../data/model/model';
+import IdeModel, { CursorPosition } from '../../../data/model/model';
 import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
@@ -37,8 +37,14 @@ export default function EditorTabContentManager({
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
         // if (focusedFile?.id !== model.focusedFile?.id) {
+        if (model.persisted) {
+          console.log(model.contentToSave);
+          console.log('here');
+          setContent(model.contentToSave);
+          // eslint-disable-next-line no-param-reassign
+          model.persisted = false;
+        } else setContent(null);
         setFocusedFile(model.getFocusedFile());
-        setContent(null);
         setLoadFileError(false);
         // }
 

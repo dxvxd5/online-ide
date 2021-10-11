@@ -28,14 +28,20 @@ export default function PersonalSpacePresenter({
   const history = useHistory();
 
   useEffect(() => {
+    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+    if (model.persisted) model.setPersisted(false);
+
     const projectObserver = (m: Message) => {
       if (m === Message.PROJECTS_CHANGE)
         setProjects([...model.getProjects()] as ProjectsData[]);
     };
+    console.log('here');
     model.addObserver(projectObserver);
 
     return () => model.removeObserver(projectObserver);
   }, []);
+
+  console.log({ projects });
 
   const handleSortedProjects = (sortProjectsValue: string) => {
     const sortedProjects: ProjectsData[] = projects.sort(
