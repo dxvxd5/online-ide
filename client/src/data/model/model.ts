@@ -387,8 +387,11 @@ export default class IdeModel {
     this.setFollowers([]);
     this.setLeader(null);
     this.roomID = '';
-    // this.isHost = true;
-    if (!this.isHost) this.setFocusedFile(null);
+    if (!this.isHost) {
+      this.resetFocusedFile();
+      this.resetTabsFiles();
+    }
+    this.isHost = true;
     this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
@@ -521,6 +524,12 @@ export default class IdeModel {
     this.resetTabsFiles();
     this.resetFocusedFile();
     this.setCurrentProject(project);
+  }
+
+  closeProject(): void {
+    this.resetTabsFiles();
+    this.resetFocusedFile();
+    this.setCurrentProject(null);
   }
 
   async getFileContent(fileID: string): Promise<string> {

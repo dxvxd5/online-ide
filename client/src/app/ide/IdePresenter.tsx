@@ -458,11 +458,12 @@ export default function IdePresenter({
     if (!isCollab) {
       swalFireLeaveProject(title, '').then((result) => {
         if (result.isConfirmed) {
+          model.closeProject();
           redirect();
         }
       });
     }
-    if (isCollab && model.isHost) {
+    if (isCollab) {
       swalFireLeaveProject(
         title,
         'All collaborators will be disconnected!'

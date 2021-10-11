@@ -26,7 +26,9 @@ export default function LoginPresenter({
       await model.login(username, password);
       setIsLoggedIn(true);
       if (loginError) setLoginError(false);
-    } catch {
+    } catch (error) {
+      console.log('error: ', error);
+      // TODO: Check error when server side is done
       setLoginErrorInfo('Error. Either username or password is incorrect');
       setLoginError(true);
     }
@@ -67,7 +69,6 @@ export default function LoginPresenter({
     });
   }
 
-  // if (!isLoggedIn)
   return (
     <LoginView
       signUp={signUp}

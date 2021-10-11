@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 import Message from '../../data/model/message';
 import IdeModel from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
@@ -17,6 +17,16 @@ interface ProjectsData {
   lastUpdated: number;
 }
 
+type SwalFireType = {
+  (input: string): void;
+};
+interface SwalFireInput {
+  title: string;
+  input: string;
+  inputLabel: string;
+  preConfirm: SwalFireType;
+}
+
 export default function PersonalSpacePresenter({
   model,
 }: PersonalSpacePresenterProp): JSX.Element {
@@ -27,6 +37,19 @@ export default function PersonalSpacePresenter({
   const [projectErrorInfo, setProjectErrorInfo] = useState('');
   const sortOptions = ['Last Updated', 'Name'];
   const history = useHistory();
+
+  const swalFirePopUp = (
+    swalFireInput: SwalFireInput
+  ): Promise<SweetAlertResult> => {
+    const options = {
+      ...swalFireInput,
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading(),
+      backdrop: true,
+    } as SweetAlertOptions;
+    return Swal.fire(options);
+  };
 
   useEffect(() => {
     const projectObserver = (m: Message) => {
@@ -68,12 +91,10 @@ export default function PersonalSpacePresenter({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    Swal.fire({
+    const swalFireInput: SwalFireInput = {
       title: 'Enter your project name',
       input: 'text',
       inputLabel: 'Your project name',
-      showCancelButton: true,
-      showLoaderOnConfirm: true,
       preConfirm: (name) => {
         const creationDate = Date.now();
         model
@@ -87,9 +108,8 @@ export default function PersonalSpacePresenter({
             )
           );
       },
-      allowOutsideClick: () => !Swal.isLoading(),
-      backdrop: true,
-    }).then((result) => {
+    };
+    swalFirePopUp(swalFireInput).then((result) => {
       if (result.isConfirmed) {
         Swal.fire(`Your project name is ${result.value}`, '', 'success');
       }
@@ -108,25 +128,33 @@ export default function PersonalSpacePresenter({
   };
 
   const deleteProject = async (projectID: string) => {
-    try {
-      await model.deleteProject(projectID);
-      if (projectError) setProjectError(false);
-    } catch {
-      setProjectErrorInfo('Could not delete the project. Please try again.');
-      setProjectError(true);
-    }
+    const swalFireInput: SwalFireInput = {
+      title: 'Are you sure you want to delete this project?',
+      input: '',
+      inputLabel: '',
+      preConfirm: () => {},
+    };
+    swalFirePopUp(swalFireInput)
+      .then((result) => {
+        if (result.isConfirmed) {
+          model.deleteProject(projectID);
+          if (projectError) setProjectError(false);
+        }
+      })
+      .catch(() => {
+        setProjectErrorInfo('Could not delete the project. Please try again.');
+        setProjectError(true);
+      });
   };
 
   const joinCollabProject = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    Swal.fire({
+    const swalFireInput: SwalFireInput = {
       title: 'Enter room ID',
       input: 'text',
       inputLabel: 'Room ID',
-      showCancelButton: true,
-      showLoaderOnConfirm: true,
       preConfirm: (roomID) => {
         model
           .getCollabProject(roomID)
@@ -139,9 +167,8 @@ export default function PersonalSpacePresenter({
             )
           );
       },
-      allowOutsideClick: () => !Swal.isLoading(),
-      backdrop: true,
-    });
+    };
+    swalFirePopUp(swalFireInput);
   };
 
   if (projectError)
