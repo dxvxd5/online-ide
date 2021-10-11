@@ -43,6 +43,7 @@ export default function EditorTabToggleManager({
           }}
           closeFileFromTab={({ id, name }) => {
             if (!model.isLeader) stopFollowing();
+            console.log('model.isLeader: ', model.isLeader);
             model.closeTabFile({ id, name });
           }}
         />

@@ -52,6 +52,7 @@ export default function EditorTabContentManager({
     return () => model.removeObserver(focusedFileListener);
   }, []);
 
+  console.log('focusedFile: ', focusedFile);
   if (!focusedFile) return <div>open a file</div>;
   if (!loadFileError && content === null) {
     model

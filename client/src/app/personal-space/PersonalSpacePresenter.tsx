@@ -25,7 +25,7 @@ export default function PersonalSpacePresenter({
   const [projectError, setProjectError] = useState(false);
   const [isProjectLoaded, setIsProjectLoaded] = useState(false);
   const [projectErrorInfo, setProjectErrorInfo] = useState('');
-  const sortOptions = ['Shared', 'Last Updated', 'Name'];
+  const sortOptions = ['Last Updated', 'Name'];
   const history = useHistory();
 
   useEffect(() => {
@@ -41,14 +41,9 @@ export default function PersonalSpacePresenter({
   const handleSortedProjects = (sortProjectsValue: string) => {
     const sortedProjects: ProjectsData[] = projects.sort(
       (project1, project2) => {
-        const isShared = sortProjectsValue === 'Shared';
         const isLastUpdated = sortProjectsValue === 'Last Updated';
         const isName = sortProjectsValue === 'Name';
 
-        if (isShared) {
-          const shared = Number(project2.shared) - Number(project1.shared);
-          return shared;
-        }
         if (isLastUpdated) {
           const dateA = new Date(project1.lastUpdated).getTime();
           const dateB = new Date(project2.lastUpdated).getTime();

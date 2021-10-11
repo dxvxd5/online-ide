@@ -30,15 +30,9 @@ export default class API {
         message: string | undefined;
       }) {
         if (error.response) {
-          const errorData = {
-            data: error.response.data,
-            status: error.response.status,
-            headers: error.response.headers,
-          };
-
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
-          throw new Error(JSON.stringify(errorData));
+          throw error.response.data;
         } else if (error.request) {
           // The request was made but no response was received
           // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
@@ -144,9 +138,6 @@ export default class API {
       url: `users/${userID}/projects/${projectID}`,
       method: 'DELETE' as Method,
       withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     };
 
     return API.call(request);

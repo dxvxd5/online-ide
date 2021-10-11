@@ -34,8 +34,12 @@ export default function SingupPresenter({
       await model.signup(name, username, password);
       setIsSignedUp(true);
       if (signupError) setSignupError(false);
-    } catch {
-      setSignupErrorInfo('Error. Could not sign up.');
+    } catch (error) {
+      if (error.error.statusCode === 400) {
+        setSignupErrorInfo(error.error.message);
+      } else {
+        setSignupErrorInfo('Something went wrong. Please try again.');
+      }
       setSignupError(true);
     }
   };

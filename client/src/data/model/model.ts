@@ -199,7 +199,7 @@ export default class IdeModel {
 
   scrollPosition!: ScrollPosition;
 
-  isLeader!: boolean;
+  isLeader: boolean;
 
   constructor() {
     this.name = '';
@@ -211,6 +211,7 @@ export default class IdeModel {
     this.currentTabFiles = [];
     this.isHost = true;
     this.followers = [];
+    this.isLeader = false;
   }
 
   addObserver(o: Observer): void {
@@ -344,7 +345,10 @@ export default class IdeModel {
     if (this.currentTabFiles.length) {
       const newFocusIdx = i === 0 ? 0 : i - 1;
       this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
-    } else this.resetFocusedFile();
+    } else {
+      console.log('resetFocusedFile is called');
+      this.resetFocusedFile();
+    }
   }
 
   closeTabFile(tabFile: FileData): void {
@@ -355,8 +359,9 @@ export default class IdeModel {
         if (this.focusedFile.id === tabFile.id) {
           this.notifyObservers(Message.TAB_FILE_CLOSE);
         }
+        console.log('this.isLeader model closeTabFile');
         this.openAnotherTabFile(i);
-      }
+      } else if (!this.leader) this.openAnotherTabFile(i);
       this.notifyObservers(Message.CURRENT_TABS);
     }
   }
@@ -382,7 +387,7 @@ export default class IdeModel {
     this.setFollowers([]);
     this.setLeader(null);
     this.roomID = '';
-    this.isHost = true;
+    // this.isHost = true;
     if (!this.isHost) this.setFocusedFile(null);
     this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);

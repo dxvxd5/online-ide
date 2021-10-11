@@ -172,6 +172,10 @@ export default function IdePresenter({
             user: { id: model.userID, name: model.name },
           });
         }
+        /* if (model.isHost) {
+          model.saveContentIntoFile();
+          console.log('presenter model.isHost:');
+        } */
         model.addCollaborator(user);
       }
     );

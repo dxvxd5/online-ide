@@ -212,7 +212,11 @@ export default function EditorPresenter({
   };
 
   const onChange = (content: string | undefined): void => {
-    if (content !== undefined) model.setFileContentToSave(content);
+    if (content !== undefined) {
+      model.setFileContentToSave(content);
+      // TODO: When done with project uncomment this below
+      if (model.roomID) model.saveContentIntoFile();
+    }
   };
 
   return (
