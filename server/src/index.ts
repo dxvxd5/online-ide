@@ -63,6 +63,8 @@ app.get('/login/success', (req, res) => {
 app.use('/users', usersRouter);
 
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: 'http://localhost:3000' } });
+const io = new Server(server, {
+  cors: { origin: 'https://online-ide-1a3f2.web.app/login' },
+});
 socketFunction(io);
 server.listen(PORT, () => console.log(`Server started on port ${PORT}!`));

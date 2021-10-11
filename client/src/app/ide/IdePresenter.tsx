@@ -65,7 +65,7 @@ export default function IdePresenter({
 
   const history = useHistory();
 
-  const serverUrl = 'http://localhost:5000';
+  const serverUrl = 'https://onlineide-server.herokuapp.com/';
 
   function redirect(): void {
     history.push({
