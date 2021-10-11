@@ -4,9 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "node --experimental-modules --es-module-specifier-resolution=node ./public/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "start:dev": "nodemon"
   },
   "keywords": [],
   "author": "",
@@ -39,7 +40,7 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-typescript": "^14.0.0",
-    "eslint-config-node": "^4.1.0",
+    "eslint-config-node": "^2.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-jsx-a11y": "^6.4.1",
