@@ -109,7 +109,8 @@ export default class API {
   static editProject(
     userID: string,
     projectID: string,
-    toUpdate: { lastUpdated?: number }
+    toUpdate: { lastUpdated?: number },
+    jwt: string
   ): Promise<unknown> {
     if (!toUpdate.lastUpdated)
       throw new Error('Nothing to update the file with');
@@ -121,9 +122,9 @@ export default class API {
     const request = {
       url: `users/${userID}/projects/${projectID}`,
       method: 'PATCH' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
       },
       data,
     };
@@ -131,11 +132,15 @@ export default class API {
     return API.call(request);
   }
 
-  static deleteProject(userID: string, projectID: string): Promise<unknown> {
+  static deleteProject(
+    userID: string,
+    projectID: string,
+    jwt: string
+  ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}`,
       method: 'DELETE' as Method,
-      withCredentials: true,
+      headers: { Authorization: `Bearer ${jwt}` },
     };
 
     return API.call(request);

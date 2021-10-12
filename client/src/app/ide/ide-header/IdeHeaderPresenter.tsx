@@ -13,6 +13,7 @@ interface IdeHeaderPresenterProps {
   stopFollowing: () => void;
   leaveProject: () => void;
   removeCollaborator: (collaborator: Collaborator) => void;
+  logout: () => void;
 }
 
 export default function IdeHeaderPresenter({
@@ -23,6 +24,7 @@ export default function IdeHeaderPresenter({
   stopFollowing,
   leaveProject,
   removeCollaborator,
+  logout,
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
@@ -59,13 +61,6 @@ export default function IdeHeaderPresenter({
     diffWith,
     (l1, l2) => l1.id === l2.id
   );
-
-  const logout = () => {
-    model.logout();
-    history.push({
-      pathname: '/login',
-    });
-  };
 
   return (
     <IdeHeaderView

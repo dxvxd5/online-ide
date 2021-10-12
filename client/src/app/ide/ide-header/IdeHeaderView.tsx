@@ -87,8 +87,8 @@ export default function IdeHeaderView({
       {roomID && <div> {roomID}</div>}
       {collaborators &&
         collaborators.map((collaborator) => (
-          <>
-            <span key={collaborator.id}>{collaborator.name}</span>
+          <div key={collaborator.id}>
+            <span>{collaborator.name}</span>
             {isHost && (
               <button
                 type="button"
@@ -97,7 +97,7 @@ export default function IdeHeaderView({
                 X
               </button>
             )}
-          </>
+          </div>
         ))}
     </div>
   );

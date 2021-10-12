@@ -5,7 +5,6 @@ import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import IdeModel, {
   SparseUserData as User,
   CursorPosition,
@@ -63,7 +62,6 @@ export default function IdePresenter({
   model,
 }: IdePresenterProps): JSX.Element {
   const socketRef = useRef<SocketIOClient.Socket>();
-  const roomIdRef = useRef<string>(model.roomID);
   const [socketState, setSocketState] = useState(SocketState.DISABLED);
 
   const history = useHistory();
@@ -157,11 +155,6 @@ export default function IdePresenter({
     });
   };
 
-  const socketLeaveRoom = (roomId: string): void => {
-    emitLeaveRoom(roomId, socketState);
-    resetCollab(socketState);
-  };
-
   useEffect(function () {
     const locationListener = function () {
       const rm = IdeModel.getFromSessionStorage(StorageItem.ROOM);
@@ -235,10 +228,6 @@ export default function IdePresenter({
             user: { id: model.userID, name: model.name },
           });
         }
-        /* if (model.isHost) {
-          model.saveContentIntoFile();
-          console.log('presenter model.isHost:');
-        } */
         model.addCollaborator(user);
       }
     );
@@ -383,47 +372,22 @@ export default function IdePresenter({
       );
   };
 
-  function emitHostLeaveRoom(roomID: string) {
-    if (!socketRef.current) return;
-    socketRef.current.emit(SocketMessage.HOST_LEAVE_ROOM, {
-      roomID,
-      user: { name: model.name, id: model.userID },
-    });
-  }
-
   const socketLeaveRoom = (roomId: string): void => {
     if (!socketRef.current) return;
 
-    if (socketState === SocketState.JOIN) {
-      swalFireLeaveProject(
-        'Are you sure you want to stop collaborating?',
-        'You will be disconnected.'
-      ).then((result) => {
-        if (result.isConfirmed) {
-          socketRef.current.emit(SocketMessage.USER_LEAVE_ROOM, {
-            roomID: roomId,
-            user: { name: model.name, id: model.userID },
-          });
-          model.stopCollaboration();
-          setSocketState(SocketState.DISABLED);
-          redirect();
-        }
-      });
-    }
+    const message = `${
+      socketState === SocketState.HOST ? 'All collaborators' : 'You'
+    } will be disconnected`;
 
-    if (socketState === SocketState.HOST) {
-      swalFireLeaveProject(
-        'Are you sure you want to stop the collaboration?',
-        'All collaborators will be disconnected.'
-      ).then((result) => {
-        if (result.isConfirmed) {
-          emitHostLeaveRoom(roomId);
-          model.stopCollaboration();
-          model.notifyHostLeft();
-          setSocketState(SocketState.DISABLED);
-        }
-      });
-    }
+    swalFireLeaveProject(
+      'Are you sure you want to leave the room?',
+      message
+    ).then((result) => {
+      if (result.isConfirmed) {
+        emitLeaveRoom(roomId, socketState);
+        resetCollab(socketState);
+      }
+    });
   };
 
   const onEditorCursorMoved = (position: CursorPosition) => {
@@ -550,11 +514,8 @@ export default function IdePresenter({
         'All collaborators will be disconnected!'
       ).then((result) => {
         if (result.isConfirmed) {
-          if (!socketRef.current) return;
-          emitHostLeaveRoom(model.roomID);
-          model.stopCollaboration();
-          model.notifyHostLeft();
-          setSocketState(SocketState.DISABLED);
+          emitLeaveRoom(model.roomID, SocketState.HOST);
+          resetCollab(SocketState.HOST);
           redirect();
         }
       });
@@ -577,6 +538,28 @@ export default function IdePresenter({
     });
   };
 
+  const logout = () => {
+    if (model.roomID) {
+      const title = 'Are you sure?';
+      const message = 'Your collaboration session will be ended';
+      swalFireLeaveProject(title, message).then((res) => {
+        if (res.isConfirmed) {
+          emitLeaveRoom(model.roomID, socketState);
+          resetCollab(socketState);
+          model.logout();
+          history.push({
+            pathname: '/login',
+          });
+        }
+      });
+    } else {
+      model.logout();
+      history.push({
+        pathname: '/login',
+      });
+    }
+  };
+
   return (
     <>
       <IdeHeader
@@ -587,6 +570,7 @@ export default function IdePresenter({
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
         model={model}
+        logout={logout}
       />
       <IdeSidebar
         stopFollowing={stopFollowing}

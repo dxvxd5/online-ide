@@ -27,8 +27,6 @@ export default function LoginPresenter({
       setIsLoggedIn(true);
       if (loginError) setLoginError(false);
     } catch (error) {
-      console.log('error: ', error);
-      // TODO: Check error when server side is done
       setLoginErrorInfo('Error. Either username or password is incorrect');
       setLoginError(true);
     }

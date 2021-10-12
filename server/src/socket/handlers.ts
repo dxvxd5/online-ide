@@ -241,7 +241,6 @@ export function removeCollaborator(
 }
 
 export function leaveSocketRoom(socket: Socket, { roomID }: SocketData): void {
-  console.log('socket.data: ', socket.data);
   socket.leave(roomID);
 }
 

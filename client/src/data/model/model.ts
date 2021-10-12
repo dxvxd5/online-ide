@@ -426,7 +426,6 @@ export default class IdeModel {
       const newFocusIdx = i === 0 ? 0 : i - 1;
       this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
     } else {
-      console.log('resetFocusedFile is called');
       this.resetFocusedFile();
     }
   }
@@ -439,16 +438,15 @@ export default class IdeModel {
         if (this.focusedFile.id === tabFile.id) {
           this.notifyObservers(Message.TAB_FILE_CLOSE);
         }
-        console.log('this.isLeader model closeTabFile');
         this.openAnotherTabFile(i);
       } else if (!this.leader) this.openAnotherTabFile(i);
       this.notifyObservers(Message.CURRENT_TABS);
     }
   }
 
-  setCurrentProject(project: CompleteProjectData): void {
+  setCurrentProject(project: CompleteProjectData | null): void {
     this.currentProject = project;
-    this.setCurrentFileTree(project.files, project.name);
+    if (project) this.setCurrentFileTree(project.files, project.name);
     this.notifyObservers(Message.CURRENT_PROJECT);
   }
 
@@ -626,11 +624,8 @@ export default class IdeModel {
     this.resetTabsFiles();
     this.resetFocusedFile();
     this.setCurrentProject(project);
-    // TODO: set back to false when closeProject is called
-    this.isCoding = true;
     this.isHost = true;
     IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
-    // TODO: Remove it from local storage when closeProject is called
     IdeModel.saveToSessionStorage(StorageItem.PROJECT, projectID);
   }
 
@@ -638,6 +633,7 @@ export default class IdeModel {
     this.resetTabsFiles();
     this.resetFocusedFile();
     this.setCurrentProject(null);
+    IdeModel.saveToSessionStorage(StorageItem.PROJECT, null);
   }
 
   async getFileContent(fileID: string): Promise<string> {
@@ -665,7 +661,7 @@ export default class IdeModel {
 
   logout(): void {
     this.stopCollaboration();
-    // TODO: close project
+    this.closeProject();
     this.setName('');
     this.setUserID('');
     this.setUsername('');
@@ -766,7 +762,6 @@ export default class IdeModel {
   }
 
   private getTreeNodeFromPath(path: number[], fileTree = this.currentFileTree) {
-    // TODO: Do nothing if the path correspond to the root
     let node = fileTree;
     let filePath = node.name;
 
@@ -851,7 +846,8 @@ export default class IdeModel {
         this.currentProject.id,
         {
           lastUpdated: Date.now(),
-        }
+        },
+        this.jwt.token
       );
 
       const i = this.projects.findIndex(
@@ -868,7 +864,7 @@ export default class IdeModel {
 
   async deleteProject(projectID: string): Promise<void> {
     try {
-      API.deleteProject(this.userID, projectID);
+      API.deleteProject(this.userID, projectID, this.jwt.token);
       this.deleteProjectFromProjects(projectID);
     } catch {
       console.log('Error when deleting file');

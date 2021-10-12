@@ -40,9 +40,9 @@ export default function EditorTabContentManager({
           setContent(model.contentToSave);
           model.setPersisted(false);
         } else setContent(null);
+
         setFocusedFile(model.getFocusedFile());
         setLoadFileError(false);
-
         const newLanguage = model.focusedFile
           ? getFileLanguage(model.focusedFile.name)
           : '';
@@ -53,7 +53,6 @@ export default function EditorTabContentManager({
     return () => model.removeObserver(focusedFileListener);
   }, []);
 
-  console.log('focusedFile: ', focusedFile);
   if (!focusedFile) return <div>open a file</div>;
   if (!loadFileError && content === null) {
     model

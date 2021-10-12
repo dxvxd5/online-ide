@@ -66,26 +66,22 @@ const PersonalSpaceView = ({
       </div>
       {projects.map((project) => (
         /* eslint-disable jsx-a11y/click-events-have-key-events */
-        <>
-          <div
-            key={project.id}
-            className="PersonalSpace"
-            onClick={() => openProject(project.id)}
-            role="button"
-            tabIndex={0}
-          >
-            <div id="personal-space-overview">
-              <div>
-                <div className={`${'flex-between-projects'}`}>
-                  <div className="project-info-wrapper">
-                    <div className="project-name-wrapper">
-                      <p className="project-name-sign">Project Name:</p>
-                      <p style={{ color: '#ff8c00' }}>{project.name}</p>
-                    </div>
-                    <div>
-                      <p className="project-last-updated-sign">Last updated:</p>
-                      <p>{new Date(project.lastUpdated).toUTCString()}</p>
-                    </div>
+        <div key={project.id} className="PersonalSpace">
+          <div id="personal-space-overview">
+            <div
+              tabIndex={0}
+              role="button"
+              onClick={() => openProject(project.id)}
+            >
+              <div className={`${'flex-between-projects'}`}>
+                <div className="project-info-wrapper">
+                  <div className="project-name-wrapper">
+                    <p className="project-name-sign">Project Name:</p>
+                    <p style={{ color: '#ff8c00' }}>{project.name}</p>
+                  </div>
+                  <div>
+                    <p className="project-last-updated-sign">Last updated:</p>
+                    <p>{new Date(project.lastUpdated).toUTCString()}</p>
                   </div>
                 </div>
               </div>
@@ -96,7 +92,7 @@ const PersonalSpaceView = ({
               X
             </button>
           </div>
-        </>
+        </div>
       ))}
     </>
   );
