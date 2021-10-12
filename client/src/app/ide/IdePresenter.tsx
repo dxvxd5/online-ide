@@ -288,6 +288,24 @@ export default function IdePresenter({
         model.removeFollower(follower);
       }
     );
+
+    socketRef.current.on(SocketMessage.REMOVE_COLLABORATOR, (leaver: User) => {
+      if (!socketRef.current) return;
+      let message;
+      if (leaver.id === model.userID) {
+        socketRef.current.emit(SocketMessage.LEAVE_SOCKET_ROOM, {
+          roomID: model.roomID,
+        });
+        message = `You've been disconnected by the host`;
+        model.stopCollaboration();
+        setSocketState(SocketState.DISABLED);
+        redirect();
+      } else {
+        message = `User ${leaver.name} has been disconnected by the host.`;
+        model.removeCollaborator(leaver);
+      }
+      notifyUserLeft(message);
+    });
   }, [socketState]);
 
   const socketCreateRoom = () => {
@@ -480,9 +498,26 @@ export default function IdePresenter({
     }
   };
 
+  const removeCollaborator = ({ id, name }) => {
+    swalFireLeaveProject(
+      'Are you sure you want to remove this collaborator?',
+      'This collaborator will be disconnected!'
+    ).then((result) => {
+      if (result.isConfirmed) {
+        if (!socketRef.current) return;
+        socketRef.current.emit(SocketMessage.REMOVE_COLLABORATOR, {
+          roomID: model.roomID,
+          user: { id, name },
+        });
+        model.removeCollaborator({ id, name });
+      }
+    });
+  };
+
   return (
     <>
       <IdeHeader
+        removeCollaborator={removeCollaborator}
         leaveProject={leaveProject}
         stopFollowing={stopFollowing}
         startFollowOnClick={startFollowOnClick}

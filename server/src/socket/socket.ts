@@ -68,6 +68,14 @@ const socketFunction = (io: Server): void => {
       SocketHandler.deleteTabFile(socket, data)
     );
 
+    socket.on(SocketMessage.REMOVE_COLLABORATOR, (data) =>
+      SocketHandler.removeCollaborator(socket, data)
+    );
+
+    socket.on(SocketMessage.LEAVE_SOCKET_ROOM, (data) =>
+      SocketHandler.leaveSocketRoom(socket, data)
+    );
+
     socket.on('disconnect', () => SocketHandler.disconnect(socket));
   });
 };

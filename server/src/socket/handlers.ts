@@ -233,6 +233,18 @@ export function deleteTabFile(
   });
 }
 
+export function removeCollaborator(
+  socket: Socket,
+  { user, roomID }: SocketData
+): void {
+  socket.to(roomID).emit(SocketMessage.REMOVE_COLLABORATOR, user);
+}
+
+export function leaveSocketRoom(socket: Socket, { roomID }: SocketData): void {
+  console.log('socket.data: ', socket.data);
+  socket.leave(roomID);
+}
+
 export function disconnect(socket: Socket): void {
   if (socket.data.isHost) {
     hostLeaveRoom(socket, socket.data);

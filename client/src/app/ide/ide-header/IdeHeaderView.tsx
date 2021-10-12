@@ -19,6 +19,7 @@ interface IdeHeaderViewProps {
   stopFollowing: () => void;
   leaveProject: () => void;
   isHost: boolean;
+  removeCollaborator: (collaborator: Collaborator) => void;
 }
 
 export default function IdeHeaderView({
@@ -34,6 +35,7 @@ export default function IdeHeaderView({
   leader,
   leaveProject,
   isHost,
+  removeCollaborator,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -80,7 +82,17 @@ export default function IdeHeaderView({
       {roomID && <div> {roomID}</div>}
       {collaborators &&
         collaborators.map((collaborator) => (
-          <span key={collaborator.id}>{collaborator.name}</span>
+          <>
+            <span key={collaborator.id}>{collaborator.name}</span>
+            {isHost && (
+              <button
+                type="button"
+                onClick={() => removeCollaborator(collaborator)}
+              >
+                X
+              </button>
+            )}
+          </>
         ))}
     </div>
   );

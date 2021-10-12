@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
-import IdeModel from '../../../data/model/model';
+import IdeModel, { Collaborator } from '../../../data/model/model';
 import IdeHeaderView from './IdeHeaderView';
 
 interface IdeHeaderPresenterProps {
@@ -11,6 +11,7 @@ interface IdeHeaderPresenterProps {
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   stopFollowing: () => void;
   leaveProject: () => void;
+  removeCollaborator: (collaborator: Collaborator) => void;
 }
 
 export default function IdeHeaderPresenter({
@@ -20,6 +21,7 @@ export default function IdeHeaderPresenter({
   startFollowOnClick,
   stopFollowing,
   leaveProject,
+  removeCollaborator,
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
@@ -58,6 +60,7 @@ export default function IdeHeaderPresenter({
 
   return (
     <IdeHeaderView
+      removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
       stopFollowing={stopFollowing}
       startFollowOnClick={startFollowOnClick}

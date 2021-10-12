@@ -22,6 +22,8 @@ enum SocketMessage {
   FOLLOW_FILE = 'follow_file',
   SCROLL_CHANGE = 'scroll_change',
   CLOSE_TAB_FILE = 'close_tab_file',
+  REMOVE_COLLABORATOR = 'remove_collaborator',
+  LEAVE_SOCKET_ROOM = 'leave_socket_room',
 }
 
 export default SocketMessage;
