@@ -20,6 +20,7 @@ interface PersonalSpaceViewProp {
   joinCollabProject: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
+  logout: () => void;
 }
 
 const PersonalSpaceView = ({
@@ -30,9 +31,13 @@ const PersonalSpaceView = ({
   openProject,
   handleProjectName,
   joinCollabProject,
+  logout,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
+      <button type="button" onClick={logout}>
+        Log out
+      </button>
       <h1>This is Personal Space Overview</h1>
       <p>Your user id is: {userID}</p>
       <br />

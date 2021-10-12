@@ -35,13 +35,10 @@ export default function PersonalSpacePresenter({
       if (m === Message.PROJECTS_CHANGE)
         setProjects([...model.getProjects()] as ProjectsData[]);
     };
-    console.log('here');
     model.addObserver(projectObserver);
 
     return () => model.removeObserver(projectObserver);
   }, []);
-
-  console.log({ projects });
 
   const handleSortedProjects = (sortProjectsValue: string) => {
     const sortedProjects: ProjectsData[] = projects.sort(
@@ -157,6 +154,13 @@ export default function PersonalSpacePresenter({
     });
   }
 
+  const logout = () => {
+    model.logout();
+    history.push({
+      pathname: '/login',
+    });
+  };
+
   return (
     <PersonalSpaceView
       joinCollabProject={joinCollabProject}
@@ -166,6 +170,7 @@ export default function PersonalSpacePresenter({
       userID={userID}
       sortOptions={sortOptions}
       openProject={openProject}
+      logout={logout}
     />
   );
 }

@@ -6,7 +6,7 @@ import ColorGenerator from '../../utils/color-generator';
 import FileTreeGenerator from '../../utils/file-tree-generator';
 import { NodeState as FileTree } from '../../utils/file-tree-node';
 
-enum StorageItem {
+export enum StorageItem {
   JWT = 'crrt',
   UID = 'crrsub',
   PROJECT = 'crrprj',
@@ -16,6 +16,8 @@ enum StorageItem {
   NAME = 'crnnm',
   UNAME = 'crunnm',
   HOST = 'crrohs',
+  ROOM = 'crrm',
+  SCK = 'crsck',
 }
 
 enum FileOperationType {
@@ -242,7 +244,7 @@ export default class IdeModel {
     this.followers = [];
   }
 
-  private static saveToSessionStorage(key: StorageItem, value: string): void {
+  static saveToSessionStorage(key: StorageItem, value: string): void {
     sessionStorage.setItem(key, btoa(value));
   }
 
@@ -250,7 +252,7 @@ export default class IdeModel {
     localStorage.setItem(key, btoa(value));
   }
 
-  private static getFromSessionStorage(key: StorageItem): unknown {
+  static getFromSessionStorage(key: StorageItem): null | unknown {
     const v = sessionStorage.getItem(key);
     if (!v) return null;
     const atobv = atob(v);
@@ -261,7 +263,7 @@ export default class IdeModel {
     }
   }
 
-  private static getFromLocalStorage(key: StorageItem): unknown {
+  private static getFromLocalStorage(key: StorageItem): null | unknown {
     const v = localStorage.getItem(key);
     if (!v) return null;
     const atobv = atob(v);
@@ -433,6 +435,7 @@ export default class IdeModel {
     this.setFollowers([]);
     this.setLeader(null);
     this.roomID = '';
+    IdeModel.saveToSessionStorage(StorageItem.ROOM, this.roomID);
     if (!this.isHost) this.setFocusedFile(null);
     this.isHost = true;
     IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
@@ -452,7 +455,12 @@ export default class IdeModel {
   startCollaboration(roomID: string, isHost: boolean): void {
     this.colorGenerator = new ColorGenerator();
     this.roomID = roomID;
+    IdeModel.saveToSessionStorage(StorageItem.ROOM, roomID);
     this.isHost = isHost;
+    if (!isHost) {
+      this.resetTabsFiles();
+      this.resetFocusedFile();
+    }
     IdeModel.saveToSessionStorage(StorageItem.HOST, `${isHost}`);
     this.notifyObservers(Message.COLLAB_STARTED);
   }
@@ -612,14 +620,13 @@ export default class IdeModel {
 
   logout(): void {
     this.stopCollaboration();
-    this.name = '';
-    this.userID = '';
-    this.username = '';
+    // TODO: close project
+    this.setName('');
+    this.setUserID('');
+    this.setUsername('');
     this.observers = [];
-    this.projects = [];
-    this.collaborators = [];
+    this.setProjects([]);
     this.currentTabFiles = [];
-    this.isHost = true;
     this.followers = [];
     this.jwt = undefined;
     this.isLoggedIn = false;
@@ -978,39 +985,32 @@ export default class IdeModel {
     this.name = name;
     this.username = uname;
 
-    this.getAllUserProjects().then((projects) => {
+    this.getAllUserProjects().then(() => {
       this.notifyObservers(Message.PROJECTS_CHANGE);
-      console.log('here in model');
     });
     this.isLoggedIn = true;
 
     this.persisted = true;
 
-    const projId = IdeModel.getFromSessionStorage(
-      StorageItem.PROJECT
-    ) as string;
+    const isHost = IdeModel.getFromSessionStorage(StorageItem.HOST);
+    if (isHost !== null) this.isHost = isHost as boolean;
+
+    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
     if (!projId) return;
 
-    const focFile = IdeModel.getFromSessionStorage(
-      StorageItem.FOC_FILE
-    ) as FileData;
+    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
 
-    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS) as FileData[];
+    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
 
-    const content = IdeModel.getFromSessionStorage(
-      StorageItem.CONTENT
-    ) as string;
+    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
 
-    const isHost = IdeModel.getFromSessionStorage(StorageItem.HOST) as boolean;
-    if (isHost !== null) this.isHost = isHost;
-
-    this.fetchProject(projId)
+    this.fetchProject(projId as string)
       .then((project) => {
         this.currentProject = project;
         this.setCurrentFileTree(project.files, project.name);
-        if (content !== undefined) this.contentToSave = content;
-        if (focFile) this.setFocusedFile(focFile);
-        if (tabs) this.setCurrentTabFiles(tabs);
+        if (content !== undefined) this.contentToSave = content as string;
+        if (focFile) this.setFocusedFile(focFile as FileData);
+        if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
         this.notifyObservers(Message.UPDATE_TREE);
         this.isCoding = true;
       })

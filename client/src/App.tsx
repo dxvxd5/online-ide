@@ -1,13 +1,14 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { HashRouter as Router, Route, Redirect } from 'react-router-dom';
 import IdeModel from './data/model/model';
 import LoginPresenter from './app/login/LoginPresenter';
 import PersonalSpacePresenter from './app/personal-space/PersonalSpacePresenter';
 
 import IdePresenter from './app/ide/IdePresenter';
 import SignupPresenter from './app/signup/SignupPresenter';
+import RoutePresenter from './routePresenter';
 
 function App(): JSX.Element {
   const ideModel = new IdeModel();
@@ -39,6 +40,7 @@ function App(): JSX.Element {
         component={() => <IdePresenter model={ideModel} />}
       />
       <Toaster />
+      <RoutePresenter model={ideModel} />
     </Router>
   );
 }
