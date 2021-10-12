@@ -43,10 +43,7 @@ export default function EditorTabContentManager({
 
         setFocusedFile(model.getFocusedFile());
         setLoadFileError(false);
-        const newLanguage = model.focusedFile
-          ? getFileLanguage(model.focusedFile.name)
-          : '';
-        setLanguage(newLanguage);
+        setLanguage(model.language);
       }
     };
     model.addObserver(focusedFileListener);

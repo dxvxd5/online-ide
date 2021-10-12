@@ -5,6 +5,7 @@ import Message from './message';
 import ColorGenerator from '../../utils/color-generator';
 import FileTreeGenerator from '../../utils/file-tree-generator';
 import { NodeState as FileTree } from '../../utils/file-tree-node';
+import { getFileLanguage } from '../../utils/file-extension';
 
 export enum StorageItem {
   JWT = 'crrt',
@@ -234,6 +235,8 @@ export default class IdeModel {
 
   persisted = false;
 
+  language!: string;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -289,6 +292,10 @@ export default class IdeModel {
     this.name = name;
     this.notifyObservers(Message.NAME_CHANGE);
     IdeModel.saveToLocalStorage(StorageItem.NAME, name);
+  }
+
+  setLanguage(language: string): void {
+    this.language = language;
   }
 
   setJWT(token: JWT): void {
@@ -454,6 +461,7 @@ export default class IdeModel {
     if (!file && !this.focusedFile) return;
     if (file?.id === this.focusedFile?.id) return;
 
+    this.setLanguage(getFileLanguage(file.name));
     this.saveContentIntoFile();
     this.focusedFile = file;
     IdeModel.saveToSessionStorage(StorageItem.FOC_FILE, JSON.stringify(file));
@@ -776,33 +784,33 @@ export default class IdeModel {
     return node;
   }
 
-  private async fileOperation(o: FileOperation): Promise<FileData | void> {
-    if (!this.isHost) return;
+  // private async fileOperation(o: FileOperation): Promise<FileData | void> {
+  //   if (!this.isHost) return;
 
-    switch (o.type) {
-      case FileOperationType.ADD: {
-        // eslint-disable-next-line consistent-return
-        return this.createFile(
-          (o as FileCreateOperation).name,
-          (o as FileCreateOperation).creationDate
-        );
-      }
-      case FileOperationType.RENAME: {
-        this.renameFile(
-          (o as FileRenameOperation).name,
-          (o as FileRenameOperation).lastUpdated,
-          (o as FileRenameOperation).fileID
-        );
-        break;
-      }
-      case FileOperationType.DELETE: {
-        this.deleteFile((o as FileDeleteOperation).fileID);
-        break;
-      }
-      default:
-        break;
-    }
-  }
+  //   switch (o.type) {
+  //     case FileOperationType.ADD: {
+  //       // eslint-disable-next-line consistent-return
+  //       return this.createFile(
+  //         (o as FileCreateOperation).name,
+  //         (o as FileCreateOperation).creationDate
+  //       );
+  //     }
+  //     case FileOperationType.RENAME: {
+  //       this.renameFile(
+  //         (o as FileRenameOperation).name,
+  //         (o as FileRenameOperation).lastUpdated,
+  //         (o as FileRenameOperation).fileID
+  //       );
+  //       break;
+  //     }
+  //     case FileOperationType.DELETE: {
+  //       this.deleteFile((o as FileDeleteOperation).fileID);
+  //       break;
+  //     }
+  //     default:
+  //       break;
+  //   }
+  // }
 
   private async createFile(
     name: string,
@@ -833,6 +841,7 @@ export default class IdeModel {
       );
 
       if (this.currentTabFiles[i].id === this.focusedFile?.id) {
+        this.setLanguage(getFileLanguage(this.currentTabFiles[i].name));
         this.setFocusedFile(this.currentTabFiles[i]);
         this.notifyObservers(Message.FOCUSED_FILE);
       }
