@@ -28,6 +28,9 @@ export default function PersonalSpacePresenter({
   const history = useHistory();
 
   useEffect(() => {
+    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+    if (model.persisted) model.setPersisted(false);
+
     const projectObserver = (m: Message) => {
       if (m === Message.PROJECTS_CHANGE)
         setProjects([...model.getProjects()] as ProjectsData[]);
@@ -151,6 +154,13 @@ export default function PersonalSpacePresenter({
     });
   }
 
+  const logout = () => {
+    model.logout();
+    history.push({
+      pathname: '/login',
+    });
+  };
+
   return (
     <PersonalSpaceView
       joinCollabProject={joinCollabProject}
@@ -160,6 +170,7 @@ export default function PersonalSpacePresenter({
       userID={userID}
       sortOptions={sortOptions}
       openProject={openProject}
+      logout={logout}
     />
   );
 }

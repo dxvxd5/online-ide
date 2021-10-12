@@ -17,6 +17,7 @@ interface IdeHeaderViewProps {
   saveFileOnClick: () => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   stopFollowing: () => void;
+  logout: () => void;
 }
 
 export default function IdeHeaderView({
@@ -30,9 +31,13 @@ export default function IdeHeaderView({
   stopFollowing,
   potentialLeaders,
   leader,
+  logout,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
+      <button type="button" onClick={logout}>
+        Log out
+      </button>
       {!isCollab && (
         <>
           <button type="button" onClick={() => createRoom()}>
@@ -41,21 +46,30 @@ export default function IdeHeaderView({
         </>
       )}
       {isCollab && (
-        <button type="button" onClick={() => leaveRoom(roomID)}>
-          Leave room
-        </button>
+        <>
+          <button type="button" onClick={() => leaveRoom(roomID)}>
+            Leave room
+          </button>
+          <select
+            id="selectLeaderToFollow"
+            value=""
+            onChange={startFollowOnClick}
+          >
+            <option>{leader ? leader.name : 'Follow...'}</option>
+            {potentialLeaders.map((collaborator) => (
+              <option
+                value={JSON.stringify(collaborator)}
+                key={collaborator.id}
+              >
+                {collaborator.name}
+              </option>
+            ))}
+          </select>
+          <button type="button" onClick={() => stopFollowing()}>
+            Stop Following
+          </button>
+        </>
       )}
-      <select id="selectLeaderToFollow" value="" onChange={startFollowOnClick}>
-        <option>{leader ? leader.name : 'Follow...'}</option>
-        {potentialLeaders.map((collaborator) => (
-          <option value={JSON.stringify(collaborator)} key={collaborator.id}>
-            {collaborator.name}
-          </option>
-        ))}
-      </select>
-      <button type="button" onClick={() => stopFollowing()}>
-        Stop Following
-      </button>
       <button type="button" onClick={() => saveFileOnClick()}>
         Save File
       </button>

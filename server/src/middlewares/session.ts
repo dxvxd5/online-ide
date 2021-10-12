@@ -1,18 +1,19 @@
-import { FirestoreStore } from '@google-cloud/connect-firestore';
+import store from 'connect-session-firebase';
 import session from 'express-session';
 
 import { SESSION_PRIVATE_KEY } from '../config/env.variables';
-import { firestore } from '../config/firebase';
+import { realtimeDB } from '../config/firebase';
 
-const fireSessionStore = new FirestoreStore({
-  dataset: firestore,
-  kind: 'express-sessions',
+const StoreConstructor = store(session);
+const FirebaseStore = new StoreConstructor({
+  database: realtimeDB,
+  reapInterval: 24 * 60 * 60 * 1000,
 });
 
 export default session({
-  store: fireSessionStore,
+  store: FirebaseStore,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   secret: SESSION_PRIVATE_KEY,
   // 1 day
   cookie: { maxAge: 24 * 60 * 60 * 1000 },

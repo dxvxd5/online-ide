@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import io from 'socket.io-client';
 import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import IdeModel, {
   FileData,
   FollowerData,
   ScrollPosition,
+  StorageItem,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
@@ -60,7 +62,7 @@ export default function IdePresenter({
   model,
 }: IdePresenterProps): JSX.Element {
   const socketRef = useRef<SocketIOClient.Socket>();
-
+  const roomIdRef = useRef<string>(model.roomID);
   const [socketState, setSocketState] = useState(SocketState.DISABLED);
 
   const history = useHistory();
@@ -85,6 +87,10 @@ export default function IdePresenter({
     });
     const isHost = socketstate === SocketState.HOST;
     model.startCollaboration(roomId, isHost);
+    IdeModel.saveToSessionStorage(
+      StorageItem.SCK,
+      `${isHost ? SocketState.HOST : SocketState.JOIN}`
+    );
     setSocketState(socketstate);
   }
 
@@ -99,20 +105,76 @@ export default function IdePresenter({
     });
   };
 
+  const resetCollab = (state: SocketState) => {
+    if (state === SocketState.JOIN) {
+      model.stopCollaboration();
+      setSocketState(SocketState.DISABLED);
+      redirect();
+    } else if (state === SocketState.HOST) {
+      model.stopCollaboration();
+      model.notifyHostLeft();
+      setSocketState(SocketState.DISABLED);
+    }
+  };
+
+  const emitLeaveRoom = (roomId: string, state: SocketState) => {
+    if (!socketRef.current) return;
+    const message =
+      state === SocketState.HOST
+        ? SocketMessage.HOST_LEAVE_ROOM
+        : SocketMessage.USER_LEAVE_ROOM;
+
+    socketRef.current.emit(message, {
+      roomID: roomId,
+      user: { name: model.name, id: model.userID },
+    });
+  };
+
+  const socketLeaveRoom = (roomId: string): void => {
+    emitLeaveRoom(roomId, socketState);
+    resetCollab(socketState);
+  };
+
+  useEffect(function () {
+    const locationListener = function () {
+      const rm = IdeModel.getFromSessionStorage(StorageItem.ROOM);
+      const sck = IdeModel.getFromSessionStorage(StorageItem.SCK);
+
+      if (rm && window.location.hash === '#/me') {
+        emitLeaveRoom(rm as string, sck as SocketState);
+        resetCollab(sck as SocketState);
+      }
+    };
+    window.addEventListener('popstate', locationListener);
+
+    return function () {
+      window.removeEventListener('popstate', locationListener);
+    };
+  }, []);
+
   useEffect(() => {
-    const currentFocusedFileListener = (m: Message) => {
+    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+
+    const ideListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
         emitFocusedFile(model.focusedFile);
       }
     };
-    model.addObserver(currentFocusedFileListener);
-
+    model.addObserver(ideListener);
+    if (model.persisted && !model.isHost) {
+      history.push({ pathname: '/me' });
+      Swal.fire(
+        "You've been disconnected from the collaboration session. Please join again."
+      );
+    }
     if (!model.isHost) {
-      // When user join roon we initiate the socket
+      // When user join room we initiate the socket
       intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
     }
 
-    return () => model.removeObserver(currentFocusedFileListener);
+    return () => {
+      model.removeObserver(ideListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -123,6 +185,7 @@ export default function IdePresenter({
       model.saveContentIntoFile();
       return false;
     });
+
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {
@@ -242,32 +305,6 @@ export default function IdePresenter({
       .then((roomID) =>
         intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST)
       );
-  };
-
-  const socketLeaveRoom = (roomId: string): void => {
-    if (!socketRef.current) return;
-
-    const message =
-      socketState === SocketState.HOST
-        ? SocketMessage.HOST_LEAVE_ROOM
-        : SocketMessage.USER_LEAVE_ROOM;
-
-    socketRef.current.emit(message, {
-      roomID: roomId,
-      user: { name: model.name, id: model.userID },
-    });
-
-    if (socketState === SocketState.JOIN) {
-      model.stopCollaboration();
-      setSocketState(SocketState.DISABLED);
-      redirect();
-    }
-
-    if (socketState === SocketState.HOST) {
-      model.stopCollaboration();
-      model.notifyHostLeft();
-      setSocketState(SocketState.DISABLED);
-    }
   };
 
   const onEditorCursorMoved = (position: CursorPosition) => {

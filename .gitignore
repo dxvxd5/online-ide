@@ -117,3 +117,6 @@ dist
 .firebase
 
 public
+
+# rsa keys
+server/keys

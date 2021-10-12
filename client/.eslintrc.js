@@ -5,7 +5,6 @@ module.exports = {
     node: true,
   },
   extends: [
-    'webpack',
     'airbnb',
     'airbnb-typescript',
     'plugin:react/recommended',

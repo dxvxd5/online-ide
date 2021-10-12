@@ -20,6 +20,7 @@ interface PersonalSpaceViewProp {
   joinCollabProject: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
+  logout: () => void;
 }
 
 const PersonalSpaceView = ({
@@ -30,9 +31,13 @@ const PersonalSpaceView = ({
   openProject,
   handleProjectName,
   joinCollabProject,
+  logout,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
     <>
+      <button type="button" onClick={logout}>
+        Log out
+      </button>
       <h1>This is Personal Space Overview</h1>
       <p>Your user id is: {userID}</p>
       <br />
@@ -77,13 +82,6 @@ const PersonalSpaceView = ({
                   <div>
                     <p className="project-last-updated-sign">Last updated:</p>
                     <p>{new Date(project.lastUpdated).toUTCString()}</p>
-                  </div>
-                  <div>
-                    <p className="project-shared-sign">Is Project Shared?</p>
-                    <p>{project.shared.toString()}</p>
-                  </div>
-                  <div>
-                    <p className="project-param-sign">Another param?</p>
                   </div>
                 </div>
               </div>
