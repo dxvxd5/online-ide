@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import IdeModel, { CursorPosition, FileData } from '../../../data/model/model';
+import IdeModel, { CursorPosition } from '../../../data/model/model';
 import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
@@ -36,11 +36,12 @@ export default function EditorTabContentManager({
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        // if (focusedFile?.id !== model.focusedFile?.id) {
+        if (model.persisted) {
+          setContent(model.contentToSave);
+          model.setPersisted(false);
+        } else setContent(null);
         setFocusedFile(model.getFocusedFile());
-        setContent(null);
         setLoadFileError(false);
-        // }
 
         const newLanguage = model.focusedFile
           ? getFileLanguage(model.focusedFile.name)

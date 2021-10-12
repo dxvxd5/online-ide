@@ -20,6 +20,7 @@ interface IdeHeaderViewProps {
   leaveProject: () => void;
   isHost: boolean;
   removeCollaborator: (collaborator: Collaborator) => void;
+  logout: () => void;
 }
 
 export default function IdeHeaderView({
@@ -36,9 +37,13 @@ export default function IdeHeaderView({
   leaveProject,
   isHost,
   removeCollaborator,
+  logout,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
+      <button type="button" onClick={logout}>
+        Log out
+      </button>
       {isHost && (
         <button type="button" onClick={() => leaveProject()}>
           Go back

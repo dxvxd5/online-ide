@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUser } from '../controllers/user.controllers';
+import * as UserController from '../controllers/user.controllers';
 import checkAuthentication from '../middlewares/authentication';
 import checkAuthorization from '../middlewares/authorization';
 import filesRouter from './file.routes';
@@ -16,6 +16,6 @@ usersRouter.use('/:userID/projects', projectsRouter);
 usersRouter.use('/:userID/files', filesRouter);
 
 // Users routing
-usersRouter.get('/:userID', getUser);
+usersRouter.get('/:userID', UserController.getUser);
 
 export default usersRouter;

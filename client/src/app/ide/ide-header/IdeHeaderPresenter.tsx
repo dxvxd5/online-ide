@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
 import IdeModel, { Collaborator } from '../../../data/model/model';
@@ -27,6 +28,7 @@ export default function IdeHeaderPresenter({
   const [roomID, setRoomID] = useState(model.roomID);
   const [leader, setLeader] = useState(model.leader);
   const [followers, setFollowers] = useState(model.getFollowerAsUsers());
+  const history = useHistory();
 
   useEffect(() => {
     function collabListener(m: Message) {
@@ -58,6 +60,13 @@ export default function IdeHeaderPresenter({
     (l1, l2) => l1.id === l2.id
   );
 
+  const logout = () => {
+    model.logout();
+    history.push({
+      pathname: '/login',
+    });
+  };
+
   return (
     <IdeHeaderView
       removeCollaborator={removeCollaborator}
@@ -73,6 +82,7 @@ export default function IdeHeaderPresenter({
       saveFileOnClick={saveFileOnClick}
       leader={leader}
       isHost={model.isHost}
+      logout={logout}
     />
   );
 }

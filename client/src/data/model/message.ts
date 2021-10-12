@@ -11,6 +11,9 @@ enum Message {
   // when the user is logged in
   LOGIN,
 
+  // when the user is logged out
+  LOGOUT,
+
   // When the user has signed up
   SIGNUP,
 

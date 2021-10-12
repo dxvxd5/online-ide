@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom';
-import React, { useState } from 'react';
-import IdeModel from '../../data/model/model';
+import React, { useState, useEffect } from 'react';
+import IdeModel, { JWT } from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
 import Loader from '../components/loader/Loader';
 import SingupView from './SignupView';
@@ -43,6 +43,10 @@ export default function SingupPresenter({
       setSignupError(true);
     }
   };
+
+  useEffect(() => {
+    if (model.isLoggedIn) history.push({ pathname: '/me' });
+  }, []);
 
   const logIn = () => {
     history.push({ pathname: '/login' });

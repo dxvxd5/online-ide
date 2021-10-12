@@ -1,5 +1,5 @@
 # TS output folder
-dist
+public
 node_modules
 .eslintrc.js
 .eslintrc.cjs

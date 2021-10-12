@@ -11,13 +11,11 @@ interface Request {
   method: Method;
   headers?: Record<string, string>;
   data?: Record<string, unknown> | string;
-  withCredentials?: boolean;
 }
 export default class API {
   private static fetcher = axios.create({
     baseURL: API_BASE_URL,
     responseType: 'json',
-    // timeout: 1000,
   });
 
   private static call(request: Request): Promise<unknown> {
@@ -49,13 +47,11 @@ export default class API {
     const request = {
       url: 'login',
       method: 'POST' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
       data: { username, password },
     };
-
     return API.call(request);
   }
 
@@ -67,7 +63,6 @@ export default class API {
     const request = {
       url: 'signup',
       method: 'POST' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -77,11 +72,13 @@ export default class API {
     return API.call(request);
   }
 
-  static getAllUserProjects(userID: string): Promise<unknown> {
+  static getAllUserProjects(userID: string, jwt: string): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects`,
       method: 'GET' as Method,
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     };
 
     return API.call(request).then((data) => {
@@ -93,14 +90,15 @@ export default class API {
   static createProject(
     userID: string,
     name: string,
-    creationDate: number
+    creationDate: number,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/create`,
       method: 'POST' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
       },
       data: { name, creationDate },
     };
@@ -147,7 +145,8 @@ export default class API {
     userID: string,
     projectID: string,
     fileID: string,
-    toUpdate: { name?: string; lastUpdated?: number }
+    toUpdate: { name?: string; lastUpdated?: number },
+    jwt: string
   ): Promise<unknown> {
     if (!(toUpdate.name || toUpdate.lastUpdated))
       throw new Error('Nothing to update the file with');
@@ -160,9 +159,9 @@ export default class API {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}`,
       method: 'PATCH' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
       },
       data,
     };
@@ -173,12 +172,15 @@ export default class API {
   static deleteFile(
     userID: string,
     projectID: string,
-    fileID: string
+    fileID: string,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}`,
       method: 'DELETE' as Method,
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     };
 
     return API.call(request);
@@ -188,14 +190,15 @@ export default class API {
     userID: string,
     projectID: string,
     name: string,
-    creationDate: number
+    creationDate: number,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/create`,
       method: 'POST' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
       },
       data: { name, creationDate },
     };
@@ -206,26 +209,33 @@ export default class API {
     userID: string,
     projectID: string,
     fileID: string,
-    contentStr: string
+    contentStr: string,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
       method: 'PUT' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'text/plain;charset=utf-16',
         'Content-Transfer-Encoding': 'BASE64',
+        Authorization: `Bearer ${jwt}`,
       },
       data: btoa(contentStr),
     };
     return API.call(request);
   }
 
-  static async getProject(userID: string, projectID: string): Promise<unknown> {
+  static async getProject(
+    userID: string,
+    projectID: string,
+    jwt: string
+  ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}`,
       method: 'GET' as Method,
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     };
 
     return API.call(request);
@@ -233,24 +243,31 @@ export default class API {
 
   static async getCollabProject(
     userID: string,
-    collabID: string
+    collabID: string,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/collab/${collabID}`,
       method: 'GET' as Method,
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     };
 
     return API.call(request);
   }
 
-  static createCollab(userID: string, projectID: string): Promise<unknown> {
+  static createCollab(
+    userID: string,
+    projectID: string,
+    jwt: string
+  ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/collab`,
       method: 'POST' as Method,
-      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
       },
     };
 
@@ -263,12 +280,15 @@ export default class API {
   static async getFileContent(
     userID: string,
     projectID: string,
-    fileID: string
+    fileID: string,
+    jwt: string
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
       method: 'GET' as Method,
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     };
     return API.call(request).then((data) => {
       return atob(data as string);

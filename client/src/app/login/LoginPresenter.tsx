@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import IdeModel from '../../data/model/model';
 import LoginView from './LoginView';
@@ -33,6 +33,10 @@ export default function LoginPresenter({
       setLoginError(true);
     }
   };
+
+  useEffect(() => {
+    if (model.isLoggedIn) history.push({ pathname: '/me' });
+  }, []);
 
   const signUp = () => {
     history.push({ pathname: '/signup' });
