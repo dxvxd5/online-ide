@@ -133,8 +133,8 @@ export default function IdePresenter({
   const resetCollab = (state: SocketState) => {
     if (state === SocketState.JOIN) {
       model.stopCollaboration();
-      setSocketState(SocketState.DISABLED);
       redirect();
+      setSocketState(SocketState.DISABLED);
     } else if (state === SocketState.HOST) {
       model.stopCollaboration();
       model.notifyHostLeft();
