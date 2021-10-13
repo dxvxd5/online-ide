@@ -92,7 +92,7 @@ These are the technologies that we will certainly need for this project and thei
 | Use cookies                                                  | Certainly to save some values we want to persist (like the id of the last file opened by the user or the theme used by the user) | 5    ✅  |
 | Good use of GET, POST, PUT, DELETE requests                  | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request | 5 ✅|
 | Good error codes                                             | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅ |
-| Deploy server without docker                                 |                                                              | 15     |
+| Deploy server without docker                                 |                                                              | 15  ✅ |
 | Handle authorization  |                               | 10      |
 |                                                              | **Total**                                                    | **70** |
 
