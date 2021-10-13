@@ -461,7 +461,7 @@ export default class IdeModel {
     if (!file && !this.focusedFile) return;
     if (file?.id === this.focusedFile?.id) return;
 
-    this.setLanguage(getFileLanguage(file.name));
+    if (file) this.setLanguage(getFileLanguage(file.name));
     this.saveContentIntoFile();
     this.focusedFile = file;
     IdeModel.saveToSessionStorage(StorageItem.FOC_FILE, JSON.stringify(file));
