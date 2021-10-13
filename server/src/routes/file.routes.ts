@@ -4,7 +4,7 @@ import * as FileController from '../controllers/file.controllers';
 
 const filesRouter = express.Router();
 
-filesRouter.get('/', FileController.getFilesFromUser);
+// filesRouter.get('/', FileController.getFilesFromUser);
 filesRouter.post('/create', FileController.createFile);
 filesRouter.get('/:fileID', FileController.getFile);
 filesRouter.patch('/:fileID', FileController.editFile);

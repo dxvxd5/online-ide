@@ -110,7 +110,8 @@ export default class API {
     userID: string,
     projectID: string,
     toUpdate: { lastUpdated?: number },
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
     if (!toUpdate.lastUpdated)
       throw new Error('Nothing to update the file with');
@@ -118,6 +119,7 @@ export default class API {
 
     let data = {};
     if (lastUpdated) data = { ...data, lastUpdated };
+    if (collabID) data = { ...data, collabID };
 
     const request = {
       url: `users/${userID}/projects/${projectID}`,
@@ -151,7 +153,8 @@ export default class API {
     projectID: string,
     fileID: string,
     toUpdate: { name?: string; lastUpdated?: number },
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
     if (!(toUpdate.name || toUpdate.lastUpdated))
       throw new Error('Nothing to update the file with');
@@ -160,6 +163,7 @@ export default class API {
     let data = {};
     if (name) data = { ...data, name };
     if (lastUpdated) data = { ...data, lastUpdated };
+    if (collabID) data = { ...data, collabID };
 
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}`,
@@ -178,14 +182,17 @@ export default class API {
     userID: string,
     projectID: string,
     fileID: string,
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}`,
       method: 'DELETE' as Method,
       headers: {
         Authorization: `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
       },
+      data: { collabID },
     };
 
     return API.call(request);
@@ -196,7 +203,8 @@ export default class API {
     projectID: string,
     name: string,
     creationDate: number,
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/create`,
@@ -205,7 +213,7 @@ export default class API {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt}`,
       },
-      data: { name, creationDate },
+      data: { name, creationDate, collabID },
     };
     return API.call(request);
   }
@@ -215,17 +223,17 @@ export default class API {
     projectID: string,
     fileID: string,
     contentStr: string,
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
       method: 'PUT' as Method,
       headers: {
-        'Content-Type': 'text/plain;charset=utf-16',
-        'Content-Transfer-Encoding': 'BASE64',
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt}`,
       },
-      data: btoa(contentStr),
+      data: { content: btoa(contentStr), collabID },
     };
     return API.call(request);
   }
@@ -256,7 +264,9 @@ export default class API {
       method: 'GET' as Method,
       headers: {
         Authorization: `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
       },
+      data: { collabID },
     };
 
     return API.call(request);
@@ -286,14 +296,18 @@ export default class API {
     userID: string,
     projectID: string,
     fileID: string,
-    jwt: string
+    jwt: string,
+    collabID: null | string = null
   ): Promise<unknown> {
+    console.log({ collabID });
     const request = {
       url: `users/${userID}/projects/${projectID}/files/${fileID}/content`,
       method: 'GET' as Method,
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${jwt}`,
       },
+      data: { collabID },
     };
     return API.call(request).then((data) => {
       return atob(data as string);

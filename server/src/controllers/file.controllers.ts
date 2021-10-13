@@ -225,7 +225,7 @@ export async function updateFileContent(
     const fileID = getFileIdFromReq(req, res);
     if (!fileID) return;
 
-    const content = req.body as string;
+    const content = req.body.content as string;
     if (_.isNil(content)) {
       res.status(400).json({
         error: new HttpError('No file content was provided', 400),

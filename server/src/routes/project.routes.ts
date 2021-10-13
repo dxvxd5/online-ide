@@ -1,8 +1,11 @@
 import express from 'express';
 import * as ProjectController from '../controllers/project.controllers';
+import checkAuthorization from '../middlewares/authorization';
 import filesRouter from './file.routes';
 
 const projectsRouter = express.Router();
+
+projectsRouter.use(checkAuthorization);
 
 // Subsequent routing
 projectsRouter.use('/:projectID/files', filesRouter);

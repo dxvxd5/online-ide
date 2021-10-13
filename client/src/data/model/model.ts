@@ -598,7 +598,8 @@ export default class IdeModel {
       this.currentProject.id,
       this.focusedFile.id,
       this.contentToSave,
-      this.jwt.token
+      this.jwt.token,
+      this.roomID
     );
 
     API.editFile(
@@ -608,7 +609,8 @@ export default class IdeModel {
       {
         lastUpdated: Date.now(),
       },
-      this.jwt.token
+      this.jwt.token,
+      this.roomID
     );
 
     this.editProject();
@@ -650,7 +652,8 @@ export default class IdeModel {
       this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
       fileID,
-      this.jwt.token
+      this.jwt.token,
+      this.roomID
     )) as string;
   }
 
@@ -784,34 +787,6 @@ export default class IdeModel {
     return node;
   }
 
-  // private async fileOperation(o: FileOperation): Promise<FileData | void> {
-  //   if (!this.isHost) return;
-
-  //   switch (o.type) {
-  //     case FileOperationType.ADD: {
-  //       // eslint-disable-next-line consistent-return
-  //       return this.createFile(
-  //         (o as FileCreateOperation).name,
-  //         (o as FileCreateOperation).creationDate
-  //       );
-  //     }
-  //     case FileOperationType.RENAME: {
-  //       this.renameFile(
-  //         (o as FileRenameOperation).name,
-  //         (o as FileRenameOperation).lastUpdated,
-  //         (o as FileRenameOperation).fileID
-  //       );
-  //       break;
-  //     }
-  //     case FileOperationType.DELETE: {
-  //       this.deleteFile((o as FileDeleteOperation).fileID);
-  //       break;
-  //     }
-  //     default:
-  //       break;
-  //   }
-  // }
-
   private async createFile(
     name: string,
     creationDate: number
@@ -822,7 +797,8 @@ export default class IdeModel {
         this.currentProject.id,
         name,
         creationDate,
-        this.jwt.token
+        this.jwt.token,
+        this.roomID
       );
       return fileData as FileData;
     } catch {
@@ -856,7 +832,8 @@ export default class IdeModel {
         {
           lastUpdated: Date.now(),
         },
-        this.jwt.token
+        this.jwt.token,
+        this.roomID
       );
 
       const i = this.projects.findIndex(
@@ -894,7 +871,8 @@ export default class IdeModel {
           name,
           lastUpdated,
         },
-        this.jwt.token
+        this.jwt.token,
+        this.roomID
       );
       this.renameTabFile(fileID, name);
     } catch {
@@ -939,7 +917,8 @@ export default class IdeModel {
         this.isHost ? this.userID : this.currentProject.owner.id,
         this.currentProject.id,
         fileID,
-        this.jwt.token
+        this.jwt.token,
+        this.roomID
       );
       this.replaceFocusedFile(fileID);
       this.deleteTabFile(fileID);

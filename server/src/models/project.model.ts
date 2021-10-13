@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import {
   firestore,
   getProjectBasePath,
@@ -166,15 +167,34 @@ export default class Project {
     return collabRef.id;
   }
 
-  static async getCollabProject(
+  // eslint-disable-next-line class-methods-use-this
+  private static async _getCollabProject(
     collabID: string
-  ): Promise<CompleteProjectData | null> {
+  ): Promise<null | FirebaseFirestore.DocumentReference> {
     const collabData = (
       await firestore.doc(getCollabPath(collabID)).get()
     ).data();
 
     if (!collabData) return null;
     const project = collabData.project as FirebaseFirestore.DocumentReference;
+
+    return project;
+  }
+
+  static async isProjectInCollab(
+    projectID: string,
+    collabID: string
+  ): Promise<boolean> {
+    const collabProject = await Project._getCollabProject(collabID);
+    if (!collabProject) return false;
+    return collabProject.id === projectID;
+  }
+
+  static async getCollabProject(
+    collabID: string
+  ): Promise<CompleteProjectData | null> {
+    const project = await Project._getCollabProject(collabID);
+    if (!project) return null;
 
     const projectData = (await project.get()).data() as ProjectData;
 
