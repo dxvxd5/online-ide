@@ -1,0 +1,36 @@
+.button {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+}
+
+.button:active {
+  border: 0.125rem solid #0070ba;
+  box-shadow: 0 0 0 0.25rem #bfdbee;
+  text-decoration: underline;
+}
+
+.button:hover {
+  cursor: pointer;
+  background-color: white;
+}
+
+.button--main {
+  background-color: #667eea;
+}
+
+.button--main:hover {
+  color: #667eea;
+  border: #667eea solid thin;
+}
+
+.button--secondary {
+  background-color: #4a5568;
+}
+
+.button--secondary:hover {
+  color: #4a5568;
+  border: #4a5568 solid thin;
+}

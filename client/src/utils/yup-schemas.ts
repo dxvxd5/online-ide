@@ -19,6 +19,6 @@ export type SignupSchemaType = typeof signupSchema;
 
 export const loginSchema = Yup.object().shape({
   username: Yup.string().required('required'),
-  password: Yup.string().required(),
+  password: Yup.string().required('required'),
 });
 export type LoginSchemaType = typeof loginSchema;

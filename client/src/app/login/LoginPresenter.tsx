@@ -21,13 +21,13 @@ export default function LoginPresenter({
   const [projectError, setProjectError] = useState(false);
   const history = useHistory();
 
-  const click = async ({ username, password }: Record<string, string>) => {
+  const logIn = async ({ username, password }: Record<string, string>) => {
     try {
       await model.login(username, password);
       setIsLoggedIn(true);
       if (loginError) setLoginError(false);
     } catch (error) {
-      setLoginErrorInfo('Error. Either username or password is incorrect');
+      setLoginErrorInfo('Either username or password is incorrect');
       setLoginError(true);
     }
   };
@@ -77,7 +77,7 @@ export default function LoginPresenter({
       loginSchema={loginSchema}
       loginError={loginError}
       loginErrorInfo={loginErrorInfo}
-      click={click}
+      logIn={logIn}
     />
   );
 }
