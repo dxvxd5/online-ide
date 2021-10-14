@@ -2,7 +2,7 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { SignupSchemaType } from '../../utils/yup-schemas';
 
-import Button from '../components/button/button';
+import Button from '../components/button/Button';
 
 import '../../assets/styles/form.css';
 
@@ -26,7 +26,7 @@ const SingupView = ({
   logIn,
 }: SingupViewProp): JSX.Element => {
   return (
-    <div className="container">
+    <div className="container container--sign-up">
       <div className="form form--sign-up">
         <h1 className="form__header">Signup</h1>
         {signupError && (

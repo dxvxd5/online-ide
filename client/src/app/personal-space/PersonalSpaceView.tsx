@@ -1,5 +1,8 @@
 import React from 'react';
-import './PersonalSpace.css';
+import Button from '../components/button/Button';
+import Logo from '../components/logo/Logo';
+import Profile from '../components/profile/Profile';
+import Project from '../components/project/Project';
 
 interface ProjectsData {
   name: string;
@@ -9,92 +12,81 @@ interface ProjectsData {
 }
 
 interface PersonalSpaceViewProp {
-  userID: string;
+  name: string;
   projects: ProjectsData[];
   handleSort: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOptions: string[];
   openProject: (id: string) => void;
-  handleProjectName: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
-  joinCollabProject: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  createProject: () => void;
+  joinCollab: () => void;
   deleteProject: (id: string) => void;
   logout: () => void;
 }
 
 const PersonalSpaceView = ({
-  userID,
+  name,
   projects,
   handleSort,
   sortOptions,
   openProject,
-  handleProjectName,
-  joinCollabProject,
+  createProject,
+  joinCollab,
   deleteProject,
   logout,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
-    <>
-      <button type="button" onClick={logout}>
-        Log out
-      </button>
-      <h1>This is Personal Space Overview</h1>
-      <p>Your user id is: {userID}</p>
-      <br />
-      <h2>Projects:</h2>
-      <div>
-        <label htmlFor="id" className="space">
-          <select id="selectTypeDish" value="" onChange={handleSort}>
-            <option disabled hidden value="">
-              Sort by...
-            </option>
-            {sortOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-        <form>
-          <button type="submit" onClick={(e) => handleProjectName(e)}>
-            Create a new project
-          </button>
-          <button type="submit" onClick={(e) => joinCollabProject(e)}>
-            Join a collab project
-          </button>
-        </form>
+    <div className="container container--personal-space">
+      <header className="header header--personal-space">
+        <Profile name={name} color="#341a58" displayName />
+        <Logo />
+        <Button
+          text="log out"
+          theme="red"
+          submit={false}
+          onClick={logout}
+          className="header__button header__button--logout"
+        />
+      </header>
+      <section className="section--personal-space">
+        <h2 className="section__title--personal-space">Projects</h2>
+        <select
+          value=""
+          onChange={handleSort}
+          className="select section__select--personal-space"
+        >
+          <option disabled hidden value="">
+            Sort by...
+          </option>
+          {sortOptions.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+        <Button
+          text="Create project"
+          submit={false}
+          onClick={createProject}
+          theme="main"
+          className="section__button--personal-space"
+        />
+        <Button
+          text="Join collaboration session"
+          submit={false}
+          onClick={joinCollab}
+          theme="secondary"
+          className="section__button--personal-space"
+        />
+      </section>
+      <div className="container--project">
+        {projects.map((project) => (
+          <Project
+            project={project}
+            key={project.id}
+            remove={deleteProject}
+            open={openProject}
+          />
+        ))}
       </div>
-      {projects.map((project) => (
-        /* eslint-disable jsx-a11y/click-events-have-key-events */
-        <div key={project.id} className="PersonalSpace">
-          <div id="personal-space-overview">
-            <div
-              tabIndex={0}
-              role="button"
-              onClick={() => openProject(project.id)}
-            >
-              <div className={`${'flex-between-projects'}`}>
-                <div className="project-info-wrapper">
-                  <div className="project-name-wrapper">
-                    <p className="project-name-sign">Project Name:</p>
-                    <p style={{ color: '#ff8c00' }}>{project.name}</p>
-                  </div>
-                  <div>
-                    <p className="project-last-updated-sign">Last updated:</p>
-                    <p>{new Date(project.lastUpdated).toUTCString()}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="project-shared-sign">
-            <button type="button" onClick={() => deleteProject(project.id)}>
-              X
-            </button>
-          </div>
-        </div>
-      ))}
-    </>
+    </div>
   );
 };
 export default PersonalSpaceView;

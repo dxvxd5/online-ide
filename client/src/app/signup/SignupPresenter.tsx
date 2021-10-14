@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import IdeModel, { JWT } from '../../data/model/model';
+import IdeModel from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
 import Loader from '../components/loader/Loader';
 import SingupView from './SignupView';

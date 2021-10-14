@@ -1,0 +1,96 @@
+.logo {
+  width: 75px;
+  height: 75px;
+  /* position: relative; */
+  z-index: 0;
+}
+.logo svg,
+.logo div {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+}
+.logo svg {
+  fill: #fff;
+}
+.logo div {
+  width: 75px;
+  height: 75px;
+  /* margin: 20px; */
+  border-radius: 20%;
+  transform: rotate(45deg);
+  mix-blend-mode: multiply;
+  animation: 2s cubic-bezier(0.66, -0.7, 0.27, 1.6) infinite;
+}
+.logo div:nth-child(1) {
+  background-color: #341a58;
+  animation-name: rotate-1;
+}
+.logo div:nth-child(2) {
+  background-color: #7068be;
+  animation-name: rotate-2;
+}
+.logo div:nth-child(3) {
+  background-color: #e4efee;
+  animation-name: rotate-3;
+}
+@-moz-keyframes rotate-1 {
+  to {
+    transform: rotate(135deg);
+  }
+}
+@-webkit-keyframes rotate-1 {
+  to {
+    transform: rotate(135deg);
+  }
+}
+@-o-keyframes rotate-1 {
+  to {
+    transform: rotate(135deg);
+  }
+}
+@keyframes rotate-1 {
+  to {
+    transform: rotate(135deg);
+  }
+}
+@-moz-keyframes rotate-2 {
+  to {
+    transform: rotate(225deg);
+  }
+}
+@-webkit-keyframes rotate-2 {
+  to {
+    transform: rotate(225deg);
+  }
+}
+@-o-keyframes rotate-2 {
+  to {
+    transform: rotate(225deg);
+  }
+}
+@keyframes rotate-2 {
+  to {
+    transform: rotate(225deg);
+  }
+}
+@-moz-keyframes rotate-3 {
+  to {
+    transform: rotate(315deg);
+  }
+}
+@-webkit-keyframes rotate-3 {
+  to {
+    transform: rotate(315deg);
+  }
+}
+@-o-keyframes rotate-3 {
+  to {
+    transform: rotate(315deg);
+  }
+}
+@keyframes rotate-3 {
+  to {
+    transform: rotate(315deg);
+  }
+}

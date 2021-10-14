@@ -30,7 +30,6 @@ interface SwalFireInput {
 export default function PersonalSpacePresenter({
   model,
 }: PersonalSpacePresenterProp): JSX.Element {
-  const userID = model.getUserID();
   const [projects, setProjects] = useState(model.getProjects());
   const [projectError, setProjectError] = useState(false);
   const [isProjectLoaded, setIsProjectLoaded] = useState(false);
@@ -90,10 +89,7 @@ export default function PersonalSpacePresenter({
     handleSortedProjects(event.target.value);
   };
 
-  const handleProjectName = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
+  const createProject = async () => {
     const swalFireInput: SwalFireInput = {
       title: 'Enter your project name',
       input: 'text',
@@ -150,10 +146,7 @@ export default function PersonalSpacePresenter({
       });
   };
 
-  const joinCollabProject = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
+  const joinCollab = async () => {
     const swalFireInput: SwalFireInput = {
       title: 'Enter room ID',
       input: 'text',
@@ -198,11 +191,11 @@ export default function PersonalSpacePresenter({
   return (
     <PersonalSpaceView
       deleteProject={deleteProject}
-      joinCollabProject={joinCollabProject}
-      handleProjectName={handleProjectName}
+      joinCollab={joinCollab}
+      createProject={createProject}
       handleSort={handleSort}
       projects={projects}
-      userID={userID}
+      name={model.name}
       sortOptions={sortOptions}
       openProject={openProject}
       logout={logout}

@@ -2,9 +2,10 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { LoginSchemaType } from '../../utils/yup-schemas';
 
-import Button from '../components/button/button';
-
 import '../../assets/styles/form.css';
+
+import Button from '../components/button/Button';
+import Logo from '../components/logo/Logo';
 
 type ClickFunction = {
   (e: { username: string; password: string }): void;
@@ -26,7 +27,7 @@ const LoginView = ({
   signUp,
 }: LoginViewProp): JSX.Element => {
   return (
-    <div className="container">
+    <div className="container container--login">
       <div className="form form--login">
         <h1 className="form__header">Login</h1>
         {loginError && (

@@ -8,7 +8,7 @@ interface ButtonProps {
   text: string;
   // eslint-disable-next-line react/require-default-props
   className?: string;
-  theme: 'main' | 'secondary';
+  theme: 'main' | 'secondary' | 'red';
   submit: boolean;
 }
 

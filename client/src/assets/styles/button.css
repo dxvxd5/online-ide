@@ -22,7 +22,7 @@
 }
 
 .button--main:hover {
-  color: #667eea;
+  color: #341a58;
   border: #667eea solid thin;
 }
 
@@ -31,6 +31,15 @@
 }
 
 .button--secondary:hover {
-  color: #4a5568;
+  color: #341a58;
   border: #4a5568 solid thin;
+}
+
+.button--red {
+  background-color: red;
+}
+
+.button--red:hover {
+  color: red;
+  border: red thin solid;
 }

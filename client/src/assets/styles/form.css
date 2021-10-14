@@ -11,6 +11,7 @@
   width: 350px;
   min-height: 40vh;
   padding: 25px;
+  box-shadow: 6px 6px 2px #667eea;
 }
 
 .form__container {

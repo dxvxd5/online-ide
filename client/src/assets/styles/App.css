@@ -21,10 +21,49 @@ body {
 }
 
 .container {
+  height: 100%;
+  width: 100%;
+}
+
+.container--sign-up,
+.container--login {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
+}
+
+.container--personal-space {
+  display: flex;
+  flex-direction: column;
+}
+
+.section__title--personal-space {
+  color: #341a58;
+  /* color: #667eea; */
+  margin-right: 10px;
+}
+
+.section--personal-space {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px auto;
+  width: 80%;
+
+  border-bottom: 1px solid #4a5568;
+}
+
+.section__button--personal-space {
+  height: 44px;
+  margin-left: 10px;
+}
+
+.section__select--personal-space {
+}
+
+.select {
+  background-color: #4a5568;
+  color: white;
+  margin-right: auto;
 }
