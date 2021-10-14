@@ -64,7 +64,7 @@ These are the technologies that we will certainly need for this project and thei
 | Formik package        | Form for user to sign up/log in | 3  ✅    |
 | TypeScript            |                                 | 15 ✅    |
 |Promise all              | in file model| 3 ✅ |
-| Use animation package or CSS animation|  | 5      |
+| Use animation package or CSS animation|  | 5  ✅    |
 |                       | **Total**                       | **41** |
 
 
@@ -82,7 +82,7 @@ These are the technologies that we will certainly need for this project and thei
 
 | Consistency                   | When/Why                                  | Points |
 | -------------------------------------------------------- | ----------------------------------------- | ------ |
-| Re-using UI-Components    | | 5 |
+| Re-using UI-Components    | | 5 ✅|
 |                                                          | **Total**                                 | **5**|
 
 | Server & Deployment                                          | When/Why/How                                                 | Points |
