@@ -9,9 +9,14 @@ export default function when(lastUpdated: number): string {
 
   const elapsed = today.getTime() - lastUpdated;
 
+  const hour = new Date(lastUpdated).getHours();
+  const minutes = new Date(lastUpdated).getMinutes();
+
   if (elapsed < oneDay) {
-    if (toHour(elapsed) < today.getHours()) return 'Today';
-    return 'Yesterday';
+    if (toHour(elapsed) < today.getHours())
+      return `Today at ${hour}:${minutes}`;
+    return `Yesterday at ${hour}:${minutes}`;
   }
-  return new Date(lastUpdated).toLocaleDateString();
+
+  return `${new Date(lastUpdated).toLocaleDateString()} at ${hour}:${minutes} `;
 }
