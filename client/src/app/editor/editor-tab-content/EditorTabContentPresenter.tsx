@@ -26,7 +26,6 @@ interface EditorPresenterProps {
   model: IdeModel;
   language: string;
   fileContent: string;
-  isFocused: boolean;
   onEditorCursorMoved: (position: CursorPosition) => void;
   onEditorSelection: (start: CursorPosition, end: CursorPosition) => void;
   onContentInsert: (index: number, text: string) => void;
@@ -39,7 +38,6 @@ export default function EditorPresenter({
   model,
   language,
   fileContent,
-  isFocused,
   onEditorCursorMoved,
   onEditorSelection,
   onContentInsert,
@@ -223,7 +221,6 @@ export default function EditorPresenter({
       language={language}
       code={fileContent}
       handleMount={handleMount}
-      isFocused={isFocused}
       onContentChange={onChange}
     />
   );

@@ -37,7 +37,7 @@ const PersonalSpaceView = ({
   return (
     <div className="container container--personal-space">
       <header className="header header--personal-space">
-        <Profile name={name} color="#341a58" displayName />
+        <Profile name={name} color="#341a58" />
         <Logo />
         <Button
           text="log out"
@@ -52,7 +52,7 @@ const PersonalSpaceView = ({
         <select
           value=""
           onChange={handleSort}
-          className="select section__select--personal-space"
+          className="select select--personal-space"
         >
           <option disabled hidden value="">
             Sort by...

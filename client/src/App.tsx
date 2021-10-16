@@ -8,7 +8,7 @@ import PersonalSpacePresenter from './app/personal-space/PersonalSpacePresenter'
 import IdePresenter from './app/ide/IdePresenter';
 import SignupPresenter from './app/signup/SignupPresenter';
 
-import './assets/styles/App.css';
+import './assets/styles/app.css';
 
 function App(): JSX.Element {
   const ideModel = new IdeModel();
@@ -16,7 +16,7 @@ function App(): JSX.Element {
 
   return (
     <Router>
-      <Route exact path="/">
+      <Route exact path="">
         <Redirect to="/login" />
       </Route>
       <Route

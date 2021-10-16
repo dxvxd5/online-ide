@@ -5,7 +5,6 @@ import { LoginSchemaType } from '../../utils/yup-schemas';
 import '../../assets/styles/form.css';
 
 import Button from '../components/button/Button';
-import Logo from '../components/logo/Logo';
 
 type ClickFunction = {
   (e: { username: string; password: string }): void;

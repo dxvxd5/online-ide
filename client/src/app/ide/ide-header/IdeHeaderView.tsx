@@ -5,9 +5,12 @@ import {
   Collaborator,
   SparseUserData as User,
 } from '../../../data/model/model';
+import Button from '../../components/button/Button';
+import Profile from '../../components/profile/Profile';
 
 interface IdeHeaderViewProps {
   createRoom: () => void;
+  copyRoomId: () => void;
   roomID: string;
   leader: User | null;
   collaborators: Collaborator[];
@@ -16,11 +19,11 @@ interface IdeHeaderViewProps {
   leaveRoom: (roomId: string) => void;
   saveFileOnClick: () => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  stopFollowing: () => void;
   leaveProject: () => void;
   isHost: boolean;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
+  name: string;
 }
 
 export default function IdeHeaderView({
@@ -31,40 +34,59 @@ export default function IdeHeaderView({
   leaveRoom,
   saveFileOnClick,
   startFollowOnClick,
-  stopFollowing,
   potentialLeaders,
   leader,
   leaveProject,
   isHost,
   removeCollaborator,
   logout,
+  name,
+  copyRoomId,
 }: IdeHeaderViewProps): JSX.Element {
   return (
-    <div className="ide--header">
-      <button type="button" onClick={logout}>
-        Log out
-      </button>
+    <div className="ide__header header">
+      <Profile name={name} color="#341a58" />
       {isHost && (
-        <button type="button" onClick={() => leaveProject()}>
-          Go back
-        </button>
+        <Button
+          submit={false}
+          theme="secondary"
+          onClick={leaveProject}
+          text="Back"
+          className="header__button ide__header-button"
+        />
       )}
-      {!isCollab && (
-        <>
-          <button type="button" onClick={() => createRoom()}>
-            Create Room
-          </button>
-        </>
+      {roomID && (
+        <Button
+          submit={false}
+          theme="secondary"
+          onClick={copyRoomId}
+          text="Copy Room ID"
+          className="header__button ide__header-button"
+        />
       )}
-      {isCollab && (
+      {isCollab ? (
+        <Button
+          submit={false}
+          theme="main"
+          onClick={() => leaveRoom(roomID)}
+          text="Stop collaboration"
+          className="header__button ide__header-button ide__header-button--left-border"
+        />
+      ) : (
+        <Button
+          submit={false}
+          theme="main"
+          onClick={createRoom}
+          text="Start new collaboration"
+          className="header__button ide__header-button  ide__header-button--left-border"
+        />
+      )}
+      {collaborators && !!collaborators.length && (
         <>
-          <button type="button" onClick={() => leaveRoom(roomID)}>
-            Leave room
-          </button>
           <select
-            id="selectLeaderToFollow"
             value=""
             onChange={startFollowOnClick}
+            className="select ide__header-select"
           >
             <option>{leader ? leader.name : 'Follow...'}</option>
             {potentialLeaders.map((collaborator) => (
@@ -76,29 +98,28 @@ export default function IdeHeaderView({
               </option>
             ))}
           </select>
-          <button type="button" onClick={() => stopFollowing()}>
-            Stop Following
-          </button>
+          <div className="ide__header-collaborators">
+            {collaborators.map((collaborator) => (
+              <Profile
+                key={collaborator.id}
+                color={collaborator.color}
+                name={collaborator.name}
+                remove={isHost ? () => removeCollaborator(collaborator) : null}
+                className={`ide__header-collaborator ${
+                  isHost ? 'ide__header-collaborator--delete' : ''
+                }`}
+              />
+            ))}
+          </div>
         </>
       )}
-      <button type="button" onClick={() => saveFileOnClick()}>
-        Save File
-      </button>
-      {roomID && <div> {roomID}</div>}
-      {collaborators &&
-        collaborators.map((collaborator) => (
-          <div key={collaborator.id}>
-            <span>{collaborator.name}</span>
-            {isHost && (
-              <button
-                type="button"
-                onClick={() => removeCollaborator(collaborator)}
-              >
-                X
-              </button>
-            )}
-          </div>
-        ))}
+      <Button
+        text="Log out"
+        onClick={logout}
+        theme="red"
+        submit={false}
+        className="header__button header__button--logout ide__header-button ide__header-button--logout"
+      />
     </div>
   );
 }
