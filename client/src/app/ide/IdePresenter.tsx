@@ -3,8 +3,9 @@ import Swal from 'sweetalert2';
 import io from 'socket.io-client';
 import Mousetrap from 'mousetrap';
 import React, { useRef, useEffect, useState } from 'react';
-
 import { useHistory } from 'react-router-dom';
+import Split from 'react-split';
+
 import IdeModel, {
   SparseUserData as User,
   CursorPosition,
@@ -20,9 +21,11 @@ import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
-import IdeSidebar from '../sidebar/SidebarPresenter';
+import IdeSidebar from './sidebar/SidebarPresenter';
 import { NodeState } from '../../utils/file-tree-node';
 import Message from '../../data/model/message';
+
+import '../../assets/styles/ide.css';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -478,6 +481,10 @@ export default function IdePresenter({
     const leader: User = JSON.parse(event.target.value);
     if (!socketRef.current) return;
     if (!leader || leader.id === model.leader?.id) return;
+    if (leader.id === 'unfollow') {
+      stopFollowing();
+      return;
+    }
     stopFollowing();
     model.setLeader(leader);
     socketRef.current.emit(SocketMessage.START_FOLLOWING, {
@@ -561,32 +568,42 @@ export default function IdePresenter({
   };
 
   return (
-    <>
+    <div className="container ide__container">
       <IdeHeader
         removeCollaborator={removeCollaborator}
         leaveProject={leaveProject}
-        stopFollowing={stopFollowing}
         startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
         model={model}
         logout={logout}
       />
-      <IdeSidebar
-        stopFollowing={stopFollowing}
-        onFileTreeChange={onFileTreeChange}
-        model={model}
-      />
-      <EditorTabs stopFollowing={stopFollowing} model={model} />
-      <Editor
-        model={model}
-        onScrollChange={onScrollChange}
-        onEditorCursorMoved={onEditorCursorMoved}
-        onEditorSelection={onEditorSelection}
-        onContentInsert={onContentInsert}
-        onContentReplace={onContentReplace}
-        onContentDelete={onContentDelete}
-      />
-    </>
+      <Split
+        sizes={[15, 85]}
+        minSize={[150, 500]}
+        expandToMin={false}
+        gutterSize={10}
+        className="split"
+      >
+        <IdeSidebar
+          stopFollowing={stopFollowing}
+          onFileTreeChange={onFileTreeChange}
+          model={model}
+        />
+
+        <div className="container ide__container ide__container--level1">
+          <EditorTabs stopFollowing={stopFollowing} model={model} />
+          <Editor
+            model={model}
+            onScrollChange={onScrollChange}
+            onEditorCursorMoved={onEditorCursorMoved}
+            onEditorSelection={onEditorSelection}
+            onContentInsert={onContentInsert}
+            onContentReplace={onContentReplace}
+            onContentDelete={onContentDelete}
+          />
+        </div>
+      </Split>
+    </div>
   );
 }

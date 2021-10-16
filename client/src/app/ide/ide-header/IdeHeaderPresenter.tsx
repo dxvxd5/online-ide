@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useHistory } from 'react-router-dom';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
 import IdeModel, { Collaborator } from '../../../data/model/model';
@@ -11,7 +10,6 @@ interface IdeHeaderPresenterProps {
   leaveRoom: (roomID: string) => void;
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  stopFollowing: () => void;
   leaveProject: () => void;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
@@ -22,7 +20,6 @@ export default function IdeHeaderPresenter({
   leaveRoom,
   model,
   startFollowOnClick,
-  stopFollowing,
   leaveProject,
   removeCollaborator,
   logout,
@@ -55,6 +52,11 @@ export default function IdeHeaderPresenter({
     model.saveContentIntoFile();
   };
 
+  const copyRoomId = () => {
+    navigator.clipboard.writeText(roomID);
+    toast.success('Copied!');
+  };
+
   const diffWith = leader ? [...followers, ...[leader]] : followers;
   const potentialLeaders = differenceWith(
     collaborators,
@@ -62,17 +64,17 @@ export default function IdeHeaderPresenter({
     (l1, l2) => l1.id === l2.id
   );
 
-  const copyClipboard = (): void => {
-    navigator.clipboard.writeText(roomID);
-    toast.success('Copied the roomID!');
-  };
+  if (leader)
+    potentialLeaders.unshift({
+      name: 'Stop following',
+      id: 'unfollow',
+      color: '',
+    });
 
   return (
     <IdeHeaderView
-      copyClipboard={copyClipboard}
       removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
-      stopFollowing={stopFollowing}
       startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
       leaveRoom={leaveRoom}
@@ -84,6 +86,8 @@ export default function IdeHeaderPresenter({
       leader={leader}
       isHost={model.isHost}
       logout={logout}
+      name={model.name}
+      copyRoomId={copyRoomId}
     />
   );
 }

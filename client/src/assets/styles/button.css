@@ -1,13 +1,17 @@
+@import url(app.css);
+
 .button {
   color: white;
   font-weight: bold;
   text-decoration: none;
   border: none;
   border-radius: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .button:active {
-  border: 0.125rem solid #0070ba;
+  border: 0.125rem solid var(--btn-active-color);
   box-shadow: 0 0 0 0.25rem #bfdbee;
   text-decoration: underline;
 }
@@ -18,12 +22,12 @@
 }
 
 .button--main {
-  background-color: #667eea;
+  background-color: var(--btn-primary-color);
 }
 
 .button--main:hover {
-  color: #341a58;
-  border: #667eea solid thin;
+  color: var(--btn-primary-color);
+  border: var(--btn-primary-color) solid thin;
 }
 
 .button--secondary {
@@ -31,8 +35,8 @@
 }
 
 .button--secondary:hover {
-  color: #341a58;
-  border: #4a5568 solid thin;
+  color: var(--btn-secondary-color);
+  border: var(--btn-secondary-color) solid thin;
 }
 
 .button--red {

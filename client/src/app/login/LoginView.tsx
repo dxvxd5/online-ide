@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { LoginSchemaType } from '../../utils/yup-schemas';
 import '../../assets/styles/form.css';
 
-import Button from '../components/button/button';
+import Button from '../components/button/Button';
 
 type ClickFunction = {
   (e: { username: string; password: string }): void;

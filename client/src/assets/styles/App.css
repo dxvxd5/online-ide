@@ -5,6 +5,21 @@
   src: local('Roboto'), url(../fonts/Roboto-Medium.ttf) format('truetype');
 }
 
+:root {
+  --header-height: 100px;
+  --background-color: #edf2f7;
+  --primary-color: #341a58;
+  --btn-active-color: #0070ba;
+  --btn-primary-color: #667eea;
+  --btn-secondary-color: #4a5568;
+  --btn-secondary-color-lighter: rgb(132, 145, 167);
+  --tab-color-focus: #1e1e1e;
+  /* --tab-color-focus: #667eea; */
+  --tab-color: #4c4c4c;
+  /* --tab-color: #1e1e1e; */
+  --tab-color-lighter: #717171;
+}
+
 @keyframes fadein {
   from {
     opacity: 0;
@@ -60,7 +75,7 @@ body {
   height: 100vh;
   margin: 0;
   padding: 0;
-  background-color: #edf2f7;
+  background-color: var(--background-color);
   font-family: 'Roboto';
 }
 
@@ -97,8 +112,7 @@ body {
 }
 
 .section__title--personal-space {
-  color: #341a58;
-  /* color: #667eea; */
+  color: var(--primary-color);
   margin-right: 10px;
 }
 
@@ -109,7 +123,7 @@ body {
   margin: 10px auto;
   width: 80%;
 
-  border-bottom: 1px solid #4a5568;
+  border-bottom: 1px solid var(--btn-secondary-color);
 }
 
 .section__button--personal-space {
@@ -118,7 +132,14 @@ body {
 }
 
 .select {
-  background-color: #4a5568;
+  background-color: var(--btn-secondary-color);
   color: white;
+}
+
+.select--personal-space {
   margin-right: auto;
+}
+
+.select:hover {
+  cursor: pointer;
 }

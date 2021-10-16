@@ -78,7 +78,6 @@ export default function EditorTabContentManager({
       onEditorCursorMoved={onEditorCursorMoved}
       language={language}
       fileContent={content as string}
-      isFocused
       model={model}
     />
   );
