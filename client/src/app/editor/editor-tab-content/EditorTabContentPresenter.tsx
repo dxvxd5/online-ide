@@ -52,6 +52,7 @@ export default function EditorPresenter({
 
   const fiveMinutes = 300000;
   const saveIntervalRef = useRef<number>();
+  // const saveIntervalRef = useRef<NodeJS.Timeout>();
 
   function removeCollaborator(cursorID: string) {
     try {
