@@ -698,6 +698,7 @@ export default class IdeModel {
     this.setUsername(username);
     this.setName(name);
     this.setJWT(jwtToken);
+    this.isLoggedIn = true;
     this.notifyObservers(Message.SIGNUP);
   }
 
