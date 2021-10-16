@@ -31,7 +31,6 @@ export default function IdeHeaderPresenter({
   const [roomID, setRoomID] = useState(model.roomID);
   const [leader, setLeader] = useState(model.leader);
   const [followers, setFollowers] = useState(model.getFollowerAsUsers());
-  const history = useHistory();
 
   useEffect(() => {
     function collabListener(m: Message) {
