@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useHistory } from 'react-router-dom';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
@@ -62,8 +63,14 @@ export default function IdeHeaderPresenter({
     (l1, l2) => l1.id === l2.id
   );
 
+  const copyClipboard = (): void => {
+    navigator.clipboard.writeText(roomID);
+    toast.success('Copied the roomID!');
+  };
+
   return (
     <IdeHeaderView
+      copyClipboard={copyClipboard}
       removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
       stopFollowing={stopFollowing}

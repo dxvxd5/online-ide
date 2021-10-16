@@ -1,6 +1,5 @@
 import React from 'react';
-import Button from '../button/Button';
-
+import Button from '../button/button';
 import '../../../assets/styles/project.css';
 import when from '../../../utils/date';
 

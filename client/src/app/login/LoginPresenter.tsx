@@ -33,7 +33,10 @@ export default function LoginPresenter({
   };
 
   useEffect(() => {
-    if (model.isLoggedIn) history.push({ pathname: '/me' });
+    if (model.isLoggedIn)
+      history.push({
+        pathname: '/me',
+      });
   }, []);
 
   const signUp = () => {

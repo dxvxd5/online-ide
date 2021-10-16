@@ -13,7 +13,6 @@ import './assets/styles/App.css';
 function App(): JSX.Element {
   const ideModel = new IdeModel();
   ideModel.persist();
-
   return (
     <Router>
       <Route exact path="/">

@@ -21,6 +21,7 @@ interface IdeHeaderViewProps {
   isHost: boolean;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
+  copyClipboard: () => void;
 }
 
 export default function IdeHeaderView({
@@ -38,6 +39,7 @@ export default function IdeHeaderView({
   isHost,
   removeCollaborator,
   logout,
+  copyClipboard,
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide--header">
@@ -84,7 +86,11 @@ export default function IdeHeaderView({
       <button type="button" onClick={() => saveFileOnClick()}>
         Save File
       </button>
-      {roomID && <div> {roomID}</div>}
+      {roomID && (
+        <button type="button" onClick={() => copyClipboard()}>
+          Copy room ID
+        </button>
+      )}
       {collaborators &&
         collaborators.map((collaborator) => (
           <div key={collaborator.id}>
