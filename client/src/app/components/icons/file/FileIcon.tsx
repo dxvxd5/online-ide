@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { SiTypescript } from 'react-icons/si';
 import { FileData } from '../../../../data/model/model';
 import IconProps from '../type';
