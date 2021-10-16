@@ -1,3 +1,4 @@
+/* eslint-disable react/style-prop-object */
 import React from 'react';
 import Button from '../button/button';
 import '../../../assets/styles/project.css';
@@ -27,26 +28,27 @@ export default function Project({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div
-      className="project"
-      onClick={() => open(id)}
-      role="button"
-      tabIndex={0}
-    >
+    <div className="project">
       <div className="project__infos">
-        <span className="project__name">{name}</span>
-        <div className="project__date">
-          <h6>Last updated:</h6>
-          <h6>{whenDidUpdate}</h6>
-        </div>
+        <div className="project__name">{name}</div>
+        <div className="project__date">{whenDidUpdate}</div>
       </div>
-      <Button
-        submit={false}
-        className="project__action project__action--delete"
-        onClick={() => remove(id)}
-        text="Delete"
-        theme="red"
-      />
+      <div className="project__buttons">
+        <Button
+          submit={false}
+          className="project__open"
+          onClick={() => open(id)}
+          text="Open"
+          theme="main"
+        />
+        <Button
+          submit={false}
+          className="project__delete"
+          onClick={() => remove(id)}
+          text="Delete"
+          theme="red"
+        />
+      </div>
     </div>
   );
 }
