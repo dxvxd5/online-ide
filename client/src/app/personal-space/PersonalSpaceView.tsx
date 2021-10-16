@@ -1,5 +1,8 @@
 import React from 'react';
-import './PersonalSpace.css';
+import Button from '../components/button/Button';
+import Logo from '../components/logo/Logo';
+import Profile from '../components/profile/Profile';
+import Project from '../components/project/Project';
 
 interface ProjectsData {
   name: string;
@@ -9,89 +12,81 @@ interface ProjectsData {
 }
 
 interface PersonalSpaceViewProp {
-  userID: string;
+  name: string;
   projects: ProjectsData[];
   handleSort: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOptions: string[];
   openProject: (id: string) => void;
-  handleProjectName: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
-  joinCollabProject: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  createProject: () => void;
+  joinCollab: () => void;
+  deleteProject: (id: string) => void;
+  logout: () => void;
 }
 
 const PersonalSpaceView = ({
-  userID,
+  name,
   projects,
   handleSort,
   sortOptions,
   openProject,
-  handleProjectName,
-  joinCollabProject,
+  createProject,
+  joinCollab,
+  deleteProject,
+  logout,
 }: PersonalSpaceViewProp): JSX.Element => {
   return (
-    <>
-      <h1>This is Personal Space Overview</h1>
-      <p>Your user id is: {userID}</p>
-      <br />
-      <h2>Projects:</h2>
-      <div>
-        <label htmlFor="id" className="space">
-          <select id="selectTypeDish" value="" onChange={handleSort}>
-            <option disabled hidden value="">
-              Sort by...
-            </option>
-            {sortOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </label>
-        <form>
-          <button type="submit" onClick={(e) => handleProjectName(e)}>
-            Create a new project
-          </button>
-          <button type="submit" onClick={(e) => joinCollabProject(e)}>
-            Join a collab project
-          </button>
-        </form>
-      </div>
-      {projects.map((project) => (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div
-          key={project.id}
-          className="PersonalSpace"
-          onClick={() => openProject(project.id)}
-          role="button"
-          tabIndex={0}
+    <div className="container container--personal-space">
+      <header className="header header--personal-space">
+        <Profile name={name} color="#341a58" />
+        <Logo />
+        <Button
+          text="log out"
+          theme="red"
+          submit={false}
+          onClick={logout}
+          className="header__button header__button--logout"
+        />
+      </header>
+      <section className="section--personal-space">
+        <h2 className="section__title--personal-space">Projects</h2>
+        <select
+          value=""
+          onChange={handleSort}
+          className="select select--personal-space"
         >
-          <div id="personal-space-overview">
-            <div>
-              <div className={`${'flex-between-projects'}`}>
-                <div className="project-info-wrapper">
-                  <div className="project-name-wrapper">
-                    <p className="project-name-sign">Project Name:</p>
-                    <p style={{ color: '#ff8c00' }}>{project.name}</p>
-                  </div>
-                  <div>
-                    <p className="project-last-updated-sign">Last updated:</p>
-                    <p>{new Date(project.lastUpdated).toUTCString()}</p>
-                  </div>
-                  <div>
-                    <p className="project-shared-sign">Is Project Shared?</p>
-                    <p>{project.shared.toString()}</p>
-                  </div>
-                  <div>
-                    <p className="project-param-sign">Another param?</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </>
+          <option disabled hidden value="">
+            Sort by...
+          </option>
+          {sortOptions.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+        <Button
+          text="Create project"
+          submit={false}
+          onClick={createProject}
+          theme="main"
+          className="section__button--personal-space"
+        />
+        <Button
+          text="Join collaboration session"
+          submit={false}
+          onClick={joinCollab}
+          theme="secondary"
+          className="section__button--personal-space"
+        />
+      </section>
+      <div className="container--project">
+        {projects.map((project) => (
+          <Project
+            project={project}
+            key={project.id}
+            remove={deleteProject}
+            open={openProject}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 export default PersonalSpaceView;

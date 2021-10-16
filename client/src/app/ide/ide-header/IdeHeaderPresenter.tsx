@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
-import IdeModel from '../../../data/model/model';
+import IdeModel, { Collaborator } from '../../../data/model/model';
 import IdeHeaderView from './IdeHeaderView';
 
 interface IdeHeaderPresenterProps {
@@ -9,7 +10,9 @@ interface IdeHeaderPresenterProps {
   leaveRoom: (roomID: string) => void;
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  stopFollowing: () => void;
+  leaveProject: () => void;
+  removeCollaborator: (collaborator: Collaborator) => void;
+  logout: () => void;
 }
 
 export default function IdeHeaderPresenter({
@@ -17,7 +20,9 @@ export default function IdeHeaderPresenter({
   leaveRoom,
   model,
   startFollowOnClick,
-  stopFollowing,
+  leaveProject,
+  removeCollaborator,
+  logout,
 }: IdeHeaderPresenterProps): JSX.Element {
   const [collaborators, setCollaborators] = useState(model.collaborators);
   const [roomID, setRoomID] = useState(model.roomID);
@@ -47,17 +52,29 @@ export default function IdeHeaderPresenter({
     model.saveContentIntoFile();
   };
 
+  const copyRoomId = () => {
+    navigator.clipboard.writeText(roomID);
+    toast.success('Copied!');
+  };
+
   const diffWith = leader ? [...followers, ...[leader]] : followers;
   const potentialLeaders = differenceWith(
     collaborators,
     diffWith,
     (l1, l2) => l1.id === l2.id
   );
-  console.log({ leader });
+
+  if (leader)
+    potentialLeaders.unshift({
+      name: 'Stop following',
+      id: 'unfollow',
+      color: '',
+    });
 
   return (
     <IdeHeaderView
-      stopFollowing={stopFollowing}
+      removeCollaborator={removeCollaborator}
+      leaveProject={leaveProject}
       startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
       leaveRoom={leaveRoom}
@@ -67,6 +84,10 @@ export default function IdeHeaderPresenter({
       isCollab={!!roomID}
       saveFileOnClick={saveFileOnClick}
       leader={leader}
+      isHost={model.isHost}
+      logout={logout}
+      name={model.name}
+      copyRoomId={copyRoomId}
     />
   );
 }

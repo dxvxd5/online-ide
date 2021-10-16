@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import IdeModel from '../../data/model/model';
 import LoginView from './LoginView';
@@ -21,16 +21,23 @@ export default function LoginPresenter({
   const [projectError, setProjectError] = useState(false);
   const history = useHistory();
 
-  const click = async ({ username, password }: Record<string, string>) => {
+  const logIn = async ({ username, password }: Record<string, string>) => {
     try {
       await model.login(username, password);
       setIsLoggedIn(true);
       if (loginError) setLoginError(false);
-    } catch {
-      setLoginErrorInfo('Error. Either username or password is incorrect');
+    } catch (error) {
+      setLoginErrorInfo('Either username or password is incorrect');
       setLoginError(true);
     }
   };
+
+  useEffect(() => {
+    if (model.isLoggedIn)
+      history.push({
+        pathname: '/me',
+      });
+  }, []);
 
   const signUp = () => {
     history.push({ pathname: '/signup' });
@@ -67,14 +74,13 @@ export default function LoginPresenter({
     });
   }
 
-  // if (!isLoggedIn)
   return (
     <LoginView
       signUp={signUp}
       loginSchema={loginSchema}
       loginError={loginError}
       loginErrorInfo={loginErrorInfo}
-      click={click}
+      logIn={logIn}
     />
   );
 }

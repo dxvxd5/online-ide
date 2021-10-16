@@ -136,6 +136,31 @@ export async function editProject(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function deleteProject(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const userID = getUserIdFromReq(req, res);
+    if (!userID) return;
+
+    const projectID = getProjectIdFromReq(req, res);
+    if (!projectID) return;
+
+    const isDeleted = await Project.deleteProject(projectID, userID);
+    if (!isDeleted) {
+      res.status(404).json({
+        error: new HttpError('The specified project does not exist.', 404),
+      });
+      return;
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
 export async function createCollab(req: Request, res: Response): Promise<void> {
   try {
     const userID = getUserIdFromReq(req, res);

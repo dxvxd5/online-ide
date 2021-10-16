@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 import Message from '../../data/model/message';
 import IdeModel from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
@@ -17,17 +17,43 @@ interface ProjectsData {
   lastUpdated: number;
 }
 
+type SwalFireType = {
+  (input: string): void;
+};
+interface SwalFireInput {
+  title: string;
+  input: string;
+  inputLabel: string;
+  preConfirm: SwalFireType;
+}
+
 export default function PersonalSpacePresenter({
   model,
 }: PersonalSpacePresenterProp): JSX.Element {
-  const userID = model.getUserID();
   const [projects, setProjects] = useState(model.getProjects());
   const [projectError, setProjectError] = useState(false);
   const [isProjectLoaded, setIsProjectLoaded] = useState(false);
-  const sortOptions = ['Shared', 'Last Updated', 'Name'];
+  const [projectErrorInfo, setProjectErrorInfo] = useState('');
+  const sortOptions = ['Last Updated', 'Name'];
   const history = useHistory();
 
+  const swalFirePopUp = (
+    swalFireInput: SwalFireInput
+  ): Promise<SweetAlertResult> => {
+    const options = {
+      ...swalFireInput,
+      showCancelButton: true,
+      showLoaderOnConfirm: true,
+      allowOutsideClick: () => !Swal.isLoading(),
+      backdrop: true,
+    } as SweetAlertOptions;
+    return Swal.fire(options);
+  };
+
   useEffect(() => {
+    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+    if (model.persisted) model.setPersisted(false);
+
     const projectObserver = (m: Message) => {
       if (m === Message.PROJECTS_CHANGE)
         setProjects([...model.getProjects()] as ProjectsData[]);
@@ -40,14 +66,9 @@ export default function PersonalSpacePresenter({
   const handleSortedProjects = (sortProjectsValue: string) => {
     const sortedProjects: ProjectsData[] = projects.sort(
       (project1, project2) => {
-        const isShared = sortProjectsValue === 'Shared';
         const isLastUpdated = sortProjectsValue === 'Last Updated';
         const isName = sortProjectsValue === 'Name';
 
-        if (isShared) {
-          const shared = Number(project2.shared) - Number(project1.shared);
-          return shared;
-        }
         if (isLastUpdated) {
           const dateA = new Date(project1.lastUpdated).getTime();
           const dateB = new Date(project2.lastUpdated).getTime();
@@ -68,16 +89,11 @@ export default function PersonalSpacePresenter({
     handleSortedProjects(event.target.value);
   };
 
-  const handleProjectName = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    Swal.fire({
+  const createProject = async () => {
+    const swalFireInput: SwalFireInput = {
       title: 'Enter your project name',
       input: 'text',
       inputLabel: 'Your project name',
-      showCancelButton: true,
-      showLoaderOnConfirm: true,
       preConfirm: (name) => {
         const creationDate = Date.now();
         model
@@ -91,9 +107,8 @@ export default function PersonalSpacePresenter({
             )
           );
       },
-      allowOutsideClick: () => !Swal.isLoading(),
-      backdrop: true,
-    }).then((result) => {
+    };
+    swalFirePopUp(swalFireInput).then((result) => {
       if (result.isConfirmed) {
         Swal.fire(`Your project name is ${result.value}`, '', 'success');
       }
@@ -106,20 +121,36 @@ export default function PersonalSpacePresenter({
       setIsProjectLoaded(true);
       if (projectError) setProjectError(false);
     } catch {
+      setProjectErrorInfo('Could not open the project. Please try again.');
       setProjectError(true);
     }
   };
 
-  const joinCollabProject = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    Swal.fire({
+  const deleteProject = async (projectID: string) => {
+    const swalFireInput: SwalFireInput = {
+      title: 'Are you sure you want to delete this project?',
+      input: '',
+      inputLabel: '',
+      preConfirm: () => {},
+    };
+    swalFirePopUp(swalFireInput)
+      .then((result) => {
+        if (result.isConfirmed) {
+          model.deleteProject(projectID);
+          if (projectError) setProjectError(false);
+        }
+      })
+      .catch(() => {
+        setProjectErrorInfo('Could not delete the project. Please try again.');
+        setProjectError(true);
+      });
+  };
+
+  const joinCollab = async () => {
+    const swalFireInput: SwalFireInput = {
       title: 'Enter room ID',
       input: 'text',
       inputLabel: 'Room ID',
-      showCancelButton: true,
-      showLoaderOnConfirm: true,
       preConfirm: (roomID) => {
         model
           .getCollabProject(roomID)
@@ -132,15 +163,14 @@ export default function PersonalSpacePresenter({
             )
           );
       },
-      allowOutsideClick: () => !Swal.isLoading(),
-      backdrop: true,
-    });
+    };
+    swalFirePopUp(swalFireInput);
   };
 
   if (projectError)
     return (
       <ProjectError
-        projectErrorInfo="Could not open the project. Please try again"
+        projectErrorInfo={projectErrorInfo}
         tryAgain={() => setProjectError(false)}
       />
     );
@@ -151,15 +181,24 @@ export default function PersonalSpacePresenter({
     });
   }
 
+  const logout = () => {
+    model.logout();
+    history.push({
+      pathname: '/login',
+    });
+  };
+
   return (
     <PersonalSpaceView
-      joinCollabProject={joinCollabProject}
-      handleProjectName={handleProjectName}
+      deleteProject={deleteProject}
+      joinCollab={joinCollab}
+      createProject={createProject}
       handleSort={handleSort}
       projects={projects}
-      userID={userID}
+      name={model.name}
       sortOptions={sortOptions}
       openProject={openProject}
+      logout={logout}
     />
   );
 }

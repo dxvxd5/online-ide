@@ -1,4 +1,4 @@
-const extToLanguage = {
+export const extToLanguage = {
   abap: 'abap',
   bat: 'windows bat',
   bib: 'bibtex',
@@ -14,6 +14,7 @@ const extToLanguage = {
   fs: 'f#',
   'git-commit': 'git',
   'git-rebase': 'git',
+  git: 'git',
   go: 'go',
   groovy: 'groovy',
   hbs: 'handlebars',
@@ -55,6 +56,8 @@ const extToLanguage = {
   yml: 'yaml',
 };
 
+const git = ['.gitattributes', '.gitignore'];
+
 export function extractBasename(path: string): string {
   // extract file name from full path ...
   // (supports `\\` and `/` separators)
@@ -74,6 +77,9 @@ export function extractBasename(path: string): string {
 export function extractExtension(path: string): string {
   const basename = extractBasename(path);
   // get last position of `.` in the basename
+
+  if (git.includes(basename)) return 'git';
+
   const pos = basename.lastIndexOf('.');
 
   if (basename === '' || pos < 1)

@@ -1,5 +1,5 @@
 import express from 'express';
-import * as RouteControllers from '../controllers/project.controllers';
+import * as ProjectController from '../controllers/project.controllers';
 import filesRouter from './file.routes';
 
 const projectsRouter = express.Router();
@@ -8,11 +8,12 @@ const projectsRouter = express.Router();
 projectsRouter.use('/:projectID/files', filesRouter);
 
 // Project routing
-projectsRouter.get('/', RouteControllers.getAllUserProjects);
-projectsRouter.post('/create', RouteControllers.createProject);
-projectsRouter.get('/:projectID', RouteControllers.getProject);
-projectsRouter.patch('/:projectID', RouteControllers.editProject);
-projectsRouter.get('/collab/:collabID', RouteControllers.getCollabProject);
-projectsRouter.post('/:projectID/collab', RouteControllers.createCollab);
+projectsRouter.get('/', ProjectController.getAllUserProjects);
+projectsRouter.post('/create', ProjectController.createProject);
+projectsRouter.get('/:projectID', ProjectController.getProject);
+projectsRouter.patch('/:projectID', ProjectController.editProject);
+projectsRouter.get('/collab/:collabID', ProjectController.getCollabProject);
+projectsRouter.post('/:projectID/collab', ProjectController.createCollab);
+projectsRouter.delete('/:projectID', ProjectController.deleteProject);
 
 export default projectsRouter;

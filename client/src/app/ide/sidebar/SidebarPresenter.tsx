@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import SidebarView from './SidebarView';
-import Message from '../../data/model/message';
-import IdeModel, { FileData, TreeChangeEvent } from '../../data/model/model';
-import FileIcon from '../components/icons/file/FileIcon';
-import { NodeState } from '../../utils/file-tree-node';
+import Message from '../../../data/model/message';
+import IdeModel, { FileData, TreeChangeEvent } from '../../../data/model/model';
+import FileIcon from '../../components/icons/file/FileIcon';
+import { NodeState } from '../../../utils/file-tree-node';
 
 interface SidebarPresenterProps {
   model: IdeModel;
@@ -54,6 +54,8 @@ export default function SidebarPresenter({
   };
 
   const FileIconComponent = FileIcon({ onClick: onFileIconClick });
+
+  if (!files) return null;
 
   return (
     <SidebarView

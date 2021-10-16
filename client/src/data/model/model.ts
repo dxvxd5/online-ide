@@ -5,12 +5,28 @@ import Message from './message';
 import ColorGenerator from '../../utils/color-generator';
 import FileTreeGenerator from '../../utils/file-tree-generator';
 import { NodeState as FileTree } from '../../utils/file-tree-node';
+import { getFileLanguage } from '../../utils/file-extension';
+
+export enum StorageItem {
+  JWT = 'crrt',
+  UID = 'crrsub',
+  PROJECT = 'crrprj',
+  FOC_FILE = 'crrfcfl',
+  TABS = 'crrtb',
+  CONTENT = 'crrctt',
+  NAME = 'crnnm',
+  UNAME = 'crunnm',
+  HOST = 'crrohs',
+  ROOM = 'crrm',
+  SCK = 'crsck',
+}
 
 enum FileOperationType {
   RENAME,
   DELETE,
   ADD,
 }
+
 interface FileOperation {
   type: FileOperationType;
   name: string;
@@ -88,6 +104,10 @@ interface UserData extends SparseUserData {
   username: string;
 }
 
+interface CompleteUserData extends UserData {
+  jwtToken: JWT;
+}
+
 export interface Collaborator extends SparseUserData {
   color: string;
 }
@@ -136,6 +156,12 @@ export interface FollowerData {
 export interface ScrollPosition {
   scrollLeft: number;
   scrollTop: number;
+}
+
+export interface JWT {
+  token: string;
+  expiresIn: number;
+  expires: number;
 }
 
 export default class IdeModel {
@@ -199,6 +225,18 @@ export default class IdeModel {
 
   scrollPosition!: ScrollPosition;
 
+  isLeader: boolean;
+
+  jwt!: JWT;
+
+  isLoggedIn = false;
+
+  isCoding = false;
+
+  persisted = false;
+
+  language!: string;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -209,6 +247,37 @@ export default class IdeModel {
     this.currentTabFiles = [];
     this.isHost = true;
     this.followers = [];
+    this.isLeader = false;
+  }
+
+  static saveToSessionStorage(key: StorageItem, value: string): void {
+    sessionStorage.setItem(key, btoa(value));
+  }
+
+  private static saveToLocalStorage(key: StorageItem, value: string): void {
+    localStorage.setItem(key, btoa(value));
+  }
+
+  static getFromSessionStorage(key: StorageItem): null | unknown {
+    const v = sessionStorage.getItem(key);
+    if (!v) return null;
+    const atobv = atob(v);
+    try {
+      return JSON.parse(atobv);
+    } catch (err) {
+      return atobv;
+    }
+  }
+
+  private static getFromLocalStorage(key: StorageItem): null | unknown {
+    const v = localStorage.getItem(key);
+    if (!v) return null;
+    const atobv = atob(v);
+    try {
+      return JSON.parse(atobv);
+    } catch (err) {
+      return atobv;
+    }
   }
 
   addObserver(o: Observer): void {
@@ -222,16 +291,28 @@ export default class IdeModel {
   setName(name: string): void {
     this.name = name;
     this.notifyObservers(Message.NAME_CHANGE);
+    IdeModel.saveToLocalStorage(StorageItem.NAME, name);
+  }
+
+  setLanguage(language: string): void {
+    this.language = language;
+  }
+
+  setJWT(token: JWT): void {
+    this.jwt = { ...token, expires: Date.now() + token.expiresIn };
+    IdeModel.saveToLocalStorage(StorageItem.JWT, JSON.stringify(this.jwt));
   }
 
   setUserID(userID: string): void {
     this.userID = userID;
+    IdeModel.saveToLocalStorage(StorageItem.UID, userID);
     this.notifyObservers(Message.ID_CHANGE);
   }
 
   setUsername(username: string): void {
     this.username = username;
     this.notifyObservers(Message.USERNAME_CHANGE);
+    IdeModel.saveToLocalStorage(StorageItem.UNAME, username);
   }
 
   setProjects(projects: ProjectData[]): void {
@@ -241,11 +322,16 @@ export default class IdeModel {
 
   setFileContentToSave(content: string): void {
     this.contentToSave = content;
+    IdeModel.saveToSessionStorage(StorageItem.CONTENT, content);
   }
 
   private setFollowers(followers: FollowerData[]): void {
     this.followers = followers;
     this.notifyObservers(Message.FOLLOWER_CHANGE);
+  }
+
+  setIsLeader(isLeader: boolean): void {
+    this.isLeader = isLeader;
   }
 
   addFollower(follower: FollowerData): void {
@@ -320,6 +406,10 @@ export default class IdeModel {
   setCurrentTabFiles(tabFiles: FileData[]): void {
     this.currentTabFiles = tabFiles;
     this.notifyObservers(Message.CURRENT_TABS);
+    IdeModel.saveToSessionStorage(
+      StorageItem.TABS,
+      JSON.stringify(this.currentTabFiles)
+    );
   }
 
   addTabFile(tabFile: FileData): void {
@@ -330,19 +420,51 @@ export default class IdeModel {
     ) {
       this.currentTabFiles.push(tabFile);
       this.notifyObservers(Message.CURRENT_TABS);
+      IdeModel.saveToSessionStorage(
+        StorageItem.TABS,
+        JSON.stringify(this.currentTabFiles)
+      );
     }
   }
 
-  setCurrentProject(project: CompleteProjectData): void {
+  private openAnotherTabFile(i: number): void {
+    // Open a another file
+    if (this.currentTabFiles.length) {
+      const newFocusIdx = i === 0 ? 0 : i - 1;
+      this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
+    } else {
+      this.resetFocusedFile();
+    }
+  }
+
+  closeTabFile(tabFile: FileData): void {
+    const i = this.currentTabFiles.findIndex((tf) => tf.id === tabFile.id);
+    if (i >= 0) {
+      this.currentTabFiles.splice(i, 1);
+      if (this.isLeader) {
+        if (this.focusedFile.id === tabFile.id) {
+          this.notifyObservers(Message.TAB_FILE_CLOSE);
+        }
+        this.openAnotherTabFile(i);
+      } else if (!this.leader) this.openAnotherTabFile(i);
+      this.notifyObservers(Message.CURRENT_TABS);
+    }
+  }
+
+  setCurrentProject(project: CompleteProjectData | null): void {
     this.currentProject = project;
-    this.setCurrentFileTree(project.files, project.name);
+    if (project) this.setCurrentFileTree(project.files, project.name);
     this.notifyObservers(Message.CURRENT_PROJECT);
   }
 
   setFocusedFile(file: FileData | null): void {
+    if (!file && !this.focusedFile) return;
     if (file?.id === this.focusedFile?.id) return;
+
+    if (file) this.setLanguage(getFileLanguage(file.name));
     this.saveContentIntoFile();
     this.focusedFile = file;
+    IdeModel.saveToSessionStorage(StorageItem.FOC_FILE, JSON.stringify(file));
     this.notifyObservers(Message.FOCUSED_FILE);
   }
 
@@ -352,8 +474,14 @@ export default class IdeModel {
     this.setFollowers([]);
     this.setLeader(null);
     this.roomID = '';
+    if (!this.isHost) {
+      this.resetFocusedFile();
+      this.resetTabsFiles();
+    }
+    IdeModel.saveToSessionStorage(StorageItem.ROOM, this.roomID);
+    IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
     this.isHost = true;
-    if (!this.isHost) this.setFocusedFile(null);
+    this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
@@ -370,7 +498,13 @@ export default class IdeModel {
   startCollaboration(roomID: string, isHost: boolean): void {
     this.colorGenerator = new ColorGenerator();
     this.roomID = roomID;
+    IdeModel.saveToSessionStorage(StorageItem.ROOM, roomID);
     this.isHost = isHost;
+    if (!isHost) {
+      this.resetTabsFiles();
+      this.resetFocusedFile();
+    }
+    IdeModel.saveToSessionStorage(StorageItem.HOST, `${isHost}`);
     this.notifyObservers(Message.COLLAB_STARTED);
   }
 
@@ -463,26 +597,51 @@ export default class IdeModel {
       fileOwnerId,
       this.currentProject.id,
       this.focusedFile.id,
-      this.contentToSave
+      this.contentToSave,
+      this.jwt.token
     );
 
-    API.editFile(fileOwnerId, this.currentProject.id, this.focusedFile.id, {
-      lastUpdated: Date.now(),
-    });
+    API.editFile(
+      fileOwnerId,
+      this.currentProject.id,
+      this.focusedFile.id,
+      {
+        lastUpdated: Date.now(),
+      },
+      this.jwt.token
+    );
+
+    this.editProject();
+  }
+
+  private async fetchProject(projectID: string): Promise<CompleteProjectData> {
+    const project = await API.getProject(
+      this.userID,
+      projectID,
+      this.jwt.token
+    );
+
+    return project as CompleteProjectData;
   }
 
   /**
    * Fetch the project with its id and set it as the current opened project.
    */
-  // eslint-disable-next-line class-methods-use-this
   async openProject(projectID: string): Promise<void> {
-    const project = (await API.getProject(
-      this.userID,
-      projectID
-    )) as CompleteProjectData;
+    const project = await this.fetchProject(projectID);
     this.resetTabsFiles();
     this.resetFocusedFile();
     this.setCurrentProject(project);
+    this.isHost = true;
+    IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
+    IdeModel.saveToSessionStorage(StorageItem.PROJECT, projectID);
+  }
+
+  closeProject(): void {
+    this.resetTabsFiles();
+    this.resetFocusedFile();
+    this.setCurrentProject(null);
+    IdeModel.saveToSessionStorage(StorageItem.PROJECT, null);
   }
 
   async getFileContent(fileID: string): Promise<string> {
@@ -490,19 +649,39 @@ export default class IdeModel {
     return (await API.getFileContent(
       this.isHost ? this.userID : this.currentProject.owner.id,
       this.currentProject.id,
-      fileID
+      fileID,
+      this.jwt.token
     )) as string;
   }
 
   async login(userName: string, password: string): Promise<void> {
-    const { username, id, name } = (await API.logIn(
+    const { username, id, name, jwtToken } = (await API.logIn(
       userName,
       password
-    )) as UserData;
+    )) as CompleteUserData;
     this.setUserID(id);
     this.setUsername(username);
     this.setName(name);
+    this.setJWT(jwtToken);
+    this.isLoggedIn = true;
     this.notifyObservers(Message.LOGIN);
+  }
+
+  logout(): void {
+    this.stopCollaboration();
+    this.closeProject();
+    this.setName('');
+    this.setUserID('');
+    this.setUsername('');
+    this.observers = [];
+    this.setProjects([]);
+    this.currentTabFiles = [];
+    this.followers = [];
+    this.jwt = undefined;
+    this.isLoggedIn = false;
+    localStorage.clear();
+    sessionStorage.clear();
+    this.notifyObservers(Message.LOGOUT);
   }
 
   async signup(
@@ -510,20 +689,22 @@ export default class IdeModel {
     userName: string,
     password: string
   ): Promise<void> {
-    const { username, id, name } = (await API.signUp(
+    const { username, id, name, jwtToken } = (await API.signUp(
       userName,
       namee,
       password
-    )) as UserData;
+    )) as CompleteUserData;
     this.setUserID(id);
     this.setUsername(username);
     this.setName(name);
+    this.setJWT(jwtToken);
     this.notifyObservers(Message.SIGNUP);
   }
 
   async getAllUserProjects(): Promise<void> {
     const projects = (await API.getAllUserProjects(
-      this.userID
+      this.userID,
+      this.jwt.token
     )) as ProjectData[];
     this.setProjects(projects);
   }
@@ -532,7 +713,8 @@ export default class IdeModel {
     const createdProject = (await API.createProject(
       this.userID,
       name,
-      creationDate
+      creationDate,
+      this.jwt.token
     )) as ProjectData;
     this.setProjects([createdProject, ...this.projects]);
   }
@@ -540,7 +722,8 @@ export default class IdeModel {
   async createCollab(): Promise<string> {
     const roomID = (await API.createCollab(
       this.userID,
-      this.currentProject.id
+      this.currentProject.id,
+      this.jwt.token
     )) as string;
     return roomID;
   }
@@ -549,7 +732,8 @@ export default class IdeModel {
     this.roomID = collabId;
     const project = (await API.getCollabProject(
       this.userID,
-      collabId
+      collabId,
+      this.jwt.token
     )) as CompleteProjectData;
     this.isHost = false;
     this.setCurrentProject(project);
@@ -586,7 +770,6 @@ export default class IdeModel {
   }
 
   private getTreeNodeFromPath(path: number[], fileTree = this.currentFileTree) {
-    // TODO: Do nothing if the path correspond to the root
     let node = fileTree;
     let filePath = node.name;
 
@@ -601,33 +784,33 @@ export default class IdeModel {
     return node;
   }
 
-  private async fileOperation(o: FileOperation): Promise<FileData | void> {
-    if (!this.isHost) return;
+  // private async fileOperation(o: FileOperation): Promise<FileData | void> {
+  //   if (!this.isHost) return;
 
-    switch (o.type) {
-      case FileOperationType.ADD: {
-        // eslint-disable-next-line consistent-return
-        return this.createFile(
-          (o as FileCreateOperation).name,
-          (o as FileCreateOperation).creationDate
-        );
-      }
-      case FileOperationType.RENAME: {
-        this.renameFile(
-          (o as FileRenameOperation).name,
-          (o as FileRenameOperation).lastUpdated,
-          (o as FileRenameOperation).fileID
-        );
-        break;
-      }
-      case FileOperationType.DELETE: {
-        this.deleteFile((o as FileDeleteOperation).fileID);
-        break;
-      }
-      default:
-        break;
-    }
-  }
+  //   switch (o.type) {
+  //     case FileOperationType.ADD: {
+  //       // eslint-disable-next-line consistent-return
+  //       return this.createFile(
+  //         (o as FileCreateOperation).name,
+  //         (o as FileCreateOperation).creationDate
+  //       );
+  //     }
+  //     case FileOperationType.RENAME: {
+  //       this.renameFile(
+  //         (o as FileRenameOperation).name,
+  //         (o as FileRenameOperation).lastUpdated,
+  //         (o as FileRenameOperation).fileID
+  //       );
+  //       break;
+  //     }
+  //     case FileOperationType.DELETE: {
+  //       this.deleteFile((o as FileDeleteOperation).fileID);
+  //       break;
+  //     }
+  //     default:
+  //       break;
+  //   }
+  // }
 
   private async createFile(
     name: string,
@@ -638,7 +821,8 @@ export default class IdeModel {
         this.isHost ? this.userID : this.currentProject.owner.id,
         this.currentProject.id,
         name,
-        creationDate
+        creationDate,
+        this.jwt.token
       );
       return fileData as FileData;
     } catch {
@@ -651,11 +835,48 @@ export default class IdeModel {
     if (i >= 0) {
       this.currentTabFiles[i].name = name;
       this.notifyObservers(Message.CURRENT_TABS);
+      IdeModel.saveToSessionStorage(
+        StorageItem.TABS,
+        JSON.stringify(this.currentTabFiles)
+      );
 
       if (this.currentTabFiles[i].id === this.focusedFile?.id) {
+        this.setLanguage(getFileLanguage(this.currentTabFiles[i].name));
         this.setFocusedFile(this.currentTabFiles[i]);
         this.notifyObservers(Message.FOCUSED_FILE);
       }
+    }
+  }
+
+  private async editProject(): Promise<void> {
+    try {
+      API.editProject(
+        this.isHost ? this.userID : this.currentProject.owner.id,
+        this.currentProject.id,
+        {
+          lastUpdated: Date.now(),
+        },
+        this.jwt.token
+      );
+
+      const i = this.projects.findIndex(
+        (project) => project.id === this.currentProject.id
+      );
+      if (i >= 0) {
+        this.projects[i].lastUpdated = Date.now();
+        this.notifyObservers(Message.PROJECTS_CHANGE);
+      }
+    } catch {
+      console.log('Error when updating project');
+    }
+  }
+
+  async deleteProject(projectID: string): Promise<void> {
+    try {
+      API.deleteProject(this.userID, projectID, this.jwt.token);
+      this.deleteProjectFromProjects(projectID);
+    } catch {
+      console.log('Error when deleting file');
     }
   }
 
@@ -672,7 +893,8 @@ export default class IdeModel {
         {
           name,
           lastUpdated,
-        }
+        },
+        this.jwt.token
       );
       this.renameTabFile(fileID, name);
     } catch {
@@ -686,13 +908,29 @@ export default class IdeModel {
       this.currentTabFiles.splice(i, 1);
 
       // Open a another file
-      if (this.currentTabFiles.length) {
-        const newFocusIdx = i === 0 ? 0 : i - 1;
-        this.setFocusedFile(this.currentTabFiles[newFocusIdx]);
-      } else this.resetFocusedFile();
+      this.openAnotherTabFile(i);
 
       this.notifyObservers(Message.CURRENT_TABS);
+      IdeModel.saveToSessionStorage(
+        StorageItem.TABS,
+        JSON.stringify(this.currentTabFiles)
+      );
     }
+  }
+
+  private deleteProjectFromProjects(projectID: string): void {
+    const i = this.projects.findIndex((project) => project.id === projectID);
+    if (i >= 0) {
+      this.projects.splice(i, 1);
+      this.notifyObservers(Message.PROJECTS_CHANGE);
+    }
+  }
+
+  private replaceFocusedFile(fileID: string) {
+    if (!(fileID === this.focusedFile.id)) return;
+    if (this.currentTabFiles.length)
+      this.setFocusedFile(this.currentTabFiles[0]);
+    else this.setFocusedFile(null);
   }
 
   private async deleteFile(fileID: string): Promise<void> {
@@ -700,9 +938,10 @@ export default class IdeModel {
       API.deleteFile(
         this.isHost ? this.userID : this.currentProject.owner.id,
         this.currentProject.id,
-        fileID
+        fileID,
+        this.jwt.token
       );
-
+      this.replaceFocusedFile(fileID);
       this.deleteTabFile(fileID);
     } catch {
       console.log('Error when deleting file');
@@ -799,11 +1038,69 @@ export default class IdeModel {
         }
         this.notifyObservers(Message.FOCUSED_FILE);
         this.notifyObservers(Message.CURRENT_TABS);
+        IdeModel.saveToSessionStorage(
+          StorageItem.TABS,
+          JSON.stringify(this.currentTabFiles)
+        );
+
         break;
       }
       default:
         break;
     }
+  }
+
+  setPersisted(persisted: boolean): void {
+    this.persisted = persisted;
+  }
+
+  persist(): void {
+    const jwt = IdeModel.getFromLocalStorage(StorageItem.JWT) as JWT;
+    const id = IdeModel.getFromLocalStorage(StorageItem.UID) as string;
+    const name = IdeModel.getFromLocalStorage(StorageItem.NAME) as string;
+    const uname = IdeModel.getFromLocalStorage(StorageItem.UNAME) as string;
+
+    if (!(jwt && id && name && uname)) return;
+
+    const expireIn = jwt.expires - Date.now();
+    const oneHour = 60 * 60 * 1000;
+    if (expireIn < oneHour) return;
+
+    this.jwt = jwt;
+    this.userID = id;
+    this.name = name;
+    this.username = uname;
+
+    this.getAllUserProjects().then(() => {
+      this.notifyObservers(Message.PROJECTS_CHANGE);
+    });
+    this.isLoggedIn = true;
+
+    this.persisted = true;
+
+    const isHost = IdeModel.getFromSessionStorage(StorageItem.HOST);
+    if (isHost !== null) this.isHost = isHost as boolean;
+
+    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
+    if (!projId) return;
+
+    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
+
+    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
+
+    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
+
+    this.fetchProject(projId as string)
+      .then((project) => {
+        this.currentProject = project;
+        this.setCurrentFileTree(project.files, project.name);
+        if (content !== undefined) this.contentToSave = content as string;
+        if (focFile) this.setFocusedFile(focFile as FileData);
+        if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
+        this.notifyObservers(Message.UPDATE_TREE);
+        this.isCoding = true;
+      })
+      .catch();
   }
 
   notifyObservers(message: Message): void {

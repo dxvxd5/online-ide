@@ -30,7 +30,7 @@ export default function EditorTabToggleManager({
   }, []);
 
   return (
-    <div className="editorTab--togglesContainer">
+    <div className="ide__tab-toggle-container">
       {openedFiles.map((file) => (
         <EditorTabToggleView
           name={extractBasename(file.name)}
@@ -40,6 +40,10 @@ export default function EditorTabToggleManager({
           handleClick={({ id, name }) => {
             stopFollowing();
             model.setFocusedFile({ name, id });
+          }}
+          closeFileFromTab={({ id, name }) => {
+            if (!model.isLeader) stopFollowing();
+            model.closeTabFile({ id, name });
           }}
         />
       ))}

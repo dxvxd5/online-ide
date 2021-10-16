@@ -25,9 +25,7 @@ import EditorView from './EditorTabContentView';
 interface EditorPresenterProps {
   model: IdeModel;
   language: string;
-  fileID: string;
   fileContent: string;
-  isFocused: boolean;
   onEditorCursorMoved: (position: CursorPosition) => void;
   onEditorSelection: (start: CursorPosition, end: CursorPosition) => void;
   onContentInsert: (index: number, text: string) => void;
@@ -39,9 +37,7 @@ interface EditorPresenterProps {
 export default function EditorPresenter({
   model,
   language,
-  fileID,
   fileContent,
-  isFocused,
   onEditorCursorMoved,
   onEditorSelection,
   onContentInsert,
@@ -214,7 +210,10 @@ export default function EditorPresenter({
   };
 
   const onChange = (content: string | undefined): void => {
-    if (content !== undefined) model.setFileContentToSave(content);
+    if (content !== undefined) {
+      model.setFileContentToSave(content);
+      if (model.roomID) model.saveContentIntoFile();
+    }
   };
 
   return (
@@ -222,7 +221,6 @@ export default function EditorPresenter({
       language={language}
       code={fileContent}
       handleMount={handleMount}
-      isFocused={isFocused}
       onContentChange={onChange}
     />
   );

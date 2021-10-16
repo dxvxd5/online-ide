@@ -12,7 +12,7 @@ export default function checkAuthentication(
 ): void {
   if (req.isUnauthenticated())
     res
-      // TODO: Maybe add the WWW-Authenticate header to the response
+      .set('WWW-Authenticate', 'Bearer')
       .status(401)
       .json({ error: new HttpError('Authentication required', 401) });
   else {

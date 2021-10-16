@@ -11,6 +11,9 @@ enum Message {
   // when the user is logged in
   LOGIN,
 
+  // when the user is logged out
+  LOGOUT,
+
   // When the user has signed up
   SIGNUP,
 
@@ -61,6 +64,9 @@ enum Message {
 
   // when we update the leader
   LEADER_CHANGE,
+
+  // When we remove a file from the tab
+  TAB_FILE_CLOSE,
 }
 
 export default Message;

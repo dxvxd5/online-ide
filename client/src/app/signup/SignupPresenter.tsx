@@ -1,5 +1,5 @@
 import { useHistory } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import IdeModel from '../../data/model/model';
 import ProjectError from '../components/error/ProjectError';
 import Loader from '../components/loader/Loader';
@@ -34,11 +34,19 @@ export default function SingupPresenter({
       await model.signup(name, username, password);
       setIsSignedUp(true);
       if (signupError) setSignupError(false);
-    } catch {
-      setSignupErrorInfo('Error. Could not sign up.');
+    } catch (error) {
+      if (error.error.statusCode === 400) {
+        setSignupErrorInfo(error.error.message);
+      } else {
+        setSignupErrorInfo('Something went wrong. Please try again.');
+      }
       setSignupError(true);
     }
   };
+
+  useEffect(() => {
+    if (model.isLoggedIn) history.push({ pathname: '/me' });
+  }, []);
 
   const logIn = () => {
     history.push({ pathname: '/login' });
