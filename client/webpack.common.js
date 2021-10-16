@@ -53,6 +53,11 @@ loaders.push({
   type: 'asset/resource',
 });
 
+loaders.push({
+  test: /\.svg$/i,
+  use: ['@svgr/webpack'],
+});
+
 module.exports = {
   entry: './src/index.tsx',
   module: {
