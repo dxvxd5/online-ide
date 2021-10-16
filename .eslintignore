@@ -1,7 +1,8 @@
 # TS output folder
 public
+
 node_modules
 .eslintrc.js
 .eslintrc.cjs
-webpack.common.js
-webpack.dev.js
+
+webpack.*
