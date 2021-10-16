@@ -18,6 +18,8 @@
   --tab-color: #4c4c4c;
   /* --tab-color: #1e1e1e; */
   --tab-color-lighter: #717171;
+}
+
 @keyframes fadein {
   from {
     opacity: 0;
