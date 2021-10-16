@@ -40,6 +40,8 @@ app.use(
 );
 
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: 'http://localhost:3000' } });
+const io = new Server(server, {
+  cors: { origin: true },
+});
 socketFunction(io);
 server.listen(PORT, () => console.log(`Server started on port ${PORT}!`));
