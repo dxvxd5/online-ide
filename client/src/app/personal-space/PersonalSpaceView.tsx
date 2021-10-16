@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../components/button/Button';
+import Button from '../components/button/button';
 import Logo from '../components/logo/Logo';
 import Profile from '../components/profile/Profile';
 import Project from '../components/project/Project';

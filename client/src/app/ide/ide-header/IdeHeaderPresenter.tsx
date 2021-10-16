@@ -73,6 +73,7 @@ export default function IdeHeaderPresenter({
 
   return (
     <IdeHeaderView
+      copyClipboard={copyClipboard}
       removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
       startFollowOnClick={startFollowOnClick}

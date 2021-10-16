@@ -18,6 +18,54 @@
   --tab-color: #4c4c4c;
   /* --tab-color: #1e1e1e; */
   --tab-color-lighter: #717171;
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 html,
@@ -38,6 +86,12 @@ body {
 .container {
   height: 100%;
   width: 100%;
+
+  animation: fadein 1s;
+  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein 1s; /* Firefox < 16 */
+  -ms-animation: fadein 1s; /* Internet Explorer */
+  -o-animation: fadein 1s; /* Opera < 12.1 */
 }
 
 .container--sign-up,
@@ -46,6 +100,8 @@ body {
   flex-direction: row;
   justify-content: center;
   align-items: center;
+
+  animation: 1s 0s 1 slideInFromRight;
 }
 
 .container--personal-space {

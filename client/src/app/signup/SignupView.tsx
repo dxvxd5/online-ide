@@ -2,7 +2,7 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { SignupSchemaType } from '../../utils/yup-schemas';
 
-import Button from '../components/button/Button';
+import Button from '../components/button/button';
 
 import '../../assets/styles/form.css';
 
