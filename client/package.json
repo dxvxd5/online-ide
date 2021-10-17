@@ -6,12 +6,13 @@
   "scripts": {
     "start": "webpack server --config webpack.dev.js",
     "build:dev": "webpack --config webpack.dev.js",
-    "build":"webpack --config webpack.prod.js",
+    "build": "webpack --config webpack.prod.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@chakra-ui/core": "^0.8.0",
     "@convergencelabs/monaco-collab-ext": "^0.3.2",
     "@monaco-editor/react": "^4.2.2",
     "axios": "^0.21.4",

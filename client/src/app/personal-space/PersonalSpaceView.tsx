@@ -3,6 +3,7 @@ import Button from '../components/button/Button';
 import Logo from '../components/logo/Logo';
 import Profile from '../components/profile/Profile';
 import Project from '../components/project/Project';
+import EmptyState from './EmptyState';
 
 interface ProjectsData {
   name: string;
@@ -76,6 +77,7 @@ const PersonalSpaceView = ({
           className="section__button--personal-space"
         />
       </section>
+      {projects.length === 0 && <EmptyState />}
       <div className="container--project">
         {projects.map((project) => (
           <Project
