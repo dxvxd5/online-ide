@@ -1,4 +1,5 @@
 const path = require('path');
+const WebpackBar = require('webpackbar');
 
 const loaders = [];
 
@@ -70,4 +71,5 @@ module.exports = {
     filename: 'main.bundle.js',
     path: path.resolve(path.resolve(), 'build'),
   },
+  plugins: [new WebpackBar()],
 };
