@@ -6,6 +6,7 @@ import EditorPresenter from './EditorTabContentPresenter';
 import Loader from '../../components/loader/Loader';
 import ProjectError from '../../components/error/ProjectError';
 import { getFileLanguage } from '../../../utils/file-extension';
+import EmptyState from './EmptyState';
 
 interface EditorTabContentManagerProps {
   model: IdeModel;
@@ -50,7 +51,12 @@ export default function EditorTabContentManager({
     return () => model.removeObserver(focusedFileListener);
   }, []);
 
-  if (!focusedFile) return <div>open a file</div>;
+  if (!focusedFile)
+    return (
+      <div>
+        <EmptyState />
+      </div>
+    );
   if (!loadFileError && content === null) {
     model
       .getFileContent(focusedFile.id)
