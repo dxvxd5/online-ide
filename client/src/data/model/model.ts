@@ -110,6 +110,7 @@ interface CompleteUserData extends UserData {
 
 export interface Collaborator extends SparseUserData {
   color: string;
+  focusedFile: FileData | null;
 }
 
 export interface CollaboratorCursor {
@@ -335,10 +336,13 @@ export default class IdeModel {
   }
 
   addFollower(follower: FollowerData): void {
-    if (!this.followers.some((f) => f.user.id === follower.user.id)) {
-      this.followers.push(follower);
-      this.notifyObservers(Message.FOLLOWER_CHANGE);
-    }
+    const follAlreadyExists = this.followers.some(
+      (f) => f.user.id === follower.user.id
+    );
+    if (follAlreadyExists) return;
+
+    this.followers.push(follower);
+    this.notifyObservers(Message.FOLLOWER_CHANGE);
   }
 
   removeFollower(follower: FollowerData): void {
@@ -413,18 +417,17 @@ export default class IdeModel {
   }
 
   addTabFile(tabFile: FileData): void {
-    if (
-      !this.currentTabFiles.some(
-        (currentTabFile) => currentTabFile.id === tabFile.id
-      )
-    ) {
-      this.currentTabFiles.push(tabFile);
-      this.notifyObservers(Message.CURRENT_TABS);
-      IdeModel.saveToSessionStorage(
-        StorageItem.TABS,
-        JSON.stringify(this.currentTabFiles)
-      );
-    }
+    const tabAlreadyExist = this.currentTabFiles.some(
+      (currentTabFile) => currentTabFile.id === tabFile.id
+    );
+    if (tabAlreadyExist) return;
+
+    this.currentTabFiles.push(tabFile);
+    this.notifyObservers(Message.CURRENT_TABS);
+    IdeModel.saveToSessionStorage(
+      StorageItem.TABS,
+      JSON.stringify(this.currentTabFiles)
+    );
   }
 
   private openAnotherTabFile(i: number): void {
@@ -485,14 +488,29 @@ export default class IdeModel {
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
-  addCollaborator(joiner: SparseUserData): void {
+  addCollaborator(joiner: SparseUserData, focusedFile: FileData | null): void {
     const newCollaborator = {
       ...joiner,
       color: this.colorGenerator?.generateColor(),
+      focusedFile: focusedFile ?? null,
     };
     this.collaborators = [...this.collaborators, newCollaborator];
     this.joiner = newCollaborator;
     this.notifyObservers(Message.USER_JOIN);
+  }
+
+  updateCollaboratorFocusedFile(
+    collaborator: SparseUserData,
+    focusedFile: FileData | null
+  ): void {
+    const i = this.collaborators.findIndex(
+      (coll) => coll.id === collaborator.id
+    );
+
+    if (i < 0) return;
+
+    this.collaborators[i].focusedFile = focusedFile;
+    this.notifyObservers(Message.COLLAB_FOCUSED_FILE_CHANGE);
   }
 
   startCollaboration(roomID: string, isHost: boolean): void {
@@ -967,14 +985,13 @@ export default class IdeModel {
         if (node.children) {
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
-          // Dummy method to force tree update:
         }
-
         break;
       }
 
       case FileTreeOperation.RENAME: {
         const node = this.getTreeNodeFromPath(event.path, newTree);
+        this.saveContentIntoFile();
         if (node.fileID) {
           this.renameFile(node.filePath, Date.now(), node.fileID);
         } else {

@@ -117,9 +117,9 @@ export default function IdePresenter({
     setSocketState(socketstate);
   }
 
-  const emitFocusedFile = (
+  const emitToFollowers = (
     focusedFile: FileData | null,
-    socketMessage: string,
+    socketMessage: SocketMessage,
     leader: User
   ) => {
     if (!socketRef.current) return;
@@ -130,6 +130,14 @@ export default function IdePresenter({
         follower,
         leader,
       });
+    });
+  };
+
+  const emitOpenFile = (focusedFile: FileData) => {
+    socketRef.current?.emit(SocketMessage.OPEN_FILE, {
+      focusedFile,
+      user: { name: model.name, id: model.userID },
+      roomID: model.roomID,
     });
   };
 
@@ -180,14 +188,16 @@ export default function IdePresenter({
 
     const ideListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        emitFocusedFile(
+        emitToFollowers(
           model.focusedFile,
           SocketMessage.FOLLOW_FILE,
           model.leader
         );
+        emitOpenFile(model.focusedFile);
       }
+
       if (m === Message.TAB_FILE_CLOSE) {
-        emitFocusedFile(
+        emitToFollowers(
           model.focusedFile,
           SocketMessage.CLOSE_TAB_FILE,
           model.leader
@@ -195,12 +205,14 @@ export default function IdePresenter({
       }
     };
     model.addObserver(ideListener);
+
     if (model.persisted && !model.isHost) {
       history.push({ pathname: '/me' });
       Swal.fire(
         "You've been disconnected from the collaboration session. Please join again."
       );
     }
+
     if (!model.isHost) {
       // When user join room we initiate the socket
       intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
@@ -222,16 +234,17 @@ export default function IdePresenter({
 
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
-      ({ user, socketID }: { user: User; socketID: string }) => {
+      ({ user, socketID, focusedFile }: SocketData) => {
         if (socketID) {
           const message = `User ${user.name} joined the room.`;
           notifyUserLeft(message);
           socketRef.current?.emit(SocketMessage.JOINED_ROOM, {
             to: socketID,
             user: { id: model.userID, name: model.name },
+            focusedFile: model.focusedFile,
           });
         }
-        model.addCollaborator(user);
+        model.addCollaborator(user, focusedFile);
       }
     );
 
@@ -247,6 +260,7 @@ export default function IdePresenter({
         notifyUserLeft(message);
       }
       model.stopCollaboration();
+
       redirect();
     });
 
@@ -310,13 +324,14 @@ export default function IdePresenter({
         model.updateTabs(newTree, event);
       }
     );
+
     socketRef.current.on(
       SocketMessage.START_FOLLOWING,
       ({ leader, follower }: SocketData) => {
         if (leader.id === model.userID) {
           model.setIsLeader(true);
           model.addFollower(follower);
-          emitFocusedFile(model.focusedFile, SocketMessage.FOLLOW_FILE, leader);
+          emitToFollowers(model.focusedFile, SocketMessage.FOLLOW_FILE, leader);
         }
       }
     );
@@ -324,7 +339,6 @@ export default function IdePresenter({
     socketRef.current.on(
       SocketMessage.FOLLOW_FILE,
       ({ focusedFile }: SocketData) => {
-        model.setIsLeader(false);
         model.addTabFile(focusedFile);
         model.setFocusedFile(focusedFile);
       }
@@ -361,6 +375,13 @@ export default function IdePresenter({
       }
       notifyUserLeft(message);
     });
+
+    socketRef.current.on(
+      SocketMessage.OPEN_FILE,
+      ({ user, focusedFile }: SocketData) => {
+        model.updateCollaboratorFocusedFile(user, focusedFile);
+      }
+    );
   }, [socketState]);
 
   const socketCreateRoom = () => {
@@ -426,6 +447,7 @@ export default function IdePresenter({
   };
 
   const onContentReplace = (index: number, length: number, text: string) => {
+    console.log('emitting onContentReplace', { index, length, text });
     if (!socketRef.current) return;
 
     socketRef.current.emit(SocketMessage.CONTENT_REPLACE, {
@@ -479,13 +501,17 @@ export default function IdePresenter({
 
   const startFollowOnClick = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const leader: User = JSON.parse(event.target.value);
+
     if (!socketRef.current) return;
     if (!leader || leader.id === model.leader?.id) return;
+
     if (leader.id === 'unfollow') {
       stopFollowing();
       return;
     }
+
     stopFollowing();
+
     model.setLeader(leader);
     socketRef.current.emit(SocketMessage.START_FOLLOWING, {
       leader,

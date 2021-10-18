@@ -69,6 +69,7 @@ export default function IdeHeaderPresenter({
       name: 'Stop following',
       id: 'unfollow',
       color: '',
+      focusedFile: null,
     });
 
   return (

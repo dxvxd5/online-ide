@@ -208,6 +208,13 @@ export function followFile(
   });
 }
 
+export function openFile(
+  socket: Socket,
+  { focusedFile, user, roomID }: SocketData
+): void {
+  socket.to(roomID).emit(SocketMessage.OPEN_FILE, { user, focusedFile });
+}
+
 export function stopFollowing(socket: Socket, { roomID }: SocketData): void {
   socket.to(roomID).emit(SocketMessage.STOP_FOLLOWING, {
     follower: { socketID: socket.id, user: socket.data.user },
