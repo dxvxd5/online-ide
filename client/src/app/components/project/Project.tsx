@@ -1,8 +1,8 @@
-/* eslint-disable react/style-prop-object */
 import React from 'react';
 import Button from '../button/Button';
-import '../../../assets/styles/project.css';
 import when from '../../../utils/date';
+
+import '../../../assets/styles/project.css';
 
 interface ProjectsData {
   name: string;
@@ -15,12 +15,15 @@ interface ProjectProps {
   project: ProjectsData;
   remove: (id: string) => void;
   open: (id: string) => void;
+  // eslint-disable-next-line react/require-default-props
+  style?: React.CSSProperties;
 }
 
 export default function Project({
   project,
   open,
   remove,
+  style,
 }: ProjectProps): JSX.Element {
   const { name, lastUpdated, id } = project;
 
@@ -28,27 +31,28 @@ export default function Project({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div className="project">
-      <div className="project__infos">
-        <div className="project__name">{name}</div>
-        <div className="project__date">{whenDidUpdate}</div>
-      </div>
-      <div className="project__buttons">
-        <Button
-          submit={false}
-          className="project__open"
-          onClick={() => open(id)}
-          text="Open"
-          theme="main"
-        />
-        <Button
-          submit={false}
-          className="project__delete"
-          onClick={() => remove(id)}
-          text="Delete"
-          theme="red"
-        />
-      </div>
+    <div className="project" title={name} style={style}>
+      <span className="project__info project__info--name">{name}</span>
+      <span className="project__info project__info--date">
+        <span className="text--little">last change: </span> <br />
+        {whenDidUpdate}
+      </span>
+      <Button
+        submit={false}
+        className="project__button"
+        onClick={() => open(id)}
+        text="Open"
+        theme="main"
+        title={`Open ${name}`}
+      />
+      <Button
+        submit={false}
+        className="project__button"
+        onClick={() => remove(id)}
+        text="Delete"
+        theme="red"
+        title={`Delete ${name}`}
+      />
     </div>
   );
 }

@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import IdeModel, { CursorPosition } from '../../../data/model/model';
 import Message from '../../../data/model/message';
 import EditorPresenter from './EditorTabContentPresenter';
-import Loader from '../../components/loader/Loader';
-import ProjectError from '../../components/error/ProjectError';
 import { getFileLanguage } from '../../../utils/file-extension';
-import EmptyState from './EmptyState';
+import Empty from '../../components/empty/Empty';
+import PromiseNoData from '../../components/promise-no-data/PromiseNoData';
 
 interface EditorTabContentManagerProps {
   model: IdeModel;
@@ -32,7 +31,8 @@ export default function EditorTabContentManager({
     model.focusedFile ? getFileLanguage(model.focusedFile.name) : ''
   );
   const [content, setContent] = useState<string | null>(null);
-  const [loadFileError, setLoadFileError] = useState(false);
+  const [state, setState] = useState(0);
+  const forceRerender = () => setState(state + 1);
 
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
@@ -43,7 +43,6 @@ export default function EditorTabContentManager({
         } else setContent(null);
 
         setFocusedFile(model.getFocusedFile());
-        setLoadFileError(false);
         setLanguage(model.language);
       }
     };
@@ -52,25 +51,17 @@ export default function EditorTabContentManager({
   }, []);
 
   if (!focusedFile)
-    return (
-      <div>
-        <EmptyState />
-      </div>
-    );
-  if (!loadFileError && content === null) {
-    model
-      .getFileContent(focusedFile.id)
-      .then((c) => setContent(c))
-      .catch(() => setLoadFileError(true));
+    return <Empty message="No file opened" className="empty--project" />;
 
-    return <Loader />;
-  }
-
-  if (loadFileError)
+  if (content === null)
     return (
-      <ProjectError
-        projectErrorInfo="Could not load file. Please try again"
-        tryAgain={() => setLoadFileError(false)}
+      <PromiseNoData
+        promise={model.getFileContent(focusedFile.id)}
+        onComplete={(c: string) => setContent(c)}
+        loadingMessage="Fetching file content..."
+        tryAgain={forceRerender}
+        classNameBlck="ide__editor"
+        errorMessage="Failed to fetch file content"
       />
     );
 

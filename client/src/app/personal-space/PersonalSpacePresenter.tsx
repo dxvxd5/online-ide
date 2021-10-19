@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 import Message from '../../data/model/message';
-import IdeModel from '../../data/model/model';
-import ProjectError from '../components/error/ProjectError';
-import PersonalSpaceView from './PersonalSpaceView';
+import IdeModel, { ProjectData } from '../../data/model/model';
+import toastPromise from '../../utils/toast';
+import PromiseNoData from '../components/promise-no-data/PromiseNoData';
+import ControlArea, { SortOption } from './PersonalSpaceControlArea';
+import ProjectsArea from './PersonalSpaceProjectArea';
 
 interface PersonalSpacePresenterProp {
   model: IdeModel;
-}
-
-interface ProjectsData {
-  name: string;
-  shared: boolean;
-  id: string;
-  lastUpdated: number;
 }
 
 type SwalFireType = {
@@ -27,14 +22,28 @@ interface SwalFireInput {
   preConfirm: SwalFireType;
 }
 
+const sortProjects = (sortingOption: SortOption, projs) => {
+  const sortedProjects: ProjectData[] = projs.sort((project1, project2) => {
+    switch (sortingOption) {
+      case SortOption.DATE:
+        return project1.lastUpdated < project2.lastUpdated ? 1 : -1;
+      case SortOption.NAME:
+        return project1.name > project2.name ? 1 : -1;
+      default:
+        return 1;
+    }
+  });
+  return sortedProjects;
+};
+
 export default function PersonalSpacePresenter({
   model,
 }: PersonalSpacePresenterProp): JSX.Element {
-  const [projects, setProjects] = useState(model.getProjects());
-  const [projectError, setProjectError] = useState(false);
-  const [isProjectLoaded, setIsProjectLoaded] = useState(false);
-  const [projectErrorInfo, setProjectErrorInfo] = useState('');
-  const sortOptions = ['Last Updated', 'Name'];
+  const currSortOption = useRef(SortOption.DATE);
+  const [projects, setProjects] = useState<ProjectData[] | null>(null);
+  const [state, setState] = useState(0);
+
+  const forceRerender = () => setState(state + 1);
   const history = useHistory();
 
   const swalFirePopUp = (
@@ -46,9 +55,16 @@ export default function PersonalSpacePresenter({
       showLoaderOnConfirm: true,
       allowOutsideClick: () => !Swal.isLoading(),
       backdrop: true,
+      heightAuto: false,
+      inputValidator: (value) => !value && 'A value must be provided!',
     } as SweetAlertOptions;
+
     return Swal.fire(options);
   };
+
+  function updateProjectState(project: ProjectData[]): void {
+    setProjects(sortProjects(currSortOption.current, [...project]));
+  }
 
   useEffect(() => {
     if (!model.isLoggedIn) history.push({ pathname: '/login' });
@@ -56,37 +72,18 @@ export default function PersonalSpacePresenter({
 
     const projectObserver = (m: Message) => {
       if (m === Message.PROJECTS_CHANGE)
-        setProjects([...model.getProjects()] as ProjectsData[]);
+        updateProjectState(model.getProjects());
     };
     model.addObserver(projectObserver);
 
     return () => model.removeObserver(projectObserver);
   }, []);
 
-  const handleSortedProjects = (sortProjectsValue: string) => {
-    const sortedProjects: ProjectsData[] = projects.sort(
-      (project1, project2) => {
-        const isLastUpdated = sortProjectsValue === 'Last Updated';
-        const isName = sortProjectsValue === 'Name';
-
-        if (isLastUpdated) {
-          const dateA = new Date(project1.lastUpdated).getTime();
-          const dateB = new Date(project2.lastUpdated).getTime();
-          const lastupdated = dateA < dateB ? 1 : -1;
-          return lastupdated;
-        }
-        if (isName) {
-          const name = project1.name > project2.name ? 1 : -1;
-          return name;
-        }
-        return 0;
-      }
-    );
-    setProjects([...sortedProjects]);
-  };
-
   const handleSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    handleSortedProjects(event.target.value);
+    const sortOption = event.target.value as SortOption;
+    const sortedProjects = sortProjects(sortOption, projects);
+    currSortOption.current = sortOption;
+    setProjects([...sortedProjects]);
   };
 
   const createProject = async () => {
@@ -96,34 +93,32 @@ export default function PersonalSpacePresenter({
       inputLabel: 'Your project name',
       preConfirm: (name) => {
         const creationDate = Date.now();
-        model
-          .createProject(name, creationDate)
-          .then(() => name)
-          .catch(() =>
-            Swal.fire(
-              `Error. Could not create a project. Please try again.`,
-              '',
-              'error'
-            )
-          );
+        const promise = model.createProject(name, creationDate);
+
+        const msgs = {
+          loading: 'Creating project...',
+          error: 'Could not create project. Please try again',
+          success: 'Project successfully created',
+        };
+
+        toastPromise(promise, msgs);
       },
     };
-    swalFirePopUp(swalFireInput).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire(`Your project name is ${result.value}`, '', 'success');
-      }
-    });
+    swalFirePopUp(swalFireInput);
   };
 
-  const openProject = async (projectID: string) => {
-    try {
-      await model.openProject(projectID);
-      setIsProjectLoaded(true);
-      if (projectError) setProjectError(false);
-    } catch {
-      setProjectErrorInfo('Could not open the project. Please try again.');
-      setProjectError(true);
-    }
+  const openProject = (projectID: string) => {
+    const promise = model.openProject(projectID).then(() => {
+      history.push({
+        pathname: '/code',
+      });
+    });
+    const msgs = {
+      loading: 'Opening project...',
+      error: 'Could not open project. Please try again',
+      success: 'Enjoy your work',
+    };
+    toastPromise(promise, msgs);
   };
 
   const deleteProject = async (projectID: string) => {
@@ -133,17 +128,18 @@ export default function PersonalSpacePresenter({
       inputLabel: '',
       preConfirm: () => {},
     };
-    swalFirePopUp(swalFireInput)
-      .then((result) => {
-        if (result.isConfirmed) {
-          model.deleteProject(projectID);
-          if (projectError) setProjectError(false);
-        }
-      })
-      .catch(() => {
-        setProjectErrorInfo('Could not delete the project. Please try again.');
-        setProjectError(true);
-      });
+    swalFirePopUp(swalFireInput).then((result) => {
+      if (result.isConfirmed) {
+        const promise = model.deleteProject(projectID);
+        const msgs = {
+          loading: 'Deleting project...',
+          success: 'Project successfully deleted',
+          error: 'Could not delete project. Please try again.',
+        };
+
+        toastPromise(promise, msgs);
+      }
+    });
   };
 
   const joinCollab = async () => {
@@ -152,34 +148,23 @@ export default function PersonalSpacePresenter({
       input: 'text',
       inputLabel: 'Room ID',
       preConfirm: (roomID) => {
-        model
-          .getCollabProject(roomID)
-          .then(() => setIsProjectLoaded(true))
-          .catch(() =>
-            Swal.fire(
-              `Error. Could not join a project. Please try again.`,
-              '',
-              'error'
-            )
-          );
+        const promise = model.getCollabProject(roomID).then(() =>
+          history.push({
+            pathname: '/code',
+          })
+        );
+
+        const msgs = {
+          loading: 'Joining session...',
+          error: 'Could not join session. Please try again',
+          success: 'Session joined successfully',
+        };
+
+        toastPromise(promise, msgs);
       },
     };
     swalFirePopUp(swalFireInput);
   };
-
-  if (projectError)
-    return (
-      <ProjectError
-        projectErrorInfo={projectErrorInfo}
-        tryAgain={() => setProjectError(false)}
-      />
-    );
-
-  if (isProjectLoaded) {
-    history.push({
-      pathname: '/code',
-    });
-  }
 
   const logout = () => {
     model.logout();
@@ -189,16 +174,35 @@ export default function PersonalSpacePresenter({
   };
 
   return (
-    <PersonalSpaceView
-      deleteProject={deleteProject}
-      joinCollab={joinCollab}
-      createProject={createProject}
-      handleSort={handleSort}
-      projects={projects}
-      name={model.name}
-      sortOptions={sortOptions}
-      openProject={openProject}
-      logout={logout}
-    />
+    <div className="container container--personal-space">
+      <ControlArea
+        logout={logout}
+        altSort={
+          currSortOption.current === SortOption.DATE
+            ? SortOption.NAME
+            : SortOption.DATE
+        }
+        currSort={currSortOption.current}
+        name={model.name}
+        handleSort={handleSort}
+        joinCollab={joinCollab}
+        createProject={createProject}
+      />
+      {projects ? (
+        <ProjectsArea
+          projects={projects}
+          openProject={openProject}
+          deleteProject={deleteProject}
+        />
+      ) : (
+        <PromiseNoData
+          promise={model.getAllUserProjects()}
+          loadingMessage="Loading your Projects"
+          errorMessage="Failed to load your projects"
+          tryAgain={forceRerender}
+          classNameBlck="personal-space"
+        />
+      )}
+    </div>
   );
 }

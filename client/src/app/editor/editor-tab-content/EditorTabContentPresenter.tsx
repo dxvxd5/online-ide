@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { OnMount } from '@monaco-editor/react';
 import {
   RemoteCursorManager,
@@ -21,6 +22,7 @@ import IdeModel, {
 } from '../../../data/model/model';
 import { randomNumberInRange } from '../../../utils/random';
 import EditorView from './EditorTabContentView';
+import toastPromise from '../../../utils/toast';
 
 interface EditorPresenterProps {
   model: IdeModel;
@@ -59,6 +61,20 @@ export default function EditorPresenter({
       selectionManagerRef.current?.removeSelection(cursorID);
       // eslint-disable-next-line no-empty
     } catch {}
+  }
+
+  function saveCurrentFile(errorMsg = '', successMsg = '') {
+    if (!model.focusedFile) {
+      if (errorMsg) toast.error(errorMsg);
+      return;
+    }
+    const msgs = {
+      loading: 'Saving file...',
+      success: successMsg || 'File saved',
+      error: 'Could not save file',
+    };
+    const promise = model.saveContentIntoFile();
+    toastPromise(promise, msgs);
   }
 
   function addCollaborator(joiner: Collaborator) {
@@ -145,7 +161,7 @@ export default function EditorPresenter({
     model.addObserver(collabListener);
 
     saveIntervalRef.current = setInterval(() => {
-      model.saveContentIntoFile();
+      saveCurrentFile('', 'File automatically saved');
     }, fiveMinutes);
 
     return () => {
@@ -203,7 +219,7 @@ export default function EditorPresenter({
       // eslint-disable-next-line no-bitwise
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
       function () {
-        model.saveContentIntoFile();
+        saveCurrentFile('No file opened');
       }
     );
     addAllCollaborators(model.collaborators);

@@ -1,0 +1,28 @@
+@import url(app.css);
+
+.error {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.error__text {
+  margin-top: 10px;
+  color: var(--primary-color);
+  font-weight: 400;
+}
+
+.error__btn {
+  height: 44px;
+  margin-top: 20px;
+}
+
+.error--personal-space {
+  margin-top: 100px;
+}
+
+.error--ide__editor {
+  margin-top: 100px;
+}

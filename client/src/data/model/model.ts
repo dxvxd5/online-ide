@@ -21,32 +21,6 @@ export enum StorageItem {
   SCK = 'crsck',
 }
 
-enum FileOperationType {
-  RENAME,
-  DELETE,
-  ADD,
-}
-
-interface FileOperation {
-  type: FileOperationType;
-  name: string;
-}
-
-interface FileDeleteOperation extends FileOperation {
-  fileID: string;
-}
-
-interface FileCreateOperation extends FileOperation {
-  name: string;
-  creationDate: number;
-}
-
-interface FileRenameOperation extends FileOperation {
-  fileID: string;
-  name: string;
-  lastUpdated: number;
-}
-
 export enum EditorContentOperationType {
   REPLACEMENT,
   DELETION,
@@ -131,7 +105,7 @@ export interface CompleteFileData extends FileData {
   content: string;
 }
 
-interface ProjectData {
+export interface ProjectData {
   name: string;
   shared: boolean;
   id: string;
@@ -176,8 +150,6 @@ export default class IdeModel {
   username: string;
 
   projects: ProjectData[];
-
-  // project: ProjectData;
 
   observers: Array<Observer>;
 
@@ -481,7 +453,6 @@ export default class IdeModel {
     IdeModel.saveToSessionStorage(StorageItem.ROOM, this.roomID);
     IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
     this.isHost = true;
-    this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
@@ -627,6 +598,7 @@ export default class IdeModel {
   /**
    * Fetch the project with its id and set it as the current opened project.
    */
+  // eslint-disable-next-line class-methods-use-this
   async openProject(projectID: string): Promise<void> {
     const project = await this.fetchProject(projectID);
     this.resetTabsFiles();
@@ -684,7 +656,7 @@ export default class IdeModel {
     this.notifyObservers(Message.LOGOUT);
   }
 
-  async signup(
+  async signUp(
     namee: string,
     userName: string,
     password: string
@@ -785,34 +757,6 @@ export default class IdeModel {
     return node;
   }
 
-  // private async fileOperation(o: FileOperation): Promise<FileData | void> {
-  //   if (!this.isHost) return;
-
-  //   switch (o.type) {
-  //     case FileOperationType.ADD: {
-  //       // eslint-disable-next-line consistent-return
-  //       return this.createFile(
-  //         (o as FileCreateOperation).name,
-  //         (o as FileCreateOperation).creationDate
-  //       );
-  //     }
-  //     case FileOperationType.RENAME: {
-  //       this.renameFile(
-  //         (o as FileRenameOperation).name,
-  //         (o as FileRenameOperation).lastUpdated,
-  //         (o as FileRenameOperation).fileID
-  //       );
-  //       break;
-  //     }
-  //     case FileOperationType.DELETE: {
-  //       this.deleteFile((o as FileDeleteOperation).fileID);
-  //       break;
-  //     }
-  //     default:
-  //       break;
-  //   }
-  // }
-
   private async createFile(
     name: string,
     creationDate: number
@@ -873,12 +817,8 @@ export default class IdeModel {
   }
 
   async deleteProject(projectID: string): Promise<void> {
-    try {
-      API.deleteProject(this.userID, projectID, this.jwt.token);
-      this.deleteProjectFromProjects(projectID);
-    } catch {
-      console.log('Error when deleting file');
-    }
+    API.deleteProject(this.userID, projectID, this.jwt.token);
+    this.deleteProjectFromProjects(projectID);
   }
 
   private async renameFile(
@@ -935,18 +875,14 @@ export default class IdeModel {
   }
 
   private async deleteFile(fileID: string): Promise<void> {
-    try {
-      API.deleteFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        fileID,
-        this.jwt.token
-      );
-      this.replaceFocusedFile(fileID);
-      this.deleteTabFile(fileID);
-    } catch {
-      console.log('Error when deleting file');
-    }
+    API.deleteFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      fileID,
+      this.jwt.token
+    ).catch(() => console.log('Error when deleting file'));
+    this.replaceFocusedFile(fileID);
+    this.deleteTabFile(fileID);
   }
 
   async applyFileTreeChange(
@@ -967,7 +903,6 @@ export default class IdeModel {
         if (node.children) {
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
-          // Dummy method to force tree update:
         }
 
         break;
@@ -1072,9 +1007,6 @@ export default class IdeModel {
     this.name = name;
     this.username = uname;
 
-    this.getAllUserProjects().then(() => {
-      this.notifyObservers(Message.PROJECTS_CHANGE);
-    });
     this.isLoggedIn = true;
 
     this.persisted = true;

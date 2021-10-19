@@ -10,9 +10,7 @@ export default function when(lastUpdated: number): string {
   const elapsed = today.getTime() - lastUpdated;
 
   const hour = new Date(lastUpdated).getHours();
-  const minutes =
-    (new Date(lastUpdated).getMinutes() < 10 ? '0' : '') +
-    new Date(lastUpdated).getMinutes();
+  const minutes = `${new Date(lastUpdated).getMinutes()}`.padStart(2, '0');
 
   if (elapsed < oneDay) {
     if (toHour(elapsed) < today.getHours())

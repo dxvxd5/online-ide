@@ -26,6 +26,8 @@ import { NodeState } from '../../utils/file-tree-node';
 import Message from '../../data/model/message';
 
 import '../../assets/styles/ide.css';
+import copyToClipboard from '../../utils/clipboard';
+import toastPromise from '../../utils/toast';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -78,23 +80,19 @@ export default function IdePresenter({
   }
 
   function notifyUserLeft(message: string) {
-    toast(message, {
-      style: {
-        background: '#333',
-        color: '#fff',
-      },
-    });
+    toast(message, { icon: 'ℹ' });
   }
 
-  function swalFireLeaveProject(title: string, text: string) {
+  function swalFireLeaveProject(text: string) {
     return Swal.fire({
-      title,
+      title: 'Are you sure?',
       text,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, leave!',
+      confirmButtonText: 'Yes',
+      heightAuto: false,
     });
   }
 
@@ -158,7 +156,23 @@ export default function IdePresenter({
     });
   };
 
+  const saveCurrentFile = () => {
+    if (!model.focusedFile) {
+      toast.error('No file opened');
+      return;
+    }
+    const msgs = {
+      loading: 'Saving file...',
+      success: 'File saved',
+      error: 'Could not save file',
+    };
+    const promise = model.saveContentIntoFile();
+    toastPromise(promise, msgs);
+  };
+
   useEffect(function () {
+    Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
+
     const locationListener = function () {
       const rm = IdeModel.getFromSessionStorage(StorageItem.ROOM);
       const sck = IdeModel.getFromSessionStorage(StorageItem.SCK);
@@ -197,9 +211,11 @@ export default function IdePresenter({
     model.addObserver(ideListener);
     if (model.persisted && !model.isHost) {
       history.push({ pathname: '/me' });
-      Swal.fire(
-        "You've been disconnected from the collaboration session. Please join again."
-      );
+      Swal.fire({
+        title:
+          'You have been disconnected from the collaboration session. Please join again.',
+        heightAuto: false,
+      });
     }
     if (!model.isHost) {
       // When user join room we initiate the socket
@@ -215,16 +231,11 @@ export default function IdePresenter({
     if (!socketRef.current) return;
     if (socketState === SocketState.DISABLED) return;
 
-    Mousetrap.bind(['command+s', 'ctrl+s'], function () {
-      model.saveContentIntoFile();
-      return false;
-    });
-
     socketRef.current.on(
       SocketMessage.JOINED_ROOM,
       ({ user, socketID }: { user: User; socketID: string }) => {
         if (socketID) {
-          const message = `User ${user.name} joined the room.`;
+          const message = `${user.name} joined the room.`;
           notifyUserLeft(message);
           socketRef.current?.emit(SocketMessage.JOINED_ROOM, {
             to: socketID,
@@ -236,15 +247,14 @@ export default function IdePresenter({
     );
 
     socketRef.current.on(SocketMessage.USER_LEAVE_ROOM, (leaver: User) => {
-      const message = `User ${leaver.name} left the room.`;
+      const message = `${leaver.name} left the room.`;
       notifyUserLeft(message);
       model.removeCollaborator(leaver);
     });
 
-    socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, (host: User) => {
+    socketRef.current.on(SocketMessage.HOST_LEAVE_ROOM, () => {
       if (!model.isHost) {
-        const message = `Host ${host.name} left the room.`;
-        notifyUserLeft(message);
+        Swal.fire({ title: 'The host ended the session', icon: 'info' });
       }
       model.stopCollaboration();
       redirect();
@@ -351,28 +361,36 @@ export default function IdePresenter({
         socketRef.current.emit(SocketMessage.LEAVE_SOCKET_ROOM, {
           roomID: model.roomID,
         });
-        message = `You've been disconnected by the host`;
+        Swal.fire({
+          title: 'You have been disconnected by the host',
+          icon: 'info',
+        });
         model.stopCollaboration();
         setSocketState(SocketState.DISABLED);
         redirect();
       } else {
-        message = `User ${leaver.name} has been disconnected by the host.`;
+        message = `${leaver.name} has been disconnected by the host.`;
+        notifyUserLeft(message);
         model.removeCollaborator(leaver);
       }
-      notifyUserLeft(message);
     });
   }, [socketState]);
 
   const socketCreateRoom = () => {
     toast
       .promise(model.createCollab(), {
-        success: 'Room created',
-        loading: 'creating room...',
-        error: 'Failed to create room. Please try again',
+        success: 'Collaboration session created',
+        loading: 'Creating session...',
+        error: 'Failed to create session. Please try again',
       })
-      .then((roomID) =>
-        intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST)
-      );
+      .then((roomID) => {
+        intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST);
+
+        copyToClipboard(
+          roomID,
+          'Session ID copied. Send it to people you trust'
+        );
+      });
   };
 
   const socketLeaveRoom = (roomId: string): void => {
@@ -382,10 +400,7 @@ export default function IdePresenter({
       socketState === SocketState.HOST ? 'All collaborators' : 'You'
     } will be disconnected`;
 
-    swalFireLeaveProject(
-      'Are you sure you want to leave the room?',
-      message
-    ).then((result) => {
+    swalFireLeaveProject(message).then((result) => {
       if (result.isConfirmed) {
         emitLeaveRoom(roomId, socketState);
         resetCollab(socketState);
@@ -505,51 +520,44 @@ export default function IdePresenter({
   };
 
   const leaveProject = () => {
-    const isCollab = !!model.roomID;
-    const title = 'Are you sure you want to leave this project?';
-    if (!isCollab) {
-      swalFireLeaveProject(title, '').then((result) => {
-        if (result.isConfirmed) {
-          model.closeProject();
-          redirect();
+    if (model.roomID) {
+      swalFireLeaveProject('All collaborators will be disconnected!').then(
+        (result) => {
+          if (result.isConfirmed) {
+            emitLeaveRoom(model.roomID, SocketState.HOST);
+            resetCollab(SocketState.HOST);
+            redirect();
+          }
         }
-      });
-    }
-    if (isCollab) {
-      swalFireLeaveProject(
-        title,
-        'All collaborators will be disconnected!'
-      ).then((result) => {
-        if (result.isConfirmed) {
-          emitLeaveRoom(model.roomID, SocketState.HOST);
-          resetCollab(SocketState.HOST);
-          redirect();
-        }
-      });
+      );
+    } else {
+      model.closeProject();
+      redirect();
     }
   };
 
   const removeCollaborator = ({ id, name }) => {
-    swalFireLeaveProject(
-      'Are you sure you want to remove this collaborator?',
-      'This collaborator will be disconnected!'
-    ).then((result) => {
-      if (result.isConfirmed) {
-        if (!socketRef.current) return;
-        socketRef.current.emit(SocketMessage.REMOVE_COLLABORATOR, {
-          roomID: model.roomID,
-          user: { id, name },
-        });
-        model.removeCollaborator({ id, name });
+    swalFireLeaveProject('This collaborator will be disconnected!').then(
+      (result) => {
+        if (result.isConfirmed) {
+          if (!socketRef.current) return;
+          socketRef.current.emit(SocketMessage.REMOVE_COLLABORATOR, {
+            roomID: model.roomID,
+            user: { id, name },
+          });
+          model.removeCollaborator({ id, name });
+        }
       }
-    });
+    );
   };
 
   const logout = () => {
     if (model.roomID) {
-      const title = 'Are you sure?';
-      const message = 'Your collaboration session will be ended';
-      swalFireLeaveProject(title, message).then((res) => {
+      let message = 'The collaboration session will be ended. ';
+      const secondMesssage = 'All collaborators will be disconnected.';
+      message = `${message}${model.isHost ? secondMesssage : ''}`;
+
+      swalFireLeaveProject(message).then((res) => {
         if (res.isConfirmed) {
           emitLeaveRoom(model.roomID, socketState);
           resetCollab(socketState);

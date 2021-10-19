@@ -1,6 +1,5 @@
 import React from 'react';
 
-import './ideHeader.css';
 import {
   Collaborator,
   SparseUserData as User,
@@ -17,7 +16,6 @@ interface IdeHeaderViewProps {
   potentialLeaders: Collaborator[];
   isCollab: boolean;
   leaveRoom: (roomId: string) => void;
-  saveFileOnClick: () => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   leaveProject: () => void;
   isHost: boolean;
@@ -32,7 +30,6 @@ export default function IdeHeaderView({
   collaborators,
   isCollab,
   leaveRoom,
-  saveFileOnClick,
   startFollowOnClick,
   potentialLeaders,
   leader,
@@ -60,7 +57,7 @@ export default function IdeHeaderView({
           submit={false}
           theme="secondary"
           onClick={copyRoomId}
-          text="Copy Room ID"
+          text="Copy session ID"
           className="header__button ide__header-button"
         />
       )}
@@ -69,7 +66,7 @@ export default function IdeHeaderView({
           submit={false}
           theme="main"
           onClick={() => leaveRoom(roomID)}
-          text="Stop collaboration"
+          text={isHost ? 'Stop session' : 'Leave session'}
           className="header__button ide__header-button ide__header-button--left-border"
         />
       ) : (

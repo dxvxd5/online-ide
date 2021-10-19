@@ -1,9 +1,5 @@
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Roboto'), url(../fonts/Roboto-Medium.ttf) format('truetype');
-}
+@import url(animations.css);
+@import url(fonts.css);
 
 :root {
   --header-height: 100px;
@@ -14,60 +10,13 @@
   --btn-secondary-color: #4a5568;
   --btn-secondary-color-lighter: rgb(132, 145, 167);
   --tab-color-focus: #1e1e1e;
-  /* --tab-color-focus: #667eea; */
+  --project-gap: 30px;
+  --project-padding: 5px;
+  --fadein-speed: 0.2s;
+  --tab-cross-size: 20px;
+  --tab-toggle-height: 40px;
   --tab-color: #4c4c4c;
-  /* --tab-color: #1e1e1e; */
   --tab-color-lighter: #717171;
-}
-
-@keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Firefox < 16 */
-@-moz-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Safari, Chrome and Opera > 12.1 */
-@-webkit-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Internet Explorer */
-@-ms-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromRight {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  50% {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 
 html,
@@ -76,7 +25,8 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--background-color);
-  font-family: 'Roboto';
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 100%;
 }
 
 #root {
@@ -88,12 +38,11 @@ body {
 .container {
   height: 100%;
   width: 100%;
-
-  animation: fadein 1s;
-  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 1s; /* Firefox < 16 */
-  -ms-animation: fadein 1s; /* Internet Explorer */
-  -o-animation: fadein 1s; /* Opera < 12.1 */
+  animation: fadein var(--fadein-speed);
+  -webkit-animation: fadein var(--fadein-speed); /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein var(--fadein-speed); /* Firefox < 16 */
+  -ms-animation: fadein var(--fadein-speed); /* Internet Explorer */
+  -o-animation: fadein var(--fadein-speed); /* Opera < 12.1 */
 }
 
 .container--sign-up,
@@ -133,6 +82,7 @@ body {
 
 .select {
   background-color: var(--btn-secondary-color);
+  text-transform: capitalize;
   color: white;
 }
 
@@ -142,4 +92,24 @@ body {
 
 .select:hover {
   cursor: pointer;
+}
+
+.empty {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+  animation: fadein 0.5s;
+  gap: 30px;
+}
+
+.empty__text {
+  margin-bottom: 0px;
+  color: var(--primary-color);
+  font-weight: 400;
+}
+
+.empty--project {
+  margin-top: 100px;
 }
