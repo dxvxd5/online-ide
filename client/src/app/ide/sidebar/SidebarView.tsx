@@ -1,10 +1,12 @@
 import React from 'react';
 import FolderTree from 'react-folder-tree';
+import introJs from 'intro.js';
 import { TreeChangeEvent } from '../../../data/model/model';
 import { NodeState } from '../../../utils/file-tree-node';
 import EditIcon from '../../components/icons/edit/EditIcon';
 import DeleteIcon from '../../components/icons/delete/DeleteIcon';
 import IconProps from '../../components/icons/type';
+import 'intro.js/introjs.css';
 
 import '../../../assets/styles/sidebar.css';
 

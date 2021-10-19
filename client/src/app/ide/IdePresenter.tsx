@@ -6,6 +6,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Split from 'react-split';
 
+import introJs from 'intro.js';
+import 'intro.js/introjs.css';
+
 import IdeModel, {
   SparseUserData as User,
   CursorPosition,
@@ -95,6 +98,34 @@ export default function IdePresenter({
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, leave!',
+    });
+  }
+
+  async function tutorialPop() {
+    const steps = ['1', '2', '3'];
+    const swalQueue = Swal.mixin({
+      progressSteps: steps,
+      confirmButtonText: 'Next >',
+      showCancelButton: true,
+    });
+
+    await swalQueue.fire({
+      title: 'side bar',
+      text: 'Create folders, files, rename and delete options in the side bar. Check the gif inspired from the folder tree package "react-folder-tree',
+      imageUrl:
+        'https://raw.githubusercontent.com/shunjizhan/react-folder-tree/cae3e2f78d71f35fbdffb4796028835d4d5ab5ff/assets/folder-tree-demo.gif',
+      currentProgressStep: 0,
+    });
+    await swalQueue.fire({
+      title: 'Start Collaboration',
+      text: 'To start collaboration click on the "Start new Collaboration" button and a new button with the room ID will appear',
+      currentProgressStep: 1,
+    });
+    await swalQueue.fire({
+      title: 'Stop Collaboration',
+      text: 'Stop the collaboration by clickling on the button "stop collaboration"',
+      currentProgressStep: 2,
+      confirmButtonText: 'OK',
     });
   }
 
@@ -528,6 +559,12 @@ export default function IdePresenter({
       });
     }
   };
+  const tutorial = () => {
+    const isHost = SocketState.HOST;
+    if (!isHost) {
+      tutorialPop();
+    }
+  };
 
   const removeCollaborator = ({ id, name }) => {
     swalFireLeaveProject(
@@ -567,11 +604,30 @@ export default function IdePresenter({
     }
   };
 
+  const tourIntroJS = () => {
+    const intro = introJs;
+
+    intro.setOptions({
+      steps: [
+        {
+          intro: 'Welcome!',
+        },
+        {
+          element: '#step-one',
+          intro: 'First step',
+        },
+      ],
+    });
+    return intro.start();
+  };
+
   return (
     <div className="container ide__container">
+      {tourIntroJS}
       <IdeHeader
         removeCollaborator={removeCollaborator}
         leaveProject={leaveProject}
+        tutorial={tutorial}
         startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}
