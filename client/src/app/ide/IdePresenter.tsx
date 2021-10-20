@@ -256,7 +256,7 @@ export default function IdePresenter({
       SocketMessage.JOINED_ROOM,
       ({ user, socketID, focusedFile }: SocketData) => {
         if (socketID) {
-          const message = `${user.name} joined the room.`;
+          const message = `${user.name} joined the session.`;
           notifyUserLeft(message);
           socketRef.current?.emit(SocketMessage.JOINED_ROOM, {
             to: socketID,
@@ -269,7 +269,7 @@ export default function IdePresenter({
     );
 
     socketRef.current.on(SocketMessage.USER_LEAVE_ROOM, (leaver: User) => {
-      const message = `${leaver.name} left the room.`;
+      const message = `${leaver.name} left the session.`;
       notifyUserLeft(message);
       model.removeCollaborator(leaver);
     });
@@ -471,7 +471,6 @@ export default function IdePresenter({
   };
 
   const onContentReplace = (index: number, length: number, text: string) => {
-    console.log('emitting onContentReplace', { index, length, text });
     if (!socketRef.current) return;
 
     socketRef.current.emit(SocketMessage.CONTENT_REPLACE, {
