@@ -35,6 +35,9 @@ enum Message {
   // when one user join the ongoing collaboration
   USER_JOIN,
 
+  // When a collaborator has changed their focused file
+  COLLAB_FOCUSED_FILE_CHANGE,
+
   // when the collaboration stop
   COLLAB_STOPPED,
 

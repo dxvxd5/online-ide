@@ -4,14 +4,9 @@ import { LoginSchemaType } from '../../utils/yup-schemas';
 import Button from '../components/button/Button';
 import '../../assets/styles/form.css';
 
-type ClickFunction = {
-  (e: { username: string; password: string }): void;
-};
-
 interface LoginViewProp {
-  logIn: ClickFunction;
-  loginError: boolean;
-  loginErrorInfo: string;
+  logIn: (_: { username: string; password: string }) => void;
+  loginError: string;
   loginSchema: LoginSchemaType;
   signUp: () => void;
 }
@@ -19,16 +14,15 @@ interface LoginViewProp {
 const LoginView = ({
   logIn,
   loginError,
-  loginErrorInfo,
   loginSchema,
   signUp,
 }: LoginViewProp): JSX.Element => {
   return (
     <div className="container container--login">
       <div className="form form--login">
-        <h1 className="form__header">Login</h1>
-        {loginError && (
-          <div className="form__error form__error--all">{loginErrorInfo}</div>
+        <h1 className="form__header">Log In</h1>
+        {!!loginError && (
+          <div className="form__error form__error--all">{loginError}</div>
         )}
         <Formik
           initialValues={{ username: '', password: '' }}

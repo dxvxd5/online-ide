@@ -8,6 +8,8 @@
   border-radius: 5px;
   padding-left: 10px;
   padding-right: 10px;
+  text-transform: capitalize;
+  font-family: 'Roboto Mono', monospace !important;
 }
 
 .button:active {

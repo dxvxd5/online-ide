@@ -12,8 +12,8 @@ const socketFunction = (io: Server): void => {
       SocketHandler.joinRoom(socket, data)
     );
 
-    socket.on(SocketMessage.JOINED_ROOM, ({ to, user }) =>
-      io.to(to).emit(SocketMessage.JOINED_ROOM, { user })
+    socket.on(SocketMessage.JOINED_ROOM, ({ to, user, focusedFile }) =>
+      io.to(to).emit(SocketMessage.JOINED_ROOM, { user, focusedFile })
     );
 
     socket.on(SocketMessage.HOST_LEAVE_ROOM, (data) =>
@@ -51,6 +51,10 @@ const socketFunction = (io: Server): void => {
     socket.on(SocketMessage.START_FOLLOWING, (data) =>
       SocketHandler.startFollowing(socket, data)
     );
+
+    socket.on(SocketMessage.OPEN_FILE, (data) => {
+      SocketHandler.openFile(socket, data);
+    });
 
     socket.on(SocketMessage.FOLLOW_FILE, (data) =>
       SocketHandler.followFile(socket, data)

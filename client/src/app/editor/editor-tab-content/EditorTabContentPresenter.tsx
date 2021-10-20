@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { OnMount } from '@monaco-editor/react';
 import {
   RemoteCursorManager,
@@ -21,6 +22,7 @@ import IdeModel, {
 } from '../../../data/model/model';
 import { randomNumberInRange } from '../../../utils/random';
 import EditorView from './EditorTabContentView';
+import toastPromise from '../../../utils/toast';
 
 interface EditorPresenterProps {
   model: IdeModel;
@@ -61,7 +63,24 @@ export default function EditorPresenter({
     } catch {}
   }
 
+  function saveCurrentFile(errorMsg = '', successMsg = '') {
+    if (!model.focusedFile) {
+      if (errorMsg) toast.error(errorMsg);
+      return;
+    }
+    const msgs = {
+      loading: 'Saving file...',
+      success: successMsg || 'File saved',
+      error: 'Could not save file',
+    };
+    const promise = model.saveContentIntoFile();
+    toastPromise(promise, msgs);
+  }
+
   function addCollaborator(joiner: Collaborator) {
+    if (!joiner.focusedFile || joiner.focusedFile.id !== model.focusedFile.id)
+      return;
+
     const joinerParams = [joiner.id, joiner.color, joiner.name] as const;
 
     const c = cursorManagerRef?.current?.addCursor(...joinerParams);
@@ -121,7 +140,9 @@ export default function EditorPresenter({
   }
 
   function addAllCollaborators(collaborators: Collaborator[]) {
-    collaborators.forEach((c) => addCollaborator(c));
+    collaborators.forEach((c) => {
+      addCollaborator(c);
+    });
   }
 
   useEffect(() => {
@@ -140,15 +161,19 @@ export default function EditorPresenter({
         applyContentOperation(model.collabContentOperation);
       } else if (m === Message.EDITOR_SCROLL) {
         editorRef.current?.setScrollPosition(model.scrollPosition);
+      } else if (m === Message.COLLAB_FOCUSED_FILE_CHANGE) {
+        removeAllCollaborators(model.collaborators);
+        addAllCollaborators(model.collaborators);
       }
     }
     model.addObserver(collabListener);
 
     saveIntervalRef.current = setInterval(() => {
-      model.saveContentIntoFile();
+      saveCurrentFile('', 'File automatically saved');
     }, fiveMinutes);
 
     return () => {
+      contentManagerRef.current?.dispose();
       model.removeObserver(collabListener);
       if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
     };
@@ -187,6 +212,7 @@ export default function EditorPresenter({
     editorRef.current.onDidChangeCursorPosition((event) =>
       onEditorCursorMoved(event.position)
     );
+
     editorRef.current.onDidChangeCursorSelection((event) =>
       onEditorSelection(
         event.selection.getStartPosition(),
@@ -203,16 +229,17 @@ export default function EditorPresenter({
       // eslint-disable-next-line no-bitwise
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
       function () {
-        model.saveContentIntoFile();
+        saveCurrentFile('No file opened');
       }
     );
+
     addAllCollaborators(model.collaborators);
   };
 
   const onChange = (content: string | undefined): void => {
     if (content !== undefined) {
       model.setFileContentToSave(content);
-      if (model.roomID) model.saveContentIntoFile();
+      if (model.roomID) model.saveContentIntoFile().catch();
     }
   };
 
