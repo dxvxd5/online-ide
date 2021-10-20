@@ -234,8 +234,6 @@ export default function EditorPresenter({
     );
 
     addAllCollaborators(model.collaborators);
-
-    console.log('Mounted');
   };
 
   const onChange = (content: string | undefined): void => {

@@ -471,7 +471,6 @@ export default function IdePresenter({
   };
 
   const onContentReplace = (index: number, length: number, text: string) => {
-    console.log('emitting onContentReplace', { index, length, text });
     if (!socketRef.current) return;
 
     socketRef.current.emit(SocketMessage.CONTENT_REPLACE, {
