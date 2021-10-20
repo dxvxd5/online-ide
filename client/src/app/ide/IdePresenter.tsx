@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-await-in-loop */
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import io from 'socket.io-client';
@@ -110,45 +112,72 @@ export default function IdePresenter({
       showCancelButton: true,
     });
 
-    await swalQueue.fire({
-      title: 'side bar',
-      text: 'Create folders, files, rename and delete options in the side bar. Check the gif inspired from the folder tree package "react-folder-tree',
-      imageUrl:
-        'https://media.discordapp.net/attachments/898188780786315264/900474983015407726/Sidebar.gif?width=340&height=677',
-      imageWidth: 200,
-      imageHeight: 350,
-      currentProgressStep: 0,
-    });
-
-    await swalQueue.fire({
-      title: 'Slider',
-      text: 'You can freely control the side bar by expanding and reducing it for a wider space for the editor space',
-      imageUrl:
-        'https://media.discordapp.net/attachments/898188780786315264/900474986848985128/Slider.gif',
-      currentProgressStep: 1,
-    });
-    await swalQueue.fire({
-      title: 'Start Collaboration',
-      text: 'To start collaboration click on the "Start new Collaboration" button and a new button with the room ID will appear, where you can copy the room ID',
-      imageUrl:
-        'https://media.discordapp.net/attachments/898188780786315264/900474985318088754/Start_Collaboration.gif',
-      currentProgressStep: 2,
-    });
-    await swalQueue.fire({
-      title: 'Remove Collaborator',
-      text: 'Remove a collaborator by go on the profile picture and click on the X button which appears when you hover on it. OBS! Only the host will be able to remove a collaborator',
-      imageUrl:
-        'https://media.discordapp.net/attachments/898188780786315264/900474979974529034/Remove_Collaborator.gif',
-      currentProgressStep: 3,
-    });
-    await swalQueue.fire({
-      title: 'Stop Collaboration',
-      text: 'Stop the collaboration by clickling on the button "stop collaboration"',
-      imageUrl:
-        'https://media.discordapp.net/attachments/898188780786315264/900474987608170526/Stop_Collaboration.gif',
-      currentProgressStep: 4,
-      confirmButtonText: 'OK',
-    });
+    let currentStep;
+    for (currentStep = 0; currentStep < steps.length; ) {
+      const sidebar = await swalQueue.fire({
+        title: 'side bar',
+        text: 'Create folders, files, rename and delete options in the side bar. Check the gif inspired from the folder tree package "react-folder-tree',
+        imageUrl:
+          'https://media.discordapp.net/attachments/898188780786315264/900474983015407726/Sidebar.gif?width=340&height=677',
+        imageWidth: 200,
+        imageHeight: 350,
+        currentProgressStep: currentStep,
+        showCancelButton: true,
+      });
+      if (sidebar.dismiss === Swal.DismissReason.cancel) {
+        break;
+      } else {
+        currentStep++;
+        const slider = await swalQueue.fire({
+          title: 'Slider',
+          text: 'You can freely control the side bar by expanding and reducing it for a wider space for the editor space',
+          imageUrl:
+            'https://media.discordapp.net/attachments/898188780786315264/900474986848985128/Slider.gif',
+          currentProgressStep: currentStep,
+          showCancelButton: true,
+        });
+        if (slider.dismiss === Swal.DismissReason.cancel) {
+          break;
+        } else {
+          currentStep++;
+          const startCol = await swalQueue.fire({
+            title: 'Start Collaboration',
+            text: 'To start collaboration click on the "Start new Collaboration" button and a new button with the room ID will appear, where you can copy the room ID',
+            imageUrl:
+              'https://media.discordapp.net/attachments/898188780786315264/900474985318088754/Start_Collaboration.gif',
+            currentProgressStep: currentStep,
+            showCancelButton: true,
+          });
+          if (startCol.dismiss === Swal.DismissReason.cancel) {
+            break;
+          } else {
+            currentStep++;
+            const removeCol = await swalQueue.fire({
+              title: 'Remove Collaborator',
+              text: 'Remove a collaborator by go on the profile picture and click on the X button which appears when you hover on it. OBS! Only the host will be able to remove a collaborator',
+              imageUrl:
+                'https://media.discordapp.net/attachments/898188780786315264/900474979974529034/Remove_Collaborator.gif',
+              currentProgressStep: currentStep,
+              showCancelButton: true,
+            });
+            if (removeCol.dismiss === Swal.DismissReason.cancel) {
+              break;
+            } else {
+              currentStep++;
+              const stopCol = await swalQueue.fire({
+                title: 'Stop Collaboration',
+                text: 'Stop the collaboration by clickling on the button "stop collaboration"',
+                imageUrl:
+                  'https://media.discordapp.net/attachments/898188780786315264/900474987608170526/Stop_Collaboration.gif',
+                currentProgressStep: currentStep,
+                confirmButtonText: 'OK',
+              });
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   function initiateSocket(
