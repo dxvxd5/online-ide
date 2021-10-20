@@ -78,6 +78,9 @@ export default function EditorPresenter({
   }
 
   function addCollaborator(joiner: Collaborator) {
+    if (!joiner.focusedFile || joiner.focusedFile.id !== model.focusedFile.id)
+      return;
+
     const joinerParams = [joiner.id, joiner.color, joiner.name] as const;
 
     const c = cursorManagerRef?.current?.addCursor(...joinerParams);
@@ -137,7 +140,9 @@ export default function EditorPresenter({
   }
 
   function addAllCollaborators(collaborators: Collaborator[]) {
-    collaborators.forEach((c) => addCollaborator(c));
+    collaborators.forEach((c) => {
+      addCollaborator(c);
+    });
   }
 
   useEffect(() => {
@@ -156,6 +161,9 @@ export default function EditorPresenter({
         applyContentOperation(model.collabContentOperation);
       } else if (m === Message.EDITOR_SCROLL) {
         editorRef.current?.setScrollPosition(model.scrollPosition);
+      } else if (m === Message.COLLAB_FOCUSED_FILE_CHANGE) {
+        removeAllCollaborators(model.collaborators);
+        addAllCollaborators(model.collaborators);
       }
     }
     model.addObserver(collabListener);
@@ -165,6 +173,7 @@ export default function EditorPresenter({
     }, fiveMinutes);
 
     return () => {
+      contentManagerRef.current?.dispose();
       model.removeObserver(collabListener);
       if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
     };
@@ -203,6 +212,7 @@ export default function EditorPresenter({
     editorRef.current.onDidChangeCursorPosition((event) =>
       onEditorCursorMoved(event.position)
     );
+
     editorRef.current.onDidChangeCursorSelection((event) =>
       onEditorSelection(
         event.selection.getStartPosition(),
@@ -222,7 +232,11 @@ export default function EditorPresenter({
         saveCurrentFile('No file opened');
       }
     );
+
+
     addAllCollaborators(model.collaborators);
+
+    console.log('Mounted');
   };
 
   const onChange = (content: string | undefined): void => {
