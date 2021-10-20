@@ -201,12 +201,17 @@ export default function IdePresenter({
 
   useEffect(() => {
     if (!model.isLoggedIn) redirectTo('login');
-    else if (model.persisted && !model.isHost) {
+    else if (model.persisted) {
+      let title;
+      if (model.isHost) title = 'The collaboration session was ended';
+      else {
+        title =
+          'You have been disconnected from the collaboration session. Please join again.';
+        redirectTo('me');
+      }
       model.setPersisted(false);
-      redirectTo('me');
       Swal.fire({
-        title:
-          'You have been disconnected from the collaboration session. Please join again.',
+        title,
         heightAuto: false,
       });
     }
