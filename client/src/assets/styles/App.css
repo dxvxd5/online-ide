@@ -108,6 +108,7 @@ body {
   margin-bottom: 0px;
   color: var(--primary-color);
   font-weight: 400;
+  text-align: center;
 }
 
 .empty--project {

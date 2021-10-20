@@ -14,7 +14,7 @@ export default function LoginPresenter({
   const [loginError, setLoginError] = useState('');
   const history = useHistory();
 
-  function redirectTo(to: 'me' | 'signup') {
+  function redirectTo(to: 'me' | 'signup' | 'code') {
     history.push({
       pathname: `/${to}`,
     });
@@ -31,41 +31,13 @@ export default function LoginPresenter({
   };
 
   useEffect(() => {
-    if (model.isLoggedIn) redirectTo('me');
+    if (model.isLoggedIn) {
+      if (model.isCoding) redirectTo('code');
+      else redirectTo('me');
+    }
   }, []);
 
   const signUp = () => redirectTo('signup');
-
-  // if (!isProjectLoaded && !projectError) {
-  //   model
-  //     .getAllUserProjects()
-  //     .then(() => {
-  //       setProjectLoaded(true);
-  //       setProjectError(false);
-  //     })
-  //     .catch(() => {
-  //       setProjectErrorInfo(
-  //         'Error. Could not load the projects. Please try again.'
-  //       );
-  //       setProjectError(true);
-  //     });
-  //   return <Loader />;
-  // }
-
-  // if (projectError) {
-  //   return (
-  //     <ProjectError
-  //       projectErrorInfo={projectErrorInfo}
-  //       tryAgain={() => setProjectError(false)}
-  //     />
-  //   );
-  // }
-
-  // if (&& isProjectLoaded) {
-  //   history.push({
-  //     pathname: '/me',
-  //   });
-  // }
 
   return (
     <LoginView

@@ -9,6 +9,7 @@
 .loader .loader--description {
   font-size: 13pt;
   font-family: 'Roboto Mono', monospace;
+  text-align: center;
 }
 
 .loader__container,
@@ -45,5 +46,9 @@
 }
 
 .loader--ide__editor {
+  margin-top: 150px;
+}
+
+.loader--ide {
   margin-top: 150px;
 }

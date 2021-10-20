@@ -990,6 +990,23 @@ export default class IdeModel {
     this.persisted = persisted;
   }
 
+  async restoreProject(): Promise<void> {
+    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
+    if (!projId) throw new Error(`No project to be restored`);
+
+    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
+    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
+    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
+
+    const project = await this.fetchProject(projId as string);
+    this.currentProject = project;
+    this.setCurrentFileTree(project.files, project.name);
+    if (content !== undefined) this.contentToSave = content as string;
+    if (focFile) this.setFocusedFile(focFile as FileData);
+    if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
+    this.notifyObservers(Message.UPDATE_TREE);
+  }
+
   persist(): void {
     const jwt = IdeModel.getFromLocalStorage(StorageItem.JWT) as JWT;
     const id = IdeModel.getFromLocalStorage(StorageItem.UID) as string;
@@ -1017,23 +1034,7 @@ export default class IdeModel {
     const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
     if (!projId) return;
 
-    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
-
-    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
-
-    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
-
-    this.fetchProject(projId as string)
-      .then((project) => {
-        this.currentProject = project;
-        this.setCurrentFileTree(project.files, project.name);
-        if (content !== undefined) this.contentToSave = content as string;
-        if (focFile) this.setFocusedFile(focFile as FileData);
-        if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
-        this.notifyObservers(Message.UPDATE_TREE);
-        this.isCoding = true;
-      })
-      .catch();
+    this.isCoding = true;
   }
 
   notifyObservers(message: Message): void {

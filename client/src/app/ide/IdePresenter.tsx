@@ -28,6 +28,7 @@ import Message from '../../data/model/message';
 import '../../assets/styles/ide.css';
 import copyToClipboard from '../../utils/clipboard';
 import toastPromise from '../../utils/toast';
+import PromiseNoData from '../components/promise-no-data/PromiseNoData';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -68,14 +69,15 @@ export default function IdePresenter({
 }: IdePresenterProps): JSX.Element {
   const socketRef = useRef<SocketIOClient.Socket>();
   const [socketState, setSocketState] = useState(SocketState.DISABLED);
+  const [project, setProject] = useState(model.currentProject);
 
   const history = useHistory();
 
   const serverUrl = 'http://localhost:5000';
 
-  function redirect(): void {
+  function redirectTo(to: 'me' | 'login' | 'code') {
     history.push({
-      pathname: '/me',
+      pathname: `/${to}`,
     });
   }
 
@@ -96,7 +98,7 @@ export default function IdePresenter({
     });
   }
 
-  function intiateSocket(
+  function initiateSocket(
     roomId: string,
     message: SocketMessage,
     socketstate: SocketState
@@ -134,7 +136,7 @@ export default function IdePresenter({
   const resetCollab = (state: SocketState) => {
     if (state === SocketState.JOIN) {
       model.stopCollaboration();
-      redirect();
+      redirectTo('me');
       setSocketState(SocketState.DISABLED);
     } else if (state === SocketState.HOST) {
       model.stopCollaboration();
@@ -182,16 +184,27 @@ export default function IdePresenter({
         resetCollab(sck as SocketState);
       }
     };
-    window.addEventListener('popstate', locationListener);
+    window.addEventListener('hashchange', locationListener);
 
     return function () {
-      window.removeEventListener('popstate', locationListener);
+      window.removeEventListener('hashchange', locationListener);
     };
   }, []);
 
   useEffect(() => {
-    if (!model.isLoggedIn) history.push({ pathname: '/login' });
+    if (!model.isLoggedIn) redirectTo('login');
+    else if (model.persisted && !model.isHost) {
+      model.setPersisted(false);
+      redirectTo('me');
+      Swal.fire({
+        title:
+          'You have been disconnected from the collaboration session. Please join again.',
+        heightAuto: false,
+      });
+    }
+  }, []);
 
+  useEffect(() => {
     const ideListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
         emitFocusedFile(
@@ -199,8 +212,7 @@ export default function IdePresenter({
           SocketMessage.FOLLOW_FILE,
           model.leader
         );
-      }
-      if (m === Message.TAB_FILE_CLOSE) {
+      } else if (m === Message.TAB_FILE_CLOSE) {
         emitFocusedFile(
           model.focusedFile,
           SocketMessage.CLOSE_TAB_FILE,
@@ -209,17 +221,10 @@ export default function IdePresenter({
       }
     };
     model.addObserver(ideListener);
-    if (model.persisted && !model.isHost) {
-      history.push({ pathname: '/me' });
-      Swal.fire({
-        title:
-          'You have been disconnected from the collaboration session. Please join again.',
-        heightAuto: false,
-      });
-    }
+
     if (!model.isHost) {
       // When user join room we initiate the socket
-      intiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
+      initiateSocket(model.roomID, SocketMessage.JOIN_ROOM, SocketState.JOIN);
     }
 
     return () => {
@@ -257,7 +262,7 @@ export default function IdePresenter({
         Swal.fire({ title: 'The host ended the session', icon: 'info' });
       }
       model.stopCollaboration();
-      redirect();
+      redirectTo('me');
     });
 
     socketRef.current.on(
@@ -367,7 +372,7 @@ export default function IdePresenter({
         });
         model.stopCollaboration();
         setSocketState(SocketState.DISABLED);
-        redirect();
+        redirectTo('me');
       } else {
         message = `${leaver.name} has been disconnected by the host.`;
         notifyUserLeft(message);
@@ -377,6 +382,11 @@ export default function IdePresenter({
   }, [socketState]);
 
   const socketCreateRoom = () => {
+    if (!project) {
+      toast.error('No project to collaborate on');
+      return;
+    }
+
     toast
       .promise(model.createCollab(), {
         success: 'Collaboration session created',
@@ -384,7 +394,7 @@ export default function IdePresenter({
         error: 'Failed to create session. Please try again',
       })
       .then((roomID) => {
-        intiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST);
+        initiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST);
 
         copyToClipboard(
           roomID,
@@ -526,13 +536,13 @@ export default function IdePresenter({
           if (result.isConfirmed) {
             emitLeaveRoom(model.roomID, SocketState.HOST);
             resetCollab(SocketState.HOST);
-            redirect();
+            redirectTo('me');
           }
         }
       );
     } else {
       model.closeProject();
-      redirect();
+      redirectTo('me');
     }
   };
 
@@ -554,24 +564,20 @@ export default function IdePresenter({
   const logout = () => {
     if (model.roomID) {
       let message = 'The collaboration session will be ended. ';
-      const secondMesssage = 'All collaborators will be disconnected.';
-      message = `${message}${model.isHost ? secondMesssage : ''}`;
+      const secondMessage = 'All collaborators will be disconnected.';
+      message = `${message}${model.isHost ? secondMessage : ''}`;
 
       swalFireLeaveProject(message).then((res) => {
         if (res.isConfirmed) {
           emitLeaveRoom(model.roomID, socketState);
           resetCollab(socketState);
           model.logout();
-          history.push({
-            pathname: '/login',
-          });
+          redirectTo('login');
         }
       });
     } else {
       model.logout();
-      history.push({
-        pathname: '/login',
-      });
+      redirectTo('login');
     }
   };
 
@@ -586,32 +592,46 @@ export default function IdePresenter({
         model={model}
         logout={logout}
       />
-      <Split
-        sizes={[15, 85]}
-        minSize={[150, 500]}
-        expandToMin={false}
-        gutterSize={10}
-        className="split"
-      >
-        <IdeSidebar
-          stopFollowing={stopFollowing}
-          onFileTreeChange={onFileTreeChange}
-          model={model}
+      {!project ? (
+        <PromiseNoData
+          promise={model
+            .restoreProject()
+            .then(() => setProject(model.currentProject))}
+          errorMessage={
+            'Failed to restore your previous work.\nPlease try again by opening it from the main page'
+          }
+          tryAgain={() => redirectTo('me')}
+          loadingMessage="Restoring your previous work"
+          classNameBlck="ide"
         />
-
-        <div className="container ide__container ide__container--level1">
-          <EditorTabs stopFollowing={stopFollowing} model={model} />
-          <Editor
+      ) : (
+        <Split
+          sizes={[15, 85]}
+          minSize={[150, 500]}
+          expandToMin={false}
+          gutterSize={10}
+          className="split"
+        >
+          <IdeSidebar
+            stopFollowing={stopFollowing}
+            onFileTreeChange={onFileTreeChange}
             model={model}
-            onScrollChange={onScrollChange}
-            onEditorCursorMoved={onEditorCursorMoved}
-            onEditorSelection={onEditorSelection}
-            onContentInsert={onContentInsert}
-            onContentReplace={onContentReplace}
-            onContentDelete={onContentDelete}
           />
-        </div>
-      </Split>
+
+          <div className="container ide__container ide__container--level1">
+            <EditorTabs stopFollowing={stopFollowing} model={model} />
+            <Editor
+              model={model}
+              onScrollChange={onScrollChange}
+              onEditorCursorMoved={onEditorCursorMoved}
+              onEditorSelection={onEditorSelection}
+              onContentInsert={onContentInsert}
+              onContentReplace={onContentReplace}
+              onContentDelete={onContentDelete}
+            />
+          </div>
+        </Split>
+      )}
     </div>
   );
 }

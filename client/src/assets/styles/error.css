@@ -12,6 +12,7 @@
   margin-top: 10px;
   color: var(--primary-color);
   font-weight: 400;
+  text-align: center;
 }
 
 .error__btn {
@@ -25,4 +26,8 @@
 
 .error--ide__editor {
   margin-top: 100px;
+}
+
+.error--ide {
+  margin-top: 120px;
 }
