@@ -167,3 +167,7 @@
 .ide__header-button--left-border {
   margin-right: auto;
 }
+
+.ide__header-select {
+  display: none;
+}
