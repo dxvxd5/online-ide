@@ -4,6 +4,7 @@ import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
 import IdeModel, { Collaborator } from '../../../data/model/model';
 import IdeHeaderView from './IdeHeaderView';
+import copyToClipboard from '../../../utils/clipboard';
 
 interface IdeHeaderPresenterProps {
   createRoom: () => void;
@@ -48,13 +49,8 @@ export default function IdeHeaderPresenter({
     return () => model.removeObserver(collabListener);
   }, []);
 
-  const saveFileOnClick = () => {
-    model.saveContentIntoFile();
-  };
-
   const copyRoomId = () => {
-    navigator.clipboard.writeText(roomID);
-    toast.success('Copied!');
+    copyToClipboard(roomID, 'Copied');
   };
 
   const diffWith = leader ? [...followers, ...[leader]] : followers;
@@ -69,6 +65,7 @@ export default function IdeHeaderPresenter({
       name: 'Stop following',
       id: 'unfollow',
       color: '',
+      focusedFile: null,
     });
 
   return (
@@ -82,7 +79,6 @@ export default function IdeHeaderPresenter({
       collaborators={collaborators}
       potentialLeaders={potentialLeaders}
       isCollab={!!roomID}
-      saveFileOnClick={saveFileOnClick}
       leader={leader}
       isHost={model.isHost}
       logout={logout}

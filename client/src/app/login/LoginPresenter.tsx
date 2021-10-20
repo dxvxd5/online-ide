@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import IdeModel from '../../data/model/model';
 import LoginView from './LoginView';
-import Loader from '../components/loader/Loader';
-import ProjectError from '../components/error/ProjectError';
 import { loginSchema } from '../../utils/yup-schemas';
 
 interface LoginPresenterProp {
@@ -13,73 +11,39 @@ interface LoginPresenterProp {
 export default function LoginPresenter({
   model,
 }: LoginPresenterProp): JSX.Element {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isProjectLoaded, setProjectLoaded] = useState(false);
-  const [loginErrorInfo, setLoginErrorInfo] = useState('');
-  const [loginError, setLoginError] = useState(false);
-  const [projectErrorInfo, setProjectErrorInfo] = useState('');
-  const [projectError, setProjectError] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const history = useHistory();
+
+  function redirectTo(to: 'me' | 'signup' | 'code') {
+    history.push({
+      pathname: `/${to}`,
+    });
+  }
 
   const logIn = async ({ username, password }: Record<string, string>) => {
     try {
       await model.login(username, password);
-      setIsLoggedIn(true);
-      if (loginError) setLoginError(false);
+      if (loginError) setLoginError('');
+      redirectTo('me');
     } catch (error) {
-      setLoginErrorInfo('Either username or password is incorrect');
-      setLoginError(true);
+      setLoginError('Either username or password is incorrect');
     }
   };
 
   useEffect(() => {
-    if (model.isLoggedIn)
-      history.push({
-        pathname: '/me',
-      });
+    if (model.isLoggedIn) {
+      if (model.isCoding) redirectTo('code');
+      else redirectTo('me');
+    }
   }, []);
 
-  const signUp = () => {
-    history.push({ pathname: '/signup' });
-  };
-
-  if (isLoggedIn && !isProjectLoaded && !projectError) {
-    model
-      .getAllUserProjects()
-      .then(() => {
-        setProjectLoaded(true);
-        setProjectError(false);
-      })
-      .catch(() => {
-        setProjectErrorInfo(
-          'Error. Could not load the projects. Please try again.'
-        );
-        setProjectError(true);
-      });
-    return <Loader />;
-  }
-
-  if (projectError) {
-    return (
-      <ProjectError
-        projectErrorInfo={projectErrorInfo}
-        tryAgain={() => setProjectError(false)}
-      />
-    );
-  }
-
-  if (isLoggedIn && isProjectLoaded && !loginError) {
-    history.push({
-      pathname: '/me',
-    });
-  }
+  const signUp = () => redirectTo('signup');
 
   return (
     <LoginView
       signUp={signUp}
       loginSchema={loginSchema}
       loginError={loginError}
-      loginErrorInfo={loginErrorInfo}
       logIn={logIn}
     />
   );

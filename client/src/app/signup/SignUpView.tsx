@@ -1,40 +1,34 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { SignupSchemaType } from '../../utils/yup-schemas';
+import { SignUpSchemaType } from '../../utils/yup-schemas';
 
 import Button from '../components/button/Button';
 
 import '../../assets/styles/form.css';
 
-type ClickFunction = {
-  (e: { name: string; username: string; password: string }): void;
-};
-
-interface SingupViewProp {
-  click: ClickFunction;
-  signupError: boolean;
-  signupErrorInfo: string;
-  signupSchema: SignupSchemaType;
+interface SignUpViewProp {
+  click: (_: { name: string; username: string; password: string }) => void;
+  signUpError: string;
+  signUpSchema: SignUpSchemaType;
   logIn: () => void;
 }
 
-const SingupView = ({
+const SignUpView = ({
   click,
-  signupError,
-  signupErrorInfo,
-  signupSchema: SignupSchema,
+  signUpError,
+  signUpSchema,
   logIn,
-}: SingupViewProp): JSX.Element => {
+}: SignUpViewProp): JSX.Element => {
   return (
     <div className="container container--sign-up">
       <div className="form form--sign-up">
-        <h1 className="form__header">Signup</h1>
-        {signupError && (
-          <div className="form__error form__error--all">{signupErrorInfo}</div>
+        <h1 className="form__header">Sign Up</h1>
+        {signUpError && (
+          <div className="form__error form__error--all">{signUpError}</div>
         )}
         <Formik
           initialValues={{ name: '', username: '', password: '' }}
-          validationSchema={SignupSchema}
+          validationSchema={signUpSchema}
           onSubmit={(e) => click(e)}
         >
           <Form className="form__container">
@@ -114,4 +108,4 @@ const SingupView = ({
   );
 };
 
-export default SingupView;
+export default SignUpView;

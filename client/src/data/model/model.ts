@@ -21,32 +21,6 @@ export enum StorageItem {
   SCK = 'crsck',
 }
 
-enum FileOperationType {
-  RENAME,
-  DELETE,
-  ADD,
-}
-
-interface FileOperation {
-  type: FileOperationType;
-  name: string;
-}
-
-interface FileDeleteOperation extends FileOperation {
-  fileID: string;
-}
-
-interface FileCreateOperation extends FileOperation {
-  name: string;
-  creationDate: number;
-}
-
-interface FileRenameOperation extends FileOperation {
-  fileID: string;
-  name: string;
-  lastUpdated: number;
-}
-
 export enum EditorContentOperationType {
   REPLACEMENT,
   DELETION,
@@ -110,6 +84,7 @@ interface CompleteUserData extends UserData {
 
 export interface Collaborator extends SparseUserData {
   color: string;
+  focusedFile: FileData | null;
 }
 
 export interface CollaboratorCursor {
@@ -131,7 +106,7 @@ export interface CompleteFileData extends FileData {
   content: string;
 }
 
-interface ProjectData {
+export interface ProjectData {
   name: string;
   shared: boolean;
   id: string;
@@ -176,8 +151,6 @@ export default class IdeModel {
   username: string;
 
   projects: ProjectData[];
-
-  // project: ProjectData;
 
   observers: Array<Observer>;
 
@@ -335,10 +308,13 @@ export default class IdeModel {
   }
 
   addFollower(follower: FollowerData): void {
-    if (!this.followers.some((f) => f.user.id === follower.user.id)) {
-      this.followers.push(follower);
-      this.notifyObservers(Message.FOLLOWER_CHANGE);
-    }
+    const follAlreadyExists = this.followers.some(
+      (f) => f.user.id === follower.user.id
+    );
+    if (follAlreadyExists) return;
+
+    this.followers.push(follower);
+    this.notifyObservers(Message.FOLLOWER_CHANGE);
   }
 
   removeFollower(follower: FollowerData): void {
@@ -413,18 +389,17 @@ export default class IdeModel {
   }
 
   addTabFile(tabFile: FileData): void {
-    if (
-      !this.currentTabFiles.some(
-        (currentTabFile) => currentTabFile.id === tabFile.id
-      )
-    ) {
-      this.currentTabFiles.push(tabFile);
-      this.notifyObservers(Message.CURRENT_TABS);
-      IdeModel.saveToSessionStorage(
-        StorageItem.TABS,
-        JSON.stringify(this.currentTabFiles)
-      );
-    }
+    const tabAlreadyExist = this.currentTabFiles.some(
+      (currentTabFile) => currentTabFile.id === tabFile.id
+    );
+    if (tabAlreadyExist) return;
+
+    this.currentTabFiles.push(tabFile);
+    this.notifyObservers(Message.CURRENT_TABS);
+    IdeModel.saveToSessionStorage(
+      StorageItem.TABS,
+      JSON.stringify(this.currentTabFiles)
+    );
   }
 
   private openAnotherTabFile(i: number): void {
@@ -481,18 +456,32 @@ export default class IdeModel {
     IdeModel.saveToSessionStorage(StorageItem.ROOM, this.roomID);
     IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
     this.isHost = true;
-    this.getAllUserProjects();
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
 
-  addCollaborator(joiner: SparseUserData): void {
+  addCollaborator(joiner: SparseUserData, focusedFile: FileData | null): void {
     const newCollaborator = {
       ...joiner,
       color: this.colorGenerator?.generateColor(),
+      focusedFile: focusedFile ?? null,
     };
     this.collaborators = [...this.collaborators, newCollaborator];
     this.joiner = newCollaborator;
     this.notifyObservers(Message.USER_JOIN);
+  }
+
+  updateCollaboratorFocusedFile(
+    collaborator: SparseUserData,
+    focusedFile: FileData | null
+  ): void {
+    const i = this.collaborators.findIndex(
+      (coll) => coll.id === collaborator.id
+    );
+
+    if (i < 0) return;
+
+    this.collaborators[i].focusedFile = focusedFile;
+    this.notifyObservers(Message.COLLAB_FOCUSED_FILE_CHANGE);
   }
 
   startCollaboration(roomID: string, isHost: boolean): void {
@@ -627,6 +616,7 @@ export default class IdeModel {
   /**
    * Fetch the project with its id and set it as the current opened project.
    */
+  // eslint-disable-next-line class-methods-use-this
   async openProject(projectID: string): Promise<void> {
     const project = await this.fetchProject(projectID);
     this.resetTabsFiles();
@@ -684,7 +674,7 @@ export default class IdeModel {
     this.notifyObservers(Message.LOGOUT);
   }
 
-  async signup(
+  async signUp(
     namee: string,
     userName: string,
     password: string
@@ -785,50 +775,18 @@ export default class IdeModel {
     return node;
   }
 
-  // private async fileOperation(o: FileOperation): Promise<FileData | void> {
-  //   if (!this.isHost) return;
-
-  //   switch (o.type) {
-  //     case FileOperationType.ADD: {
-  //       // eslint-disable-next-line consistent-return
-  //       return this.createFile(
-  //         (o as FileCreateOperation).name,
-  //         (o as FileCreateOperation).creationDate
-  //       );
-  //     }
-  //     case FileOperationType.RENAME: {
-  //       this.renameFile(
-  //         (o as FileRenameOperation).name,
-  //         (o as FileRenameOperation).lastUpdated,
-  //         (o as FileRenameOperation).fileID
-  //       );
-  //       break;
-  //     }
-  //     case FileOperationType.DELETE: {
-  //       this.deleteFile((o as FileDeleteOperation).fileID);
-  //       break;
-  //     }
-  //     default:
-  //       break;
-  //   }
-  // }
-
   private async createFile(
     name: string,
     creationDate: number
   ): Promise<FileData | undefined> {
-    try {
-      const fileData = await API.createFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        name,
-        creationDate,
-        this.jwt.token
-      );
-      return fileData as FileData;
-    } catch {
-      return undefined;
-    }
+    const fileData = await API.createFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      name,
+      creationDate,
+      this.jwt.token
+    ).catch();
+    return fileData as FileData;
   }
 
   private renameTabFile(fileID: string, name: string): void {
@@ -850,35 +808,27 @@ export default class IdeModel {
   }
 
   private async editProject(): Promise<void> {
-    try {
-      API.editProject(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        {
-          lastUpdated: Date.now(),
-        },
-        this.jwt.token
-      );
+    API.editProject(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      {
+        lastUpdated: Date.now(),
+      },
+      this.jwt.token
+    ).catch();
 
-      const i = this.projects.findIndex(
-        (project) => project.id === this.currentProject.id
-      );
-      if (i >= 0) {
-        this.projects[i].lastUpdated = Date.now();
-        this.notifyObservers(Message.PROJECTS_CHANGE);
-      }
-    } catch {
-      console.log('Error when updating project');
+    const i = this.projects.findIndex(
+      (project) => project.id === this.currentProject.id
+    );
+    if (i >= 0) {
+      this.projects[i].lastUpdated = Date.now();
+      this.notifyObservers(Message.PROJECTS_CHANGE);
     }
   }
 
   async deleteProject(projectID: string): Promise<void> {
-    try {
-      API.deleteProject(this.userID, projectID, this.jwt.token);
-      this.deleteProjectFromProjects(projectID);
-    } catch {
-      console.log('Error when deleting file');
-    }
+    API.deleteProject(this.userID, projectID, this.jwt.token);
+    this.deleteProjectFromProjects(projectID);
   }
 
   private async renameFile(
@@ -886,21 +836,17 @@ export default class IdeModel {
     lastUpdated: number,
     fileID: string
   ): Promise<void> {
-    try {
-      API.editFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        fileID,
-        {
-          name,
-          lastUpdated,
-        },
-        this.jwt.token
-      );
-      this.renameTabFile(fileID, name);
-    } catch {
-      console.log('Error when updating file');
-    }
+    API.editFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      fileID,
+      {
+        name,
+        lastUpdated,
+      },
+      this.jwt.token
+    ).catch();
+    this.renameTabFile(fileID, name);
   }
 
   private deleteTabFile(fileID: string): void {
@@ -935,18 +881,14 @@ export default class IdeModel {
   }
 
   private async deleteFile(fileID: string): Promise<void> {
-    try {
-      API.deleteFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        fileID,
-        this.jwt.token
-      );
-      this.replaceFocusedFile(fileID);
-      this.deleteTabFile(fileID);
-    } catch {
-      console.log('Error when deleting file');
-    }
+    API.deleteFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      fileID,
+      this.jwt.token
+    ).catch();
+    this.replaceFocusedFile(fileID);
+    this.deleteTabFile(fileID);
   }
 
   async applyFileTreeChange(
@@ -967,14 +909,13 @@ export default class IdeModel {
         if (node.children) {
           node.children[0].fileID = newFile.id;
           node.children[0].filePath = newFile.name;
-          // Dummy method to force tree update:
         }
-
         break;
       }
 
       case FileTreeOperation.RENAME: {
         const node = this.getTreeNodeFromPath(event.path, newTree);
+        this.saveContentIntoFile();
         if (node.fileID) {
           this.renameFile(node.filePath, Date.now(), node.fileID);
         } else {
@@ -1055,6 +996,23 @@ export default class IdeModel {
     this.persisted = persisted;
   }
 
+  async restoreProject(): Promise<void> {
+    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
+    if (!projId) throw new Error(`No project to be restored`);
+
+    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
+    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
+    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
+
+    const project = await this.fetchProject(projId as string);
+    this.currentProject = project;
+    this.setCurrentFileTree(project.files, project.name);
+    if (content !== undefined) this.contentToSave = content as string;
+    if (focFile) this.setFocusedFile(focFile as FileData);
+    if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
+    this.notifyObservers(Message.UPDATE_TREE);
+  }
+
   persist(): void {
     const jwt = IdeModel.getFromLocalStorage(StorageItem.JWT) as JWT;
     const id = IdeModel.getFromLocalStorage(StorageItem.UID) as string;
@@ -1072,9 +1030,6 @@ export default class IdeModel {
     this.name = name;
     this.username = uname;
 
-    this.getAllUserProjects().then(() => {
-      this.notifyObservers(Message.PROJECTS_CHANGE);
-    });
     this.isLoggedIn = true;
 
     this.persisted = true;
@@ -1085,23 +1040,7 @@ export default class IdeModel {
     const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
     if (!projId) return;
 
-    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
-
-    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
-
-    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
-
-    this.fetchProject(projId as string)
-      .then((project) => {
-        this.currentProject = project;
-        this.setCurrentFileTree(project.files, project.name);
-        if (content !== undefined) this.contentToSave = content as string;
-        if (focFile) this.setFocusedFile(focFile as FileData);
-        if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
-        this.notifyObservers(Message.UPDATE_TREE);
-        this.isCoding = true;
-      })
-      .catch();
+    this.isCoding = true;
   }
 
   notifyObservers(message: Message): void {

@@ -1,14 +1,5 @@
 @import url(app.css);
 
-@keyframes fadein--cross {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .ide__header {
   gap: 10px;
 }
@@ -23,7 +14,7 @@
 }
 
 .ide__tab-content {
-  height: 100%;
+  height: calc(100% - var(--tab-toggle-height));
 }
 
 .split {
@@ -39,7 +30,8 @@
 }
 
 .gutter {
-  background-color: #eee;
+  background-color: rgb(171, 168, 168);
+  /* background-color: var(--btn-primary-color); */
   background-repeat: no-repeat;
   background-position: 50%;
 }
@@ -50,13 +42,16 @@
 }
 
 .ide__editor-tab-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
   font-weight: lighter;
   color: white;
   background-color: var(--tab-color);
-  width: fit-content;
-  padding: 5px 15px;
-  /* border-right: solid 1px white;
-  border-left: solid 1px white; */
+  max-width: 200px;
+  min-width: 80px;
+  height: var(--tab-toggle-height);
 }
 
 .ide__editor-tab-toggle--focus {
@@ -70,14 +65,32 @@
 }
 
 .ide__editor-tab-toggle-name {
-  padding-right: 5px;
+  height: 100%;
+  width: calc(100% - var(--tab-cross-size));
+
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ide__editor-tab-toggle-name span {
+  width: calc(90%);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .ide__editor-tab-toggle-cross {
-  margin-top: auto;
-  margin-bottom: auto;
-  font-size: 10px;
-  padding: 0.5em;
+  width: var(--tab-cross-size);
+  height: var(--tab-cross-size);
+  font-weight: 500;
+  font-size: medium;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ide__editor-tab-toggle-cross:hover {
@@ -88,8 +101,12 @@
 .ide__tab-toggle-container {
   display: flex;
   flex-direction: row;
+  height: fit-content;
   justify-content: flex-start;
   background-color: var(--tab-color);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
 .ide__header-collaborator {
@@ -135,10 +152,6 @@
   margin: 10px initial;
 }
 
-.ide__header-button--logout {
-  /* margin-left: auto; */
-}
-
 .ide__header-collaborators {
   display: flex;
   flex-direction: row;
@@ -148,7 +161,6 @@
   width: fit-content;
   max-width: 30%;
   overflow-x: auto;
-  /* background-color: aqua; */
   padding: 10px;
 }
 

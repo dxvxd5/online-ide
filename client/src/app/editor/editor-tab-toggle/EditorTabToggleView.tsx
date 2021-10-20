@@ -20,22 +20,22 @@ export default function EditorTabToggleView({
   const className = `${be} ${isFocused ? `${be}--focus` : ''}`;
   return (
     <div className={className}>
-      <span
+      <div
         className={`${be}-name`}
         role="button"
         tabIndex={0}
         onClick={() => handleClick({ id, name })}
       >
-        {name}
-      </span>
-      <span
+        <span>{name}</span>
+      </div>
+      <div
         className={`${be}-cross`}
         role="button"
         tabIndex={0}
         onClick={() => closeFileFromTab({ id, name })}
       >
         X
-      </span>
+      </div>
     </div>
   );
 }

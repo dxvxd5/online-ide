@@ -19,7 +19,12 @@ export default function FileIcon({ onClick }: FileIconProps) {
     };
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <span role="button" tabIndex={0} onClick={handleClick}>
+      <span
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        className="sidebar__icon"
+      >
         {LanguageIcon(nodeData.name)}
       </span>
     );

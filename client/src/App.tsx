@@ -9,8 +9,10 @@ import IdePresenter from './app/ide/IdePresenter';
 import SignupPresenter from './app/signup/SignupPresenter';
 
 import './assets/styles/app.css';
+import prevDefaultShortcuts from './utils/shortcuts';
 
 function App(): JSX.Element {
+  prevDefaultShortcuts();
   const ideModel = new IdeModel();
   ideModel.persist();
   return (

@@ -1,22 +1,30 @@
+/* eslint-disable react/require-default-props */
 import React from 'react';
-import ContentLoader from 'react-content-loader';
 
-const Loader = (): JSX.Element => (
-  <ContentLoader
-    speed={2}
-    width={400}
-    height={160}
-    viewBox="0 0 400 160"
-    backgroundColor="#f3f3f3"
-    foregroundColor="#ecebeb"
-  >
-    <rect x="48" y="8" rx="3" ry="3" width="88" height="6" />
-    <rect x="48" y="26" rx="3" ry="3" width="52" height="6" />
-    <rect x="1" y="52" rx="3" ry="3" width="410" height="6" />
-    <rect x="0" y="72" rx="3" ry="3" width="380" height="6" />
-    <rect x="0" y="88" rx="3" ry="3" width="178" height="6" />
-    <circle cx="22" cy="22" r="20" />
-  </ContentLoader>
-);
+import '../../../assets/styles/loader.css';
 
-export default Loader;
+interface LoaderProps {
+  message: string;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export default function Loader({
+  message,
+  className,
+  style,
+}: LoaderProps): JSX.Element {
+  return (
+    <div className={`container loader ${className}`} style={style}>
+      <div className="loader__container">
+        <div className="loader__spinner">
+          <div className="spinner--color" data-bind="css: {}" />
+        </div>
+      </div>
+      <br />
+      <div className="loader--description" data-bind="text: description">
+        {message}
+      </div>
+    </div>
+  );
+}
