@@ -18,17 +18,19 @@ Users have access to a full-fledged code editor with syntax highlightning and au
 - Users can see on their respective editors a cursor showing where their collaborators are in the file. 
 - Users can invite other users to collaborate together on a project.
 
+## Tech
+
+- Sockets: [socket.io](https://socket.io/)
+- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html) 
 
 ### Future improvements
 - Code execution
 - Upload file
 - File download
 - Github integration
+- Better support for programming languages
+- Following feature during collaboration
 
-## Tech
-
-- Sockets: [socket.io](https://socket.io/)
-- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html) 
 
 ## Grading criteria
 
