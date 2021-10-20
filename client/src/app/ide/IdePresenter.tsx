@@ -8,9 +8,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Split from 'react-split';
 
-import introJs from 'intro.js';
-import 'intro.js/introjs.css';
-
 import IdeModel, {
   SparseUserData as User,
   CursorPosition,
@@ -697,26 +694,8 @@ export default function IdePresenter({
     }
   };
 
-  const tourIntroJS = () => {
-    const intro = introJs;
-
-    intro.setOptions({
-      steps: [
-        {
-          intro: 'Welcome!',
-        },
-        {
-          element: '#step-one',
-          intro: 'First step',
-        },
-      ],
-    });
-    return intro.start();
-  };
-
   return (
     <div className="container ide__container">
-      {tourIntroJS}
       <IdeHeader
         removeCollaborator={removeCollaborator}
         leaveProject={leaveProject}
