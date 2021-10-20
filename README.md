@@ -2,44 +2,33 @@
 
 ## Purpose
 
-The purpose of the application is to offer a space where developers can collaborate in real-time on code. 
-
-The application will have roughly the same features as [CodeSandbox](https://codesandbox.io/)
+The purpose of the application is to offer a space where developers can collaborate in real-time on code.
 
 ## Features
 
 ### Personal space
-When users create an account on the application, they get access to a personal space. 
-In this personal space is saved all the files they have worked on and all the users they have collaborated with. 
-Each time users log in, they see a quick summary of their personal space (mainly their recent files and collaborators). 
-- Projects : several files in a folder can be opened on the web editor. 
+When users create an account on the application, they get access to a personal space, where they can see all their projects and edit them. 
 
 ### Full-fledged code editor
-Users have access to a full-fledged code editor with the following features:
-- Syntax highlighting
-- Code completion
-- Code running?
-- Drag and drop file to open it
-- Upload file to open it
-- Download file
+Users have access to a full-fledged code editor with syntax highlightning and autocompletion (for the languages supported by monaco editor)
+
 
 ### Collaborative code editing
-Several users (how many max?) can collaborate on a file together in real-time.
-Users can see on their respective editors a cursor showing where their collaborators are in the file. 
-Users can invite other users to collaborate together on a file.
-
-### Compiler
-
-### Others
-- User can log in with their GitHub account
-- User can change their profile picture
+- Several users can collaborate on a file together in real-time.
+- Users can see on their respective editors a cursor showing where their collaborators are in the file. 
+- Users can invite other users to collaborate together on a project.
 
 
+### Future improvements
+- Code execution
+- Upload file
+- File download
+- Github integration
 
 ## Tech
 
 - Sockets: [socket.io](https://socket.io/)
-- Online code editor: [Ace](https://ace.c9.io/)/[CodeMirror](https://codemirror.net/6/)/[Monaco](https://microsoft.github.io/monaco-editor/index.html) 
+- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html) 
 
 ## Grading criteria
 
@@ -47,37 +36,30 @@ These are the technologies that we will certainly need for this project and thei
 
 | Functionality                           | When/Why                       | Points |
 | --------------------------------------- | ------------------------------ | ------ |
-| Drag and drop                           | To open a new file             | 3      |
-| Media upload                            | When updating profile picture  | 3      |
 | Text (code) editor                      | Obvious                        | 5 ✅     |
 | Collaborative feature with shared state | Obvious                        | 5 ✅     |
 | Regex                                   | server side | 3 ✅     |
-|                                         | **Total**                      | **19** |
+|                                         | **Total**                      | **13** |
 
 
 
 | JS/CSS/NPM            | When/Why                        | Points |
 | --------------------- | ------------------------------- | ------ |
 | CSS naming convention |  Using BEM                               | 5 ✅     |
-| CSS preprocessor      |                                 | 5      |
 | Lodash package        | For all utility functions       | 5  ✅    |
 | Formik package        | Form for user to sign up/log in | 3  ✅    |
 | TypeScript            |                                 | 15 ✅    |
 |Promise all              | in file model| 3 ✅ |
 | Use animation package or CSS animation|  | 5  ✅    |
-|                       | **Total**                       | **41** |
+|                       | **Total**                       | **36** |
 
 
 
 | Advanced model/React & Performance                       | When/Why                                  | Points |
 | -------------------------------------------------------- | ----------------------------------------- | ------ |
-| Normalize nested data in model (e.g. use normalizr)      | Make sure our model get updated correctly | 5 ❔   |
-| No big unnecessary DOM update                            | Performance                               | 3 ❔     |
-| Memoization of all functions created in React components | Performance                               | 3  ❔    |
-| Memoization of all computationally heavy functions       | Performance                               | 2   ❔   |
-| Lazy-loading of bundle                                   | Performance                               | 10  ❔   |
+| No big unnecessary DOM update                            | Performance                               | 3    ✅    |
 | Use PropTypes/interface/type to declare component props  | Fewer bugs                                | 2   ✅   |
-|                                                          | **Total**                                 | **25 ❔** 2|
+|                                                          | **Total**                                 | **5**|
 
 
 | Consistency                   | When/Why                                  | Points |
@@ -89,11 +71,10 @@ These are the technologies that we will certainly need for this project and thei
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
 | Node (express.js framework or plain node) (*If you create a web server, all communication with the database must go through the server. Otherwise Fx*) | To implement the server                                      | 20  ✅   |
 | Websocket multiplayer                                        | To implement real-time collaboration                         | 10   ✅  |
-| Use cookies                                                  | Certainly to save some values we want to persist (like the id of the last file opened by the user or the theme used by the user) | 5    ✅  |
 | Good use of GET, POST, PUT, DELETE requests                  | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request | 5 ✅|
 | Good error codes                                             | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅ |
 | Deploy server without docker                                 |                                                              | 15  ✅ |
-| Handle authorization  |                               | 10      |
-|                                                              | **Total**                                                    | **70** |
+| Handle authorization  | With JWT                              | 10  ✅  |
+|                                                              | **Total**                                                    | **65** |
 
-### **Total**: **137 ** --> Grade A
+### **Total**: 124  --> Grade A
