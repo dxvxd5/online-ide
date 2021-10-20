@@ -49,10 +49,6 @@ export default function IdeHeaderPresenter({
     return () => model.removeObserver(collabListener);
   }, []);
 
-  const saveFileOnClick = () => {
-    model.saveContentIntoFile();
-  };
-
   const copyRoomId = () => {
     copyToClipboard(roomID, 'Copied');
   };

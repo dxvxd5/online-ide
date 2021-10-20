@@ -779,18 +779,14 @@ export default class IdeModel {
     name: string,
     creationDate: number
   ): Promise<FileData | undefined> {
-    try {
-      const fileData = await API.createFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        name,
-        creationDate,
-        this.jwt.token
-      );
-      return fileData as FileData;
-    } catch {
-      return undefined;
-    }
+    const fileData = await API.createFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      name,
+      creationDate,
+      this.jwt.token
+    ).catch();
+    return fileData as FileData;
   }
 
   private renameTabFile(fileID: string, name: string): void {
@@ -812,25 +808,21 @@ export default class IdeModel {
   }
 
   private async editProject(): Promise<void> {
-    try {
-      API.editProject(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        {
-          lastUpdated: Date.now(),
-        },
-        this.jwt.token
-      );
+    API.editProject(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      {
+        lastUpdated: Date.now(),
+      },
+      this.jwt.token
+    ).catch();
 
-      const i = this.projects.findIndex(
-        (project) => project.id === this.currentProject.id
-      );
-      if (i >= 0) {
-        this.projects[i].lastUpdated = Date.now();
-        this.notifyObservers(Message.PROJECTS_CHANGE);
-      }
-    } catch {
-      console.log('Error when updating project');
+    const i = this.projects.findIndex(
+      (project) => project.id === this.currentProject.id
+    );
+    if (i >= 0) {
+      this.projects[i].lastUpdated = Date.now();
+      this.notifyObservers(Message.PROJECTS_CHANGE);
     }
   }
 
@@ -844,21 +836,17 @@ export default class IdeModel {
     lastUpdated: number,
     fileID: string
   ): Promise<void> {
-    try {
-      API.editFile(
-        this.isHost ? this.userID : this.currentProject.owner.id,
-        this.currentProject.id,
-        fileID,
-        {
-          name,
-          lastUpdated,
-        },
-        this.jwt.token
-      );
-      this.renameTabFile(fileID, name);
-    } catch {
-      console.log('Error when updating file');
-    }
+    API.editFile(
+      this.isHost ? this.userID : this.currentProject.owner.id,
+      this.currentProject.id,
+      fileID,
+      {
+        name,
+        lastUpdated,
+      },
+      this.jwt.token
+    ).catch();
+    this.renameTabFile(fileID, name);
   }
 
   private deleteTabFile(fileID: string): void {
@@ -898,7 +886,7 @@ export default class IdeModel {
       this.currentProject.id,
       fileID,
       this.jwt.token
-    ).catch(() => console.log('Error when deleting file'));
+    ).catch();
     this.replaceFocusedFile(fileID);
     this.deleteTabFile(fileID);
   }

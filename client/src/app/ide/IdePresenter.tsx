@@ -406,20 +406,16 @@ export default function IdePresenter({
       return;
     }
 
-    toast
-      .promise(model.createCollab(), {
-        success: 'Collaboration session created',
-        loading: 'Creating session...',
-        error: 'Failed to create session. Please try again',
-      })
-      .then((roomID) => {
-        initiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST);
-
-        copyToClipboard(
-          roomID,
-          'Session ID copied. Send it to people you trust'
-        );
-      });
+    const promise = model.createCollab().then((roomID) => {
+      initiateSocket(roomID, SocketMessage.CREATE_ROOM, SocketState.HOST);
+      copyToClipboard(roomID);
+    });
+    const msgs = {
+      success: 'Session created and session ID copied to clipboard',
+      loading: 'Creating session...',
+      error: 'Failed to create session. Please try again',
+    };
+    toastPromise(promise, msgs);
   };
 
   const socketLeaveRoom = (roomId: string): void => {
@@ -501,15 +497,19 @@ export default function IdePresenter({
       ].includes(e.type)
     )
       return;
-    model.applyFileTreeChange(t, e).then(() => {
-      if (!socketRef.current) return;
-      socketRef.current.emit(SocketMessage.FILE_TREE_CHANGE, {
-        newTree: t,
-        event: e,
-        roomID: model.roomID,
-      });
-      e.type = FileTreeOperation.INITIALIZATION;
-    });
+    model
+      .applyFileTreeChange(t, e)
+      .then(() => {
+        if (!socketRef.current) return;
+        socketRef.current.emit(SocketMessage.FILE_TREE_CHANGE, {
+          newTree: t,
+          event: e,
+          roomID: model.roomID,
+        });
+
+        e.type = FileTreeOperation.INITIALIZATION;
+      })
+      .catch();
   };
 
   const stopFollowing = () => {
