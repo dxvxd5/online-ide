@@ -30,7 +30,8 @@
 }
 
 .gutter {
-  background-color: #eee;
+  background-color: rgb(171, 168, 168);
+  /* background-color: var(--btn-primary-color); */
   background-repeat: no-repeat;
   background-position: 50%;
 }
