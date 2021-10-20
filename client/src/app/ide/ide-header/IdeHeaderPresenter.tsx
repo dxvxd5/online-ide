@@ -12,6 +12,7 @@ interface IdeHeaderPresenterProps {
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   leaveProject: () => void;
+  tutorial: () => void;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
 }
@@ -22,6 +23,7 @@ export default function IdeHeaderPresenter({
   model,
   startFollowOnClick,
   leaveProject,
+  tutorial,
   removeCollaborator,
   logout,
 }: IdeHeaderPresenterProps): JSX.Element {
@@ -72,6 +74,7 @@ export default function IdeHeaderPresenter({
     <IdeHeaderView
       removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
+      tutorial={tutorial}
       startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
       leaveRoom={leaveRoom}
