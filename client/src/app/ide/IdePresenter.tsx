@@ -256,7 +256,7 @@ export default function IdePresenter({
       SocketMessage.JOINED_ROOM,
       ({ user, socketID, focusedFile }: SocketData) => {
         if (socketID) {
-          const message = `${user.name} joined session.`;
+          const message = `${user.name} joined the session.`;
           notifyUserLeft(message);
           socketRef.current?.emit(SocketMessage.JOINED_ROOM, {
             to: socketID,
