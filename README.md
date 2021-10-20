@@ -23,14 +23,6 @@ Users have access to a full-fledged code editor with syntax highlightning and au
 - Sockets: [socket.io](https://socket.io/)
 - Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html) 
 
-### Future improvements
-- Code execution
-- Upload file
-- File download
-- Github integration
-- Better support for programming languages
-- Following feature during collaboration
-
 
 ## Grading criteria
 
@@ -80,3 +72,11 @@ These are the technologies that we will certainly need for this project and thei
 |                                                              | **Total**                                                    | **65** |
 
 ### **Total**: 124  --> Grade A
+
+## Future improvements
+- Code execution
+- Upload file
+- File download
+- Github integration
+- Better support for programming languages
+- Following feature during collaboration
