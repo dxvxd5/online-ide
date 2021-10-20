@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import IdeModel from '../../data/model/model';
-import SignUpView from './SignUpView';
+import SignUpView from './SignupView';
 import { signUpSchema } from '../../utils/yup-schemas';
 
 interface SignUpPresenterProp {
