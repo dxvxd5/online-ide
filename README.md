@@ -26,12 +26,12 @@ Users have access to a full-fledged code editor with syntax highlightning and au
 
 ## Grading criteria
 
-These are the technologies that we will certainly need for this project and their associated points.
+These are parts of the grading criteria that we implemented and their associated points. 
 
 | Functionality                           | When/Why                       | Points |
 | --------------------------------------- | ------------------------------ | ------ |
-| Text (code) editor                      | Obvious                        | 5 ✅     |
-| Collaborative feature with shared state | Obvious                        | 5 ✅     |
+| Text (code) editor                      |                      | 5 ✅     |
+| Collaborative feature with shared state |                      | 5 ✅     |
 | Regex                                   | server side | 3 ✅     |
 |                                         | **Total**                      | **13** |
 
