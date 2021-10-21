@@ -5,7 +5,6 @@ import Empty from '../components/empty/Empty';
 import Logo from '../components/logo/Logo';
 import Profile from '../components/profile/Profile';
 import Project from '../components/project/Project';
-// import EmptyState from './EmptyState';
 
 export enum SortOption {
   DATE = 'last change',

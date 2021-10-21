@@ -1,19 +1,11 @@
-import flash from 'connect-flash';
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-
-// import { expressCspHeader, INLINE, NONE, SELF } from 'express-csp-header';
 import { PORT } from './config/env.variables';
-
 import persistParams from './middlewares/persist-param';
-// import { passport, passportAuthenticator } from './middlewares/passport';
 import passport from './middlewares/passport-jwt';
-import session from './middlewares/session';
-
 import usersRouter from './routes/user.routes';
-
 import socketFunction from './socket/socket';
 import { logIn, signUpUser } from './controllers/user.controllers';
 
@@ -44,4 +36,4 @@ const io = new Server(server, {
   cors: { origin: true },
 });
 socketFunction(io);
-server.listen(PORT, () => console.log(`Server started on port ${PORT}!`));
+server.listen(PORT);

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
 import IdeModel, { Collaborator } from '../../../data/model/model';
@@ -12,7 +11,7 @@ interface IdeHeaderPresenterProps {
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   leaveProject: () => void;
-  tutorial: () => void;
+  tutorial: () => Promise<void>;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
 }

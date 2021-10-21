@@ -18,7 +18,7 @@ interface IdeHeaderViewProps {
   leaveRoom: (roomId: string) => void;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   leaveProject: () => void;
-  tutorial: () => void;
+  tutorial: () => Promise<void>;
   isHost: boolean;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
@@ -58,7 +58,7 @@ export default function IdeHeaderView({
         <Button
           submit={false}
           theme="secondary"
-          onClick={tutorial}
+          onClick={() => tutorial()}
           text="tutorial"
           className="header__button ide__header-button"
         />
