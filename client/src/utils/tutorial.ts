@@ -5,7 +5,6 @@ enum SwalFireState {
   IS_DENIED,
   IS_DISMISSED,
 }
-
 interface Tutorial {
   title: string;
   text: string;
@@ -17,45 +16,44 @@ interface Tutorial {
 
 const sidebarTutorial: Tutorial = {
   title: 'Sidebar',
-  text: 'Create folders, files, as well as, rename and delete options in the sidebar.',
-  imageUrl:
-    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Sidebar.gif',
+  text: 'You can create folders, files, as well as rename and delete them in the sidebar.',
+  imageUrl: 'https://i.imgur.com/4x6oaIJ.gif',
   currentProgressStep: 0,
   isLastStep: false,
   isFirstStep: true,
 };
+
 const sliderTutorial: Tutorial = {
   title: 'Slider',
-  text: 'You can freely control the sidebar by expanding and reducing it for a wider space for the editor space.',
-  imageUrl:
-    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Slider.gif',
+  text: 'You can expand or reduce the sidebar width according to your needs.',
+  imageUrl: 'https://i.imgur.com/MMBJz2J.gif',
   currentProgressStep: 1,
   isLastStep: false,
   isFirstStep: false,
 };
+
 const startCollabTutorial: Tutorial = {
   title: 'Start Collaboration',
-  text: 'To start collaboration click on the "Start New Collaboration" button and a new button with the session ID will appear, where you can copy the session ID.',
-  imageUrl:
-    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Start_Collaboration.gif',
+  text: 'To start a collaboration session, click on the "Start New Collaboration" button. A unique ID will be generated for your session and copied to your clipboard.You can always copy it again by clicking on the button "Copy Session ID" that appears then. Collaborators can join your session with that ID.',
+  imageUrl: 'https://i.imgur.com/oA6BwD5.gif',
   currentProgressStep: 2,
   isLastStep: false,
   isFirstStep: false,
 };
+
 const removeCollabTutorial: Tutorial = {
   title: 'Remove Collaborator',
-  text: 'As a host, you can remove a collaborator by going on the profile picture and clicking on the X button, which appears when you hover on it.',
-  imageUrl:
-    'https://raw.githubusercontent.com/dxvxd5/online-ide/540b864ed93c06579c8f7a1d93536d402cee8ee4/client/doc/Remove_Collaborator.gif',
+  text: 'When hosting a session, you can always remove collaborators by hovering on their profile picture and clicking on the "X" button that appears then.',
+  imageUrl: 'https://i.imgur.com/ZtaxLxv.gif',
   currentProgressStep: 3,
   isLastStep: false,
   isFirstStep: false,
 };
+
 const stopCollabTutorial: Tutorial = {
   title: 'Stop Collaboration',
-  text: 'Stop the collaboration by clickling on the button "Stop Session".',
-  imageUrl:
-    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Stop_Collaboration.gif',
+  text: 'You can stop or leave a collaboration session by clicking on the button "Stop Session" if you are the host or "Leave session" if you are not.',
+  imageUrl: 'https://i.imgur.com/7x1DXiZ.gif',
   currentProgressStep: 4,
   isLastStep: true,
   isFirstStep: false,
