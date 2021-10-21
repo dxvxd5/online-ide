@@ -29,6 +29,7 @@ import '../../assets/styles/ide.css';
 import copyToClipboard from '../../utils/clipboard';
 import toastPromise from '../../utils/toast';
 import PromiseNoData from '../components/promise-no-data/PromiseNoData';
+import fireTutorials from '../../utils/tutorial';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -614,6 +615,7 @@ export default function IdePresenter({
       <IdeHeader
         removeCollaborator={removeCollaborator}
         leaveProject={leaveProject}
+        tutorial={fireTutorials}
         startFollowOnClick={startFollowOnClick}
         leaveRoom={socketLeaveRoom}
         createRoom={socketCreateRoom}

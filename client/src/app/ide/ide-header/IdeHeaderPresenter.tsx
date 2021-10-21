@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { differenceWith } from 'lodash';
 import Message from '../../../data/model/message';
 import IdeModel, { Collaborator } from '../../../data/model/model';
@@ -12,6 +11,7 @@ interface IdeHeaderPresenterProps {
   model: IdeModel;
   startFollowOnClick: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   leaveProject: () => void;
+  tutorial: () => Promise<void>;
   removeCollaborator: (collaborator: Collaborator) => void;
   logout: () => void;
 }
@@ -22,6 +22,7 @@ export default function IdeHeaderPresenter({
   model,
   startFollowOnClick,
   leaveProject,
+  tutorial,
   removeCollaborator,
   logout,
 }: IdeHeaderPresenterProps): JSX.Element {
@@ -72,6 +73,7 @@ export default function IdeHeaderPresenter({
     <IdeHeaderView
       removeCollaborator={removeCollaborator}
       leaveProject={leaveProject}
+      tutorial={tutorial}
       startFollowOnClick={startFollowOnClick}
       createRoom={createRoom}
       leaveRoom={leaveRoom}

@@ -115,16 +115,6 @@ export default class User {
   }
 
   /**
-   * Get a user from the database by its username
-   * Assumes that the user exists in the database
-   */
-  // static async getFromUsername(username: string): Promise<User | null> {
-  //   const userData = await User._getFromUsername(username);
-  //   if (!userData) return null;
-  //   return new User(userData);
-  // }
-
-  /**
    * Get a user associated with the credentials.
    */
   static async getFromCredentials(
