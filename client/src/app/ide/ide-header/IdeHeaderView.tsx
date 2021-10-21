@@ -54,16 +54,14 @@ export default function IdeHeaderView({
           className="header__button ide__header-button"
         />
       )}
-      {isHost && (
-        <Button
-          submit={false}
-          theme="secondary"
-          onClick={() => tutorial()}
-          text="tutorial"
-          className="header__button ide__header-button"
-        />
-      )}
-      {roomID && (
+      <Button
+        submit={false}
+        theme="secondary"
+        onClick={() => tutorial()}
+        text="tutorial"
+        className="header__button ide__header-button"
+      />
+      {isHost && roomID && (
         <Button
           submit={false}
           theme="secondary"
