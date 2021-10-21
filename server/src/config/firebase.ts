@@ -1,14 +1,11 @@
 import admin from 'firebase-admin';
-import { FIREBASE_CONFIG, REALTIME_DB_URL } from './env.variables';
+import { FIREBASE_CONFIG } from './env.variables';
 
 admin.initializeApp({
   credential: admin.credential.cert(FIREBASE_CONFIG),
-  databaseURL: REALTIME_DB_URL,
 });
 
 export const firestore = admin.firestore();
-
-export const realtimeDB = admin.database();
 
 export const userBasePath = '/users';
 

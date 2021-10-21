@@ -15,7 +15,6 @@ const {
   HASH_CONFIG_KEYLEN: hashKeylen,
   HASH_CONFIG_DIGEST: hashDigest,
   HASH_CONFIG_SALT_LEN: saltLen,
-  REALTIME_DB_URL: rtimeDB,
 } = process.env;
 
 function pleaseSpecify(toSpecify: string): string {
@@ -28,14 +27,12 @@ const FIREBASE_ADMIN_SDK_SERVICE_ACCOUNT = assert(
   firebaseCredential,
   pleaseSpecify('the firebase service account configuration')
 );
-export const REALTIME_DB_URL = assert(
-  rtimeDB,
-  pleaseSpecify('the realtime database url')
-);
+
 export const SESSION_PRIVATE_KEY = assert(
   sessionKey,
   pleaseSpecify('a private key for express-session')
 );
+
 export const HASH_CONFIG_DIGEST = assert(
   hashDigest,
   pleaseSpecify('the hash digest')
