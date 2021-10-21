@@ -10,8 +10,6 @@ interface Tutorial {
   title: string;
   text: string;
   imageUrl: string;
-  imageWidth?: number;
-  imageHeight?: number;
   currentProgressStep: number;
   isLastStep: boolean;
   isFirstStep: boolean;
@@ -21,9 +19,7 @@ const sidebarTutorial: Tutorial = {
   title: 'Sidebar',
   text: 'Create folders, files, as well as, rename and delete options in the sidebar.',
   imageUrl:
-    'https://media.discordapp.net/attachments/898188780786315264/900474983015407726/Sidebar.gif?width=340&height=677',
-  imageWidth: 200,
-  imageHeight: 350,
+    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Sidebar.gif',
   currentProgressStep: 0,
   isLastStep: false,
   isFirstStep: true,
@@ -32,7 +28,7 @@ const sliderTutorial: Tutorial = {
   title: 'Slider',
   text: 'You can freely control the sidebar by expanding and reducing it for a wider space for the editor space.',
   imageUrl:
-    'https://media.discordapp.net/attachments/898188780786315264/900474986848985128/Slider.gif',
+    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Slider.gif',
   currentProgressStep: 1,
   isLastStep: false,
   isFirstStep: false,
@@ -41,7 +37,7 @@ const startCollabTutorial: Tutorial = {
   title: 'Start Collaboration',
   text: 'To start collaboration click on the "Start New Collaboration" button and a new button with the session ID will appear, where you can copy the session ID.',
   imageUrl:
-    'https://media.discordapp.net/attachments/898188780786315264/900474985318088754/Start_Collaboration.gif',
+    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Start_Collaboration.gif',
   currentProgressStep: 2,
   isLastStep: false,
   isFirstStep: false,
@@ -50,7 +46,7 @@ const removeCollabTutorial: Tutorial = {
   title: 'Remove Collaborator',
   text: 'As a host, you can remove a collaborator by going on the profile picture and clicking on the X button, which appears when you hover on it.',
   imageUrl:
-    'https://media.discordapp.net/attachments/898188780786315264/900474979974529034/Remove_Collaborator.gif',
+    'https://raw.githubusercontent.com/dxvxd5/online-ide/540b864ed93c06579c8f7a1d93536d402cee8ee4/client/doc/Remove_Collaborator.gif',
   currentProgressStep: 3,
   isLastStep: false,
   isFirstStep: false,
@@ -59,7 +55,7 @@ const stopCollabTutorial: Tutorial = {
   title: 'Stop Collaboration',
   text: 'Stop the collaboration by clickling on the button "Stop Session".',
   imageUrl:
-    'https://media.discordapp.net/attachments/898188780786315264/900474987608170526/Stop_Collaboration.gif',
+    'https://raw.githubusercontent.com/dxvxd5/online-ide/main/client/doc/Stop_Collaboration.gif',
   currentProgressStep: 4,
   isLastStep: true,
   isFirstStep: false,
