@@ -1,0 +1,51 @@
+@import url(app.css);
+
+.button {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-transform: capitalize;
+  font-family: 'Roboto Mono', monospace !important;
+}
+
+.button:active {
+  border: 0.125rem solid var(--btn-active-color);
+  box-shadow: 0 0 0 0.25rem #bfdbee;
+  text-decoration: underline;
+}
+
+.button:hover {
+  cursor: pointer;
+  background-color: white;
+}
+
+.button--main {
+  background-color: var(--btn-primary-color);
+}
+
+.button--main:hover {
+  color: var(--btn-primary-color);
+  border: var(--btn-primary-color) solid thin;
+}
+
+.button--secondary {
+  background-color: #4a5568;
+}
+
+.button--secondary:hover {
+  color: var(--btn-secondary-color);
+  border: var(--btn-secondary-color) solid thin;
+}
+
+.button--red {
+  background-color: red;
+}
+
+.button--red:hover {
+  color: red;
+  border: red thin solid;
+}

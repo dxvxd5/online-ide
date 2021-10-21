@@ -1,0 +1,61 @@
+@import url(app.css);
+
+.header {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  height: var(--header-height);
+  min-height: var(--header-height);
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 30px;
+  padding-right: 30px;
+  box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+}
+
+.header__profile {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
+  width: 50px;
+  height: 50px;
+}
+
+.header__profile:hover {
+  cursor: pointer;
+}
+
+.header__profile-pic {
+  color: white;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.header__profile-name {
+  text-transform: capitalize;
+  height: 50px;
+  color: white;
+  background-color: #341a58;
+  display: none;
+}
+
+.header__profile:hover .header__profile-name {
+  position: absolute;
+  max-width: 100px;
+  top: 80px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  height: fit-content;
+}
+
+.header__button {
+  height: 50%;
+}
+
+.header--personal-space {
+  justify-content: space-between !important;
+}

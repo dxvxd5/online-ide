@@ -1,0 +1,48 @@
+/* Impossible to use the BEM naming method because the css class names are defined by the monaco collab extension that we use. 
+    https://github.com/convergencelabs/monaco-collab-ext/blob/master/src/css/monaco-collab-ext.css
+*/
+
+.monaco-remote-cursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4000;
+  width: 2px;
+}
+
+.monaco-remote-cursor:after {
+  content: '';
+  width: 3px;
+  height: 20px;
+  background: inherit;
+  display: block;
+  margin-left: -2px;
+  margin-top: 0;
+  z-index: 4000;
+  display: flex;
+}
+
+.monaco-remote-cursor-tooltip {
+  position: absolute;
+  white-space: nowrap;
+  color: black;
+  font-weight: bold;
+  opacity: 1;
+  font-size: 12px;
+  padding: 2px;
+  font-family: sans-serif;
+  z-index: 4000;
+  /* transform: rotate(-90deg); */
+
+  transition: opacity 0.5s ease-out;
+  -webkit-transition: opacity 0.5s ease-out;
+  -moz-transition: opacity 0.5s ease-out;
+  -ms-transition: opacity 0.5s ease-out;
+  -o-transition: opacity 0.5s ease-out;
+}
+
+.monaco-remote-selection {
+  position: absolute;
+  pointer-events: auto;
+  opacity: 0.3;
+  background: blue;
+}

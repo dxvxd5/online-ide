@@ -112,3 +112,11 @@ dist
 
 # MAC OS
 .DS_Store
+
+# firebase
+.firebase
+
+public
+
+# rsa keys
+server/keys

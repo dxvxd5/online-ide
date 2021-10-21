@@ -1,0 +1,98 @@
+@import url(app.css);
+
+.project {
+  flex-grow: 0.25;
+  background-color: white;
+  border-radius: 10px;
+
+  /*! Update each time project padding and project-gap are updated */
+  width: calc((100% - 130px) / 4);
+  max-width: calc((100% - 130px) / 4);
+
+  height: 20vh;
+
+  padding: var(--project-padding);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s, transform 0.2s;
+  transform: translateY(0);
+  opacity: 0;
+  transform: translateY(100px);
+
+  animation: riseUp 0.2s ease forwards, fadeIn 0.7s ease forwards;
+
+  font-family: 'Roboto Mono', monospace !important;
+}
+
+.project::after {
+  content: attr(data-position);
+}
+
+.project:hover {
+  cursor: pointer;
+  transform: translateY(-2px);
+  box-shadow: 1px 1px 10px 4px var(--btn-secondary-color-lighter);
+}
+
+.project__info {
+  display: block;
+  animation: fadein--cross 0.5s;
+  width: calc(90%);
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.project__button {
+  display: none;
+  width: 50%;
+  height: 30%;
+  margin: 10px;
+}
+
+.project:hover .project__info {
+  display: none;
+}
+
+.project:hover .project__button {
+  display: block;
+  animation: fadein--cross 0.5s;
+}
+
+.container--project {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--project-gap);
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.project__info--name {
+  text-transform: capitalize;
+  font-weight: 500;
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+
+.text--little {
+  font-size: smaller;
+  /* font-style: normal; */
+  font-weight: 300;
+  color: var(--btn-secondary-color-lighter);
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.project__info--date {
+  text-transform: lowercase;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--btn-active-color);
+}
