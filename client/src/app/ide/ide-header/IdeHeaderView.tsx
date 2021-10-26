@@ -44,7 +44,11 @@ export default function IdeHeaderView({
 }: IdeHeaderViewProps): JSX.Element {
   return (
     <div className="ide__header header">
-      <Profile name={name} color="#341a58" />
+      <Profile
+        name={name}
+        color="#341a58"
+        onClick={isHost ? leaveProject : () => leaveRoom(roomID)}
+      />
       {isHost && (
         <Button
           submit={false}
