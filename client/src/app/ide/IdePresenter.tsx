@@ -110,10 +110,6 @@ export default function IdePresenter({
     });
     const isHost = socketstate === SocketState.HOST;
     model.startCollaboration(roomId, isHost);
-    // IdeModel.saveToSessionStorage(
-    //   StorageItem.SCK,
-    //   `${isHost ? SocketState.HOST : SocketState.JOIN}`
-    // );
     setSocketState(socketstate);
   }
 
@@ -143,6 +139,7 @@ export default function IdePresenter({
 
   const resetCollab = (state: SocketState) => {
     if (state === SocketState.JOIN) {
+      model.closeProject();
       model.stopCollaboration();
       redirectTo('me');
       setSocketState(SocketState.DISABLED);
@@ -262,6 +259,7 @@ export default function IdePresenter({
       if (!model.isHost) {
         Swal.fire({ title: 'The host ended the session', icon: 'info' });
       }
+      model.closeProject();
       model.stopCollaboration();
       redirectTo('me');
     });
@@ -371,6 +369,7 @@ export default function IdePresenter({
           title: 'You have been disconnected by the host',
           icon: 'info',
         });
+        model.closeProject();
         model.stopCollaboration();
         setSocketState(SocketState.DISABLED);
         redirectTo('me');
