@@ -7,20 +7,6 @@ import FileTreeGenerator from '../../utils/file-tree-generator';
 import { NodeState as FileTree } from '../../utils/file-tree-node';
 import { getFileLanguage } from '../../utils/file-extension';
 
-export enum StorageItem {
-  JWT = 'crrt',
-  UID = 'crrsub',
-  PROJECT = 'crrprj',
-  FOC_FILE = 'crrfcfl',
-  TABS = 'crrtb',
-  CONTENT = 'crrctt',
-  NAME = 'crnnm',
-  UNAME = 'crunnm',
-  HOST = 'crrohs',
-  ROOM = 'crrm',
-  SCK = 'crsck',
-}
-
 export enum EditorContentOperationType {
   REPLACEMENT,
   DELETION,
@@ -210,6 +196,8 @@ export default class IdeModel {
 
   language!: string;
 
+  isInCollab = false;
+
   constructor() {
     this.name = '';
     this.userID = '';
@@ -223,36 +211,6 @@ export default class IdeModel {
     this.isLeader = false;
   }
 
-  static saveToSessionStorage(key: StorageItem, value: string): void {
-    sessionStorage.setItem(key, btoa(value));
-  }
-
-  private static saveToLocalStorage(key: StorageItem, value: string): void {
-    localStorage.setItem(key, btoa(value));
-  }
-
-  static getFromSessionStorage(key: StorageItem): null | unknown {
-    const v = sessionStorage.getItem(key);
-    if (!v) return null;
-    const atobv = atob(v);
-    try {
-      return JSON.parse(atobv);
-    } catch (err) {
-      return atobv;
-    }
-  }
-
-  private static getFromLocalStorage(key: StorageItem): null | unknown {
-    const v = localStorage.getItem(key);
-    if (!v) return null;
-    const atobv = atob(v);
-    try {
-      return JSON.parse(atobv);
-    } catch (err) {
-      return atobv;
-    }
-  }
-
   addObserver(o: Observer): void {
     this.observers.push(o);
   }
@@ -264,7 +222,6 @@ export default class IdeModel {
   setName(name: string): void {
     this.name = name;
     this.notifyObservers(Message.NAME_CHANGE);
-    IdeModel.saveToLocalStorage(StorageItem.NAME, name);
   }
 
   setLanguage(language: string): void {
@@ -273,19 +230,16 @@ export default class IdeModel {
 
   setJWT(token: JWT): void {
     this.jwt = { ...token, expires: Date.now() + token.expiresIn };
-    IdeModel.saveToLocalStorage(StorageItem.JWT, JSON.stringify(this.jwt));
   }
 
   setUserID(userID: string): void {
     this.userID = userID;
-    IdeModel.saveToLocalStorage(StorageItem.UID, userID);
     this.notifyObservers(Message.ID_CHANGE);
   }
 
   setUsername(username: string): void {
     this.username = username;
     this.notifyObservers(Message.USERNAME_CHANGE);
-    IdeModel.saveToLocalStorage(StorageItem.UNAME, username);
   }
 
   setProjects(projects: ProjectData[]): void {
@@ -295,7 +249,6 @@ export default class IdeModel {
 
   setFileContentToSave(content: string): void {
     this.contentToSave = content;
-    IdeModel.saveToSessionStorage(StorageItem.CONTENT, content);
   }
 
   private setFollowers(followers: FollowerData[]): void {
@@ -382,10 +335,6 @@ export default class IdeModel {
   setCurrentTabFiles(tabFiles: FileData[]): void {
     this.currentTabFiles = tabFiles;
     this.notifyObservers(Message.CURRENT_TABS);
-    IdeModel.saveToSessionStorage(
-      StorageItem.TABS,
-      JSON.stringify(this.currentTabFiles)
-    );
   }
 
   addTabFile(tabFile: FileData): void {
@@ -396,10 +345,6 @@ export default class IdeModel {
 
     this.currentTabFiles.push(tabFile);
     this.notifyObservers(Message.CURRENT_TABS);
-    IdeModel.saveToSessionStorage(
-      StorageItem.TABS,
-      JSON.stringify(this.currentTabFiles)
-    );
   }
 
   private openAnotherTabFile(i: number): void {
@@ -439,7 +384,6 @@ export default class IdeModel {
     if (file) this.setLanguage(getFileLanguage(file.name));
     this.saveContentIntoFile();
     this.focusedFile = file;
-    IdeModel.saveToSessionStorage(StorageItem.FOC_FILE, JSON.stringify(file));
     this.notifyObservers(Message.FOCUSED_FILE);
   }
 
@@ -453,8 +397,6 @@ export default class IdeModel {
       this.resetFocusedFile();
       this.resetTabsFiles();
     }
-    IdeModel.saveToSessionStorage(StorageItem.ROOM, this.roomID);
-    IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
     this.isHost = true;
     this.notifyObservers(Message.COLLAB_STOPPED);
   }
@@ -487,13 +429,11 @@ export default class IdeModel {
   startCollaboration(roomID: string, isHost: boolean): void {
     this.colorGenerator = new ColorGenerator();
     this.roomID = roomID;
-    IdeModel.saveToSessionStorage(StorageItem.ROOM, roomID);
     this.isHost = isHost;
     if (!isHost) {
       this.resetTabsFiles();
       this.resetFocusedFile();
     }
-    IdeModel.saveToSessionStorage(StorageItem.HOST, `${isHost}`);
     this.notifyObservers(Message.COLLAB_STARTED);
   }
 
@@ -623,15 +563,14 @@ export default class IdeModel {
     this.resetFocusedFile();
     this.setCurrentProject(project);
     this.isHost = true;
-    IdeModel.saveToSessionStorage(StorageItem.HOST, `${this.isHost}`);
-    IdeModel.saveToSessionStorage(StorageItem.PROJECT, projectID);
+    this.notifyObservers(Message.OPEN_PROJECT);
   }
 
   closeProject(): void {
     this.resetTabsFiles();
     this.resetFocusedFile();
     this.setCurrentProject(null);
-    IdeModel.saveToSessionStorage(StorageItem.PROJECT, null);
+    this.notifyObservers(Message.CLOSE_PROJECT);
   }
 
   async getFileContent(fileID: string): Promise<string> {
@@ -794,10 +733,6 @@ export default class IdeModel {
     if (i >= 0) {
       this.currentTabFiles[i].name = name;
       this.notifyObservers(Message.CURRENT_TABS);
-      IdeModel.saveToSessionStorage(
-        StorageItem.TABS,
-        JSON.stringify(this.currentTabFiles)
-      );
 
       if (this.currentTabFiles[i].id === this.focusedFile?.id) {
         this.setLanguage(getFileLanguage(this.currentTabFiles[i].name));
@@ -858,10 +793,6 @@ export default class IdeModel {
       this.openAnotherTabFile(i);
 
       this.notifyObservers(Message.CURRENT_TABS);
-      IdeModel.saveToSessionStorage(
-        StorageItem.TABS,
-        JSON.stringify(this.currentTabFiles)
-      );
     }
   }
 
@@ -938,6 +869,7 @@ export default class IdeModel {
     }
 
     this.currentFileTree = cloneDeep(newTree);
+    this.notifyObservers(Message.SAVE_TREE);
   }
 
   private recursiveDeleteTabFiles(
@@ -980,10 +912,6 @@ export default class IdeModel {
         }
         this.notifyObservers(Message.FOCUSED_FILE);
         this.notifyObservers(Message.CURRENT_TABS);
-        IdeModel.saveToSessionStorage(
-          StorageItem.TABS,
-          JSON.stringify(this.currentTabFiles)
-        );
 
         break;
       }
@@ -994,53 +922,6 @@ export default class IdeModel {
 
   setPersisted(persisted: boolean): void {
     this.persisted = persisted;
-  }
-
-  async restoreProject(): Promise<void> {
-    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
-    if (!projId) throw new Error(`No project to be restored`);
-
-    const focFile = IdeModel.getFromSessionStorage(StorageItem.FOC_FILE);
-    const tabs = IdeModel.getFromSessionStorage(StorageItem.TABS);
-    const content = IdeModel.getFromSessionStorage(StorageItem.CONTENT);
-
-    const project = await this.fetchProject(projId as string);
-    this.currentProject = project;
-    this.setCurrentFileTree(project.files, project.name);
-    if (content !== undefined) this.contentToSave = content as string;
-    if (focFile) this.setFocusedFile(focFile as FileData);
-    if (tabs) this.setCurrentTabFiles(tabs as FileData[]);
-    this.notifyObservers(Message.UPDATE_TREE);
-  }
-
-  persist(): void {
-    const jwt = IdeModel.getFromLocalStorage(StorageItem.JWT) as JWT;
-    const id = IdeModel.getFromLocalStorage(StorageItem.UID) as string;
-    const name = IdeModel.getFromLocalStorage(StorageItem.NAME) as string;
-    const uname = IdeModel.getFromLocalStorage(StorageItem.UNAME) as string;
-
-    if (!(jwt && id && name && uname)) return;
-
-    const expireIn = jwt.expires - Date.now();
-    const oneHour = 60 * 60 * 1000;
-    if (expireIn < oneHour) return;
-
-    this.jwt = jwt;
-    this.userID = id;
-    this.name = name;
-    this.username = uname;
-
-    this.isLoggedIn = true;
-
-    this.persisted = true;
-
-    const isHost = IdeModel.getFromSessionStorage(StorageItem.HOST);
-    if (isHost !== null) this.isHost = isHost as boolean;
-
-    const projId = IdeModel.getFromSessionStorage(StorageItem.PROJECT);
-    if (!projId) return;
-
-    this.isCoding = true;
   }
 
   notifyObservers(message: Message): void {

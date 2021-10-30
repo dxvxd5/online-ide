@@ -42,7 +42,7 @@ export default function LoginPresenter({
 
   useEffect(() => {
     if (model.isLoggedIn) {
-      if (model.isCoding) redirectTo('code');
+      if (model.isCoding || model.isInCollab) redirectTo('code');
       else redirectTo('me');
     }
   }, []);

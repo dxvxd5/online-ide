@@ -15,7 +15,6 @@ import IdeModel, {
   FileData,
   FollowerData,
   ScrollPosition,
-  StorageItem,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
@@ -111,10 +110,10 @@ export default function IdePresenter({
     });
     const isHost = socketstate === SocketState.HOST;
     model.startCollaboration(roomId, isHost);
-    IdeModel.saveToSessionStorage(
-      StorageItem.SCK,
-      `${isHost ? SocketState.HOST : SocketState.JOIN}`
-    );
+    // IdeModel.saveToSessionStorage(
+    //   StorageItem.SCK,
+    //   `${isHost ? SocketState.HOST : SocketState.JOIN}`
+    // );
     setSocketState(socketstate);
   }
 
@@ -181,28 +180,11 @@ export default function IdePresenter({
     toastPromise(promise, msgs);
   };
 
-  useEffect(function () {
+  useEffect(() => {
     Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
 
-    const locationListener = function () {
-      const rm = IdeModel.getFromSessionStorage(StorageItem.ROOM);
-      const sck = IdeModel.getFromSessionStorage(StorageItem.SCK);
-
-      if (rm && window.location.hash === '#/me') {
-        emitLeaveRoom(rm as string, sck as SocketState);
-        resetCollab(sck as SocketState);
-      }
-    };
-    window.addEventListener('hashchange', locationListener);
-
-    return function () {
-      window.removeEventListener('hashchange', locationListener);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!model.isLoggedIn) redirectTo('login');
-    else if (model.persisted) {
+    else if (model.persisted && model.isInCollab) {
       let title;
       if (model.isHost) title = 'The collaboration session was ended';
       else {
@@ -210,11 +192,12 @@ export default function IdePresenter({
           'You have been disconnected from the collaboration session. Please join again.';
         redirectTo('me');
       }
-      model.setPersisted(false);
       Swal.fire({
         title,
         heightAuto: false,
       });
+      model.setPersisted(false);
+      model.stopCollaboration();
     }
   }, []);
 
@@ -622,7 +605,7 @@ export default function IdePresenter({
         model={model}
         logout={logout}
       />
-      {!project ? (
+      {/* {!project ? (
         <PromiseNoData
           promise={model
             .restoreProject()
@@ -634,34 +617,34 @@ export default function IdePresenter({
           loadingMessage="Restoring your previous work"
           classNameBlck="ide"
         />
-      ) : (
-        <Split
-          sizes={[15, 85]}
-          minSize={[150, 500]}
-          expandToMin={false}
-          gutterSize={10}
-          className="split"
-        >
-          <IdeSidebar
-            stopFollowing={stopFollowing}
-            onFileTreeChange={onFileTreeChange}
-            model={model}
-          />
+      ) : ( */}
+      <Split
+        sizes={[15, 85]}
+        minSize={[150, 500]}
+        expandToMin={false}
+        gutterSize={10}
+        className="split"
+      >
+        <IdeSidebar
+          stopFollowing={stopFollowing}
+          onFileTreeChange={onFileTreeChange}
+          model={model}
+        />
 
-          <div className="container ide__container ide__container--level1">
-            <EditorTabs stopFollowing={stopFollowing} model={model} />
-            <Editor
-              model={model}
-              onScrollChange={onScrollChange}
-              onEditorCursorMoved={onEditorCursorMoved}
-              onEditorSelection={onEditorSelection}
-              onContentInsert={onContentInsert}
-              onContentReplace={onContentReplace}
-              onContentDelete={onContentDelete}
-            />
-          </div>
-        </Split>
-      )}
+        <div className="container ide__container ide__container--level1">
+          <EditorTabs stopFollowing={stopFollowing} model={model} />
+          <Editor
+            model={model}
+            onScrollChange={onScrollChange}
+            onEditorCursorMoved={onEditorCursorMoved}
+            onEditorSelection={onEditorSelection}
+            onContentInsert={onContentInsert}
+            onContentReplace={onContentReplace}
+            onContentDelete={onContentDelete}
+          />
+        </div>
+      </Split>
+      {/* )} */}
     </div>
   );
 }
