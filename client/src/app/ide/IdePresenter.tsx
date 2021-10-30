@@ -21,13 +21,13 @@ import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
 import IdeSidebar from './sidebar/SidebarPresenter';
+import Error from '../components/error/Error';
 import { NodeState } from '../../utils/file-tree-node';
 import Message from '../../data/model/message';
 
 import '../../assets/styles/ide.css';
 import copyToClipboard from '../../utils/clipboard';
 import toastPromise from '../../utils/toast';
-import PromiseNoData from '../components/promise-no-data/PromiseNoData';
 import fireTutorials from '../../utils/tutorial';
 
 interface IdePresenterProps {
@@ -605,46 +605,42 @@ export default function IdePresenter({
         model={model}
         logout={logout}
       />
-      {/* {!project ? (
-        <PromiseNoData
-          promise={model
-            .restoreProject()
-            .then(() => setProject(model.currentProject))}
-          errorMessage={
-            'Failed to restore your previous work.\nPlease try again by opening it from the main page'
+      {!project ? (
+        <Error
+          errorInfo={
+            'No project opened. \nPlease try again by opening a project from the main page'
           }
           tryAgain={() => redirectTo('me')}
-          loadingMessage="Restoring your previous work"
-          classNameBlck="ide"
+          className="error--ide"
         />
-      ) : ( */}
-      <Split
-        sizes={[15, 85]}
-        minSize={[150, 500]}
-        expandToMin={false}
-        gutterSize={10}
-        className="split"
-      >
-        <IdeSidebar
-          stopFollowing={stopFollowing}
-          onFileTreeChange={onFileTreeChange}
-          model={model}
-        />
-
-        <div className="container ide__container ide__container--level1">
-          <EditorTabs stopFollowing={stopFollowing} model={model} />
-          <Editor
+      ) : (
+        <Split
+          sizes={[15, 85]}
+          minSize={[150, 500]}
+          expandToMin={false}
+          gutterSize={10}
+          className="split"
+        >
+          <IdeSidebar
+            stopFollowing={stopFollowing}
+            onFileTreeChange={onFileTreeChange}
             model={model}
-            onScrollChange={onScrollChange}
-            onEditorCursorMoved={onEditorCursorMoved}
-            onEditorSelection={onEditorSelection}
-            onContentInsert={onContentInsert}
-            onContentReplace={onContentReplace}
-            onContentDelete={onContentDelete}
           />
-        </div>
-      </Split>
-      {/* )} */}
+
+          <div className="container ide__container ide__container--level1">
+            <EditorTabs stopFollowing={stopFollowing} model={model} />
+            <Editor
+              model={model}
+              onScrollChange={onScrollChange}
+              onEditorCursorMoved={onEditorCursorMoved}
+              onEditorSelection={onEditorSelection}
+              onContentInsert={onContentInsert}
+              onContentReplace={onContentReplace}
+              onContentDelete={onContentDelete}
+            />
+          </div>
+        </Split>
+      )}
     </div>
   );
 }
