@@ -178,6 +178,18 @@ export default function IdePresenter({
   };
 
   useEffect(() => {
+    const hashListener = () => {
+      if (window.location.hash === '#/code') return;
+      const state = model.isHost ? SocketState.HOST : SocketState.JOIN;
+      emitLeaveRoom(model.roomID, state);
+      resetCollab(state);
+    };
+    window.addEventListener('hashchange', hashListener);
+
+    return () => window.removeEventListener('hashchange', hashListener);
+  }, []);
+
+  useEffect(() => {
     Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
 
     if (!model.isLoggedIn) redirectTo('login');
