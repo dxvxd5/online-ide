@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { HashRouter as Router, Route, Redirect } from 'react-router-dom';
 
 import IdeModel from './data/model/model';
+import Persister from './data/persistence/persistence';
 import LoginPresenter from './app/login/LoginPresenter';
 import PersonalSpacePresenter from './app/personal-space/PersonalSpacePresenter';
 import IdePresenter from './app/ide/IdePresenter';
@@ -14,7 +15,8 @@ import prevDefaultShortcuts from './utils/shortcuts';
 function App(): JSX.Element {
   prevDefaultShortcuts();
   const ideModel = new IdeModel();
-  ideModel.persist();
+  const persister = new Persister(ideModel);
+  persister.persist();
   return (
     <Router>
       <Route exact path="">

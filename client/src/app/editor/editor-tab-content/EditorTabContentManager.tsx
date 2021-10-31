@@ -37,11 +37,7 @@ export default function EditorTabContentManager({
   useEffect(() => {
     const focusedFileListener = (m: Message) => {
       if (m === Message.FOCUSED_FILE) {
-        if (model.persisted) {
-          setContent(model.contentToSave);
-          model.setPersisted(false);
-        } else setContent(null);
-
+        setContent(null);
         setFocusedFile(model.getFocusedFile());
         setLanguage(model.language);
       }

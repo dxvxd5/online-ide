@@ -75,6 +75,7 @@ const swalQueue = Swal.mixin({
   denyButtonColor: '#4a5568',
   denyButtonText: '< Previous step',
   confirmButtonText: 'Next step >',
+  reverseButtons: true,
   heightAuto: false,
   showCancelButton: true,
   allowOutsideClick: false,

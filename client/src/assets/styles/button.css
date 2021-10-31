@@ -10,6 +10,7 @@
   padding-right: 10px;
   text-transform: capitalize;
   font-family: 'Roboto Mono', monospace !important;
+  max-height: max-content;
 }
 
 .button:active {
