@@ -7,76 +7,91 @@ The purpose of the application is to offer a space where developers can collabor
 ## Features
 
 ### Personal space
-When users create an account on the application, they get access to a personal space, where they can see all their projects and edit them. 
+
+When users create an account on the application, they get access to a personal space, where they can see all their projects and edit them.
 
 ### Full-fledged code editor
+
 Users have access to a full-fledged code editor with syntax highlightning and autocompletion (for the languages supported by monaco editor)
 
-
 ### Collaborative code editing
+
 - Several users can collaborate on a file together in real-time.
-- Users can see on their respective editors a cursor showing where their collaborators are in the file. 
+- Users can see on their respective editors a cursor showing where their collaborators are in the file.
 - Users can invite other users to collaborate together on a project.
 
 ## Tech
 
 - Sockets: [socket.io](https://socket.io/)
-- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html) 
-
+- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html)
 
 ## Grading criteria
 
-These are parts of the grading criteria that we implemented and their associated points. 
+These are parts of the grading criteria that we implemented and their associated points.
 
-| Functionality                           | When/Why                       | Points |
-| --------------------------------------- | ------------------------------ | ------ |
-| Text (code) editor                      |                      | 5 ✅     |
-| Collaborative feature with shared state |                      | 5 ✅     |
-| Regex                                   | server side | 3 ✅     |
-|                                         | **Total**                      | **13** |
+| Functionality                           | When/Why    | Points |
+| --------------------------------------- | ----------- | ------ |
+| Text (code) editor                      |             | 5 ✅   |
+| Collaborative feature with shared state |             | 5 ✅   |
+| Regex                                   | server side | 3 ✅   |
+|                                         | **Total**   | **13** |
 
+| JS/CSS/NPM                             | When/Why                        | Points |
+| -------------------------------------- | ------------------------------- | ------ |
+| CSS naming convention                  | Using BEM                       | 5 ✅   |
+| Lodash package                         | For all utility functions       | 5 ✅   |
+| Formik package                         | Form for user to sign up/log in | 3 ✅   |
+| TypeScript                             |                                 | 15 ✅  |
+| Promise all                            | in file model                   | 3 ✅   |
+| Use animation package or CSS animation |                                 | 5 ✅   |
+|                                        | **Total**                       | **36** |
 
+| Advanced model/React & Performance                      | When/Why    | Points |
+| ------------------------------------------------------- | ----------- | ------ |
+| No big unnecessary DOM update                           | Performance | 3 ✅   |
+| Use PropTypes/interface/type to declare component props | Fewer bugs  | 2 ✅   |
+|                                                         | **Total**   | **5**  |
 
-| JS/CSS/NPM            | When/Why                        | Points |
-| --------------------- | ------------------------------- | ------ |
-| CSS naming convention |  Using BEM                               | 5 ✅     |
-| Lodash package        | For all utility functions       | 5  ✅    |
-| Formik package        | Form for user to sign up/log in | 3  ✅    |
-| TypeScript            |                                 | 15 ✅    |
-|Promise all              | in file model| 3 ✅ |
-| Use animation package or CSS animation|  | 5  ✅    |
-|                       | **Total**                       | **36** |
+| Consistency            | When/Why  | Points |
+| ---------------------- | --------- | ------ |
+| Re-using UI-Components |           | 5 ✅   |
+|                        | **Total** | **5**  |
 
+| Server & Deployment                                                                                                                                    | When/Why/How                                                                  | Points |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------ |
+| Node (express.js framework or plain node) (_If you create a web server, all communication with the database must go through the server. Otherwise Fx_) | To implement the server                                                       | 20 ✅  |
+| Websocket multiplayer                                                                                                                                  | To implement real-time collaboration                                          | 10 ✅  |
+| Good use of GET, POST, PUT, DELETE requests                                                                                                            | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request    | 5 ✅   |
+| Good error codes                                                                                                                                       | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅   |
+| Deploy server without docker                                                                                                                           |                                                                               | 15 ✅  |
+| Handle authorization                                                                                                                                   | With JWT                                                                      | 10 ✅  |
+|                                                                                                                                                        | **Total**                                                                     | **65** |
 
-
-| Advanced model/React & Performance                       | When/Why                                  | Points |
-| -------------------------------------------------------- | ----------------------------------------- | ------ |
-| No big unnecessary DOM update                            | Performance                               | 3    ✅    |
-| Use PropTypes/interface/type to declare component props  | Fewer bugs                                | 2   ✅   |
-|                                                          | **Total**                                 | **5**|
-
-
-| Consistency                   | When/Why                                  | Points |
-| -------------------------------------------------------- | ----------------------------------------- | ------ |
-| Re-using UI-Components    | | 5 ✅|
-|                                                          | **Total**                                 | **5**|
-
-| Server & Deployment                                          | When/Why/How                                                 | Points |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
-| Node (express.js framework or plain node) (*If you create a web server, all communication with the database must go through the server. Otherwise Fx*) | To implement the server                                      | 20  ✅   |
-| Websocket multiplayer                                        | To implement real-time collaboration                         | 10   ✅  |
-| Good use of GET, POST, PUT, DELETE requests                  | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request | 5 ✅|
-| Good error codes                                             | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅ |
-| Deploy server without docker                                 |                                                              | 15  ✅ |
-| Handle authorization  | With JWT                              | 10  ✅  |
-|                                                              | **Total**                                                    | **65** |
-
-### **Total**: 124  --> Grade A
+### **Total**: 124 --> Grade A
 
 ## Future improvements
+
 - Code execution
 - Upload file
 - File download
 - Github integration
 - Better support for programming languages
 - Following feature during collaboration
+
+## How to run the app locally
+
+#### First install the dependencies
+
+In order to install all the dependencies of the app, you need to execute the command `npm install` in the following directories:
+
+- the project root directory `online-ide`
+- the `client` directory
+- the `server` directory
+
+#### Next, run the app
+
+Run the entire application (both client and server) by executing the command `npm run dev` in the project root directory `online-ide`.
+
+You can now access the application at `localhost:3000`.
+
+_*PS: You need to have our `.env` file in the `server` directory for this to work*_
