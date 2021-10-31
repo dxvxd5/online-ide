@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import IdeModel from '../../data/model/model';
 import SignUpView from './SignUpView';
 import { signUpSchema } from '../../utils/yup-schemas';
+import toastPromise from '../../utils/toast';
 
 interface SignUpPresenterProp {
   model: IdeModel;
@@ -21,26 +22,31 @@ export default function SignUpPresenter({
     });
   }
 
-  const signUp = async ({
-    name,
-    username,
-    password,
-  }: {
+  const signUp = (credentials: {
     name: string;
-    username: string;
     password: string;
+    username: string;
   }) => {
-    try {
-      await model.signUp(name, username, password);
+    const { name, password, username } = credentials;
+
+    const promise = model.signUp(name, username, password).then(() => {
       if (signUpError) setSignUpError('');
       redirectTo('me');
-    } catch (error) {
+    });
+
+    const msgs = {
+      success: `Successfully signed up as ${username}`,
+      loading: 'Signing you up...',
+      error: 'Failed to sign up',
+    };
+
+    toastPromise(promise, msgs).catch((error) => {
       if (error.error.statusCode === 400) {
         setSignUpError('Username already in use');
       } else {
         setSignUpError('Something went wrong. Please try again.');
       }
-    }
+    });
   };
 
   useEffect(() => {

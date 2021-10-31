@@ -70,6 +70,15 @@ enum Message {
 
   // When we remove a file from the tab
   TAB_FILE_CLOSE,
+
+  // When we open a project
+  OPEN_PROJECT,
+
+  // When we close a project
+  CLOSE_PROJECT,
+
+  // Save tree into session storage
+  SAVE_TREE,
 }
 
 export default Message;

@@ -9,6 +9,7 @@ interface ProfileProps {
   color: string;
   remove?: () => void;
   className?: string;
+  onClick?: (_: unknown) => void;
 }
 
 export default function Profile({
@@ -16,6 +17,7 @@ export default function Profile({
   color,
   remove,
   className,
+  onClick,
 }: ProfileProps): JSX.Element {
   const initials = getInitials(name);
 
@@ -23,6 +25,9 @@ export default function Profile({
     <div
       className={`header__profile ${className}`}
       style={{ backgroundColor: color }}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
     >
       <span title={name} className="header__profile-pic">
         {initials}

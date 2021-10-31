@@ -720,3 +720,4 @@ The user is authenticated, but it’s not allowed to access a resource.
 ```
 Status: 403 Forbidden
 ```
+

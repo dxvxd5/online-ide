@@ -15,20 +15,19 @@ import IdeModel, {
   FileData,
   FollowerData,
   ScrollPosition,
-  StorageItem,
 } from '../../data/model/model';
 import Editor from '../editor/editor-tab-content/EditorTabContentManager';
 import EditorTabs from '../editor/editor-tab-toggle/EditorTabTogglePresenter';
 import SocketMessage from '../../utils/socket-message';
 import IdeHeader from './ide-header/IdeHeaderPresenter';
 import IdeSidebar from './sidebar/SidebarPresenter';
+import Error from '../components/error/Error';
 import { NodeState } from '../../utils/file-tree-node';
 import Message from '../../data/model/message';
 
 import '../../assets/styles/ide.css';
 import copyToClipboard from '../../utils/clipboard';
 import toastPromise from '../../utils/toast';
-import PromiseNoData from '../components/promise-no-data/PromiseNoData';
 import fireTutorials from '../../utils/tutorial';
 
 interface IdePresenterProps {
@@ -111,10 +110,6 @@ export default function IdePresenter({
     });
     const isHost = socketstate === SocketState.HOST;
     model.startCollaboration(roomId, isHost);
-    IdeModel.saveToSessionStorage(
-      StorageItem.SCK,
-      `${isHost ? SocketState.HOST : SocketState.JOIN}`
-    );
     setSocketState(socketstate);
   }
 
@@ -144,6 +139,7 @@ export default function IdePresenter({
 
   const resetCollab = (state: SocketState) => {
     if (state === SocketState.JOIN) {
+      model.closeProject();
       model.stopCollaboration();
       redirectTo('me');
       setSocketState(SocketState.DISABLED);
@@ -181,28 +177,23 @@ export default function IdePresenter({
     toastPromise(promise, msgs);
   };
 
-  useEffect(function () {
-    Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
-
-    const locationListener = function () {
-      const rm = IdeModel.getFromSessionStorage(StorageItem.ROOM);
-      const sck = IdeModel.getFromSessionStorage(StorageItem.SCK);
-
-      if (rm && window.location.hash === '#/me') {
-        emitLeaveRoom(rm as string, sck as SocketState);
-        resetCollab(sck as SocketState);
-      }
+  useEffect(() => {
+    const hashListener = () => {
+      if (window.location.hash === '#/code') return;
+      const state = model.isHost ? SocketState.HOST : SocketState.JOIN;
+      emitLeaveRoom(model.roomID, state);
+      resetCollab(state);
     };
-    window.addEventListener('hashchange', locationListener);
+    window.addEventListener('hashchange', hashListener);
 
-    return function () {
-      window.removeEventListener('hashchange', locationListener);
-    };
+    return () => window.removeEventListener('hashchange', hashListener);
   }, []);
 
   useEffect(() => {
+    Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
+
     if (!model.isLoggedIn) redirectTo('login');
-    else if (model.persisted) {
+    else if (model.persisted && model.isInCollab) {
       let title;
       if (model.isHost) title = 'The collaboration session was ended';
       else {
@@ -210,11 +201,12 @@ export default function IdePresenter({
           'You have been disconnected from the collaboration session. Please join again.';
         redirectTo('me');
       }
-      model.setPersisted(false);
       Swal.fire({
         title,
         heightAuto: false,
       });
+      model.setPersisted(false);
+      model.stopCollaboration();
     }
   }, []);
 
@@ -279,6 +271,7 @@ export default function IdePresenter({
       if (!model.isHost) {
         Swal.fire({ title: 'The host ended the session', icon: 'info' });
       }
+      model.closeProject();
       model.stopCollaboration();
       redirectTo('me');
     });
@@ -388,6 +381,7 @@ export default function IdePresenter({
           title: 'You have been disconnected by the host',
           icon: 'info',
         });
+        model.closeProject();
         model.stopCollaboration();
         setSocketState(SocketState.DISABLED);
         redirectTo('me');
@@ -623,16 +617,12 @@ export default function IdePresenter({
         logout={logout}
       />
       {!project ? (
-        <PromiseNoData
-          promise={model
-            .restoreProject()
-            .then(() => setProject(model.currentProject))}
-          errorMessage={
-            'Failed to restore your previous work.\nPlease try again by opening it from the main page'
+        <Error
+          errorInfo={
+            'No project opened. \nPlease try again by opening a project from the main page'
           }
           tryAgain={() => redirectTo('me')}
-          loadingMessage="Restoring your previous work"
-          classNameBlck="ide"
+          className="error--ide"
         />
       ) : (
         <Split

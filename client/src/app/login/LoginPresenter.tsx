@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import IdeModel from '../../data/model/model';
 import LoginView from './LoginView';
 import { loginSchema } from '../../utils/yup-schemas';
+import toastPromise from '../../utils/toast';
 
 interface LoginPresenterProp {
   model: IdeModel;
@@ -20,19 +21,28 @@ export default function LoginPresenter({
     });
   }
 
-  const logIn = async ({ username, password }: Record<string, string>) => {
-    try {
-      await model.login(username, password);
+  const logIn = (credentials: { username: string; password: string }) => {
+    const { username, password } = credentials;
+
+    const promise = model.login(username, password).then(() => {
       if (loginError) setLoginError('');
       redirectTo('me');
-    } catch (error) {
-      setLoginError('Either username or password is incorrect');
-    }
+    });
+
+    const msgs = {
+      success: `Successfully logged in as ${username}`,
+      error: 'Failed to login',
+      loading: 'Logging you in...',
+    };
+
+    toastPromise(promise, msgs).catch(() =>
+      setLoginError('Either username or password is incorrect')
+    );
   };
 
   useEffect(() => {
     if (model.isLoggedIn) {
-      if (model.isCoding) redirectTo('code');
+      if (model.isCoding || model.isInCollab) redirectTo('code');
       else redirectTo('me');
     }
   }, []);
