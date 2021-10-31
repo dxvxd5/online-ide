@@ -94,4 +94,4 @@ Run the entire application (both client and server) by executing the command `np
 
 You can now access the application at `localhost:3000`.
 
-_*PS: You need to have our `.env` file in the `server` directory for this to work*_
+_*PS: You need to have our `.env` file and `jwt issuer keys` in the `server` directory for this to work*_
