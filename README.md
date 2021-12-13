@@ -1,8 +1,8 @@
-# Collaborative online IDE
-
-## Purpose
-
-The purpose of the application is to offer a space where developers can collaborate in real-time on code.
+<h1 align="center">
+  <img src="https://i.imgur.com/gNNuQK3.png"/><br/>
+  Collaborative online IDE
+</h1>
+<p align="center"> A space where developers can collaborate in real-time on code👨🏾‍💻👩🏾‍💻. <br/> </p>
 
 ## Features
 
@@ -20,55 +20,6 @@ Users have access to a full-fledged code editor with syntax highlightning and au
 - Users can see on their respective editors a cursor showing where their collaborators are in the file.
 - Users can invite other users to collaborate together on a project.
 
-## Tech
-
-- Sockets: [socket.io](https://socket.io/)
-- Online code editor: [Monaco](https://microsoft.github.io/monaco-editor/index.html)
-
-## Grading criteria
-
-These are parts of the grading criteria that we implemented and their associated points.
-
-| Functionality                           | When/Why    | Points |
-| --------------------------------------- | ----------- | ------ |
-| Text (code) editor                      |             | 5 ✅   |
-| Collaborative feature with shared state |             | 5 ✅   |
-| Regex                                   | server side | 3 ✅   |
-|                                         | **Total**   | **13** |
-
-| JS/CSS/NPM                             | When/Why                        | Points |
-| -------------------------------------- | ------------------------------- | ------ |
-| CSS naming convention                  | Using BEM                       | 5 ✅   |
-| Lodash package                         | For all utility functions       | 5 ✅   |
-| Formik package                         | Form for user to sign up/log in | 3 ✅   |
-| TypeScript                             |                                 | 15 ✅  |
-| Promise all                            | in file model                   | 3 ✅   |
-| Use animation package or CSS animation |                                 | 5 ✅   |
-|                                        | **Total**                       | **36** |
-
-| Advanced model/React & Performance                      | When/Why    | Points |
-| ------------------------------------------------------- | ----------- | ------ |
-| No big unnecessary DOM update                           | Performance | 3 ✅   |
-| Use PropTypes/interface/type to declare component props | Fewer bugs  | 2 ✅   |
-|                                                         | **Total**   | **5**  |
-
-| Consistency            | When/Why  | Points |
-| ---------------------- | --------- | ------ |
-| Re-using UI-Components |           | 5 ✅   |
-|                        | **Total** | **5**  |
-
-| Server & Deployment                                                                                                                                    | When/Why/How                                                                  | Points |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------ |
-| Node (express.js framework or plain node) (_If you create a web server, all communication with the database must go through the server. Otherwise Fx_) | To implement the server                                                       | 20 ✅  |
-| Websocket multiplayer                                                                                                                                  | To implement real-time collaboration                                          | 10 ✅  |
-| Good use of GET, POST, PUT, DELETE requests                                                                                                            | e.g. Don't send sensitive data in GET, don't fetch stuff in DELETE request    | 5 ✅   |
-| Good error codes                                                                                                                                       | e.g. 401 not authorized, 404 not found, 500 server error + good error message | 5 ✅   |
-| Deploy server without docker                                                                                                                           |                                                                               | 15 ✅  |
-| Handle authorization                                                                                                                                   | With JWT                                                                      | 10 ✅  |
-|                                                                                                                                                        | **Total**                                                                     | **65** |
-
-### **Total**: 124 --> Grade A
-
 ## Future improvements
 
 - Code execution
@@ -79,19 +30,19 @@ These are parts of the grading criteria that we implemented and their associated
 - Following feature during collaboration
 
 ## How to run the app locally
+- [Create a new firebase project](https://codinglatte.com/posts/how-to/how-to-create-a-firebase-project/). Add a Firestore instance to this project. 
+- To install all the dependencies, run `npm install` in the root folder `online-ide`, the `client` folder and the `server` folder. 
+- Create a `.env` file in the `server` folder. Fill it with the Json file containing your firebase project [service accout key](https://firebase.google.com/docs/admin/setup#initialize-sdk). The `.env` file should be like so: 
+```
+# Firebase project configuration
+FIREBASE_ADMIN_SDK_SERVICE_ACCOUNT= __json containing the service account key__
 
-#### First install the dependencies
+# Password hashing configuration
+HASH_CONFIG_ITERATION=100000
+HASH_CONFIG_KEYLEN=128
+HASH_CONFIG_DIGEST=sha512
+HASH_CONFIG_SALT_LEN=64
+```
+- Use the function `genKeyPair` in the file `online-ide/server/src/utils/jwt.ts` to generate the RSA keys used by the server to sign the jwt tokens. It should create a folder named `keys` containing the files `id_rsa_private.pem` and `id_rsa_pub.pem` in the `server` folder 
+- Run the entire application (both client and server) by executing the command `npm run dev` in the project root directory `online-ide`.
 
-In order to install all the dependencies of the app, you need to execute the command `npm install` in the following directories:
-
-- the project root directory `online-ide`
-- the `client` directory
-- the `server` directory
-
-#### Next, run the app
-
-Run the entire application (both client and server) by executing the command `npm run dev` in the project root directory `online-ide`.
-
-You can now access the application at `localhost:3000`.
-
-_*PS: You need to have our `.env` file and `jwt issuer keys` in the `server` directory for this to work*_
