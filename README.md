@@ -12,7 +12,7 @@ When users create an account on the application, they get access to a personal s
 
 ### Full-fledged code editor
 
-Users have access to a full-fledged code editor with syntax highlightning and autocompletion (for the languages supported by monaco editor)
+Users have access to a full-fledged code editor with syntax highlighting and autocompletion (for the languages supported by monaco editor)
 
 ### Collaborative code editing
 
