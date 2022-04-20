@@ -23,6 +23,7 @@ import IdeModel, {
 import { randomNumberInRange } from '../../../utils/random';
 import EditorView from './EditorTabContentView';
 import toastPromise from '../../../utils/toast';
+import debounce from '../../../utils/debounce';
 
 interface EditorPresenterProps {
   model: IdeModel;
@@ -228,9 +229,7 @@ export default function EditorPresenter({
     editorRef.current.addCommand(
       // eslint-disable-next-line no-bitwise
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
-      function () {
-        saveCurrentFile('No file opened');
-      }
+      debounce(() => saveCurrentFile('No file opened'))
     );
 
     addAllCollaborators(model.collaborators);
