@@ -29,6 +29,7 @@ import '../../assets/styles/ide.css';
 import copyToClipboard from '../../utils/clipboard';
 import toastPromise from '../../utils/toast';
 import fireTutorials from '../../utils/tutorial';
+import debounce from '../../utils/debounce';
 
 interface IdePresenterProps {
   model: IdeModel;
@@ -190,7 +191,10 @@ export default function IdePresenter({
   }, []);
 
   useEffect(() => {
-    Mousetrap.bind(['command+s', 'ctrl+s'], () => saveCurrentFile());
+    Mousetrap.bind(
+      ['command+s', 'ctrl+s'],
+      debounce(() => saveCurrentFile())
+    );
 
     if (!model.isLoggedIn) redirectTo('login');
     else if (model.persisted && model.isInCollab) {
