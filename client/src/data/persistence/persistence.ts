@@ -139,6 +139,11 @@ export default class Persister {
         Persister.saveToSessionStorage(StorageItem.PROJECT, null);
         break;
       }
+
+      case Message.LOGOUT:
+        localStorage.clear();
+        sessionStorage.clear();
+        break;
       default:
         break;
     }

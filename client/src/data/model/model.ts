@@ -608,8 +608,6 @@ export default class IdeModel {
     this.followers = [];
     this.jwt = undefined;
     this.isLoggedIn = false;
-    localStorage.clear();
-    sessionStorage.clear();
     this.notifyObservers(Message.LOGOUT);
   }
 
